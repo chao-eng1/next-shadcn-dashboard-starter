@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ProjectSelector } from '@/features/project-management/components/project/project-selector';
 import Link from 'next/link';
@@ -40,20 +40,45 @@ export function TaskContainer({
 }: TaskContainerProps) {
   const t = useTranslations('tasks');
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  
+  // 初始化时从URL读取projectId
+  const getInitialProjectId = () => {
+    const projectIdFromUrl = searchParams.get('projectId');
+    if (projectIdFromUrl && projects.some((p) => p.id === projectIdFromUrl)) {
+      return projectIdFromUrl;
+    }
+    return undefined;
+  };
+  
   const [selectedProjectId, setSelectedProjectId] = useState<
     string | undefined
-  >(undefined);
+  >(getInitialProjectId);
 
-  // 从URL参数中读取projectId
+  // 当URL参数或项目列表变化时更新projectId
   useEffect(() => {
     const projectIdFromUrl = searchParams.get('projectId');
     if (projectIdFromUrl && projects.some((p) => p.id === projectIdFromUrl)) {
       setSelectedProjectId(projectIdFromUrl);
+    } else if (!projectIdFromUrl) {
+      setSelectedProjectId(undefined);
     }
   }, [searchParams, projects]);
 
   const handleProjectChange = (projectId: string) => {
-    setSelectedProjectId(projectId === 'all' ? undefined : projectId);
+    const newProjectId = projectId === 'all' ? undefined : projectId;
+    setSelectedProjectId(newProjectId);
+    
+    // 更新URL参数
+    const params = new URLSearchParams(searchParams.toString());
+    if (newProjectId) {
+      params.set('projectId', newProjectId);
+    } else {
+      params.delete('projectId');
+    }
+    
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   return (

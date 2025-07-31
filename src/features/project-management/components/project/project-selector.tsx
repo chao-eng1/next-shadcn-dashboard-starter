@@ -27,7 +27,7 @@ export function ProjectSelector({
 }: ProjectSelectorProps) {
   return (
     <Select
-      defaultValue={currentProjectId || 'all'}
+      value={currentProjectId || 'all'}
       onValueChange={(value) => {
         // 直接调用回调函数，不进行路由跳转
         if (onProjectChange) {

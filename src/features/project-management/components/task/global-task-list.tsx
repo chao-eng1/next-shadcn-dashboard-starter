@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -243,7 +243,7 @@ export function GlobalTaskList({
   const [isDeleting, setIsDeleting] = useState(false);
 
   // 加载任务列表
-  const loadTasks = async () => {
+  const loadTasks = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -283,22 +283,26 @@ export function GlobalTaskList({
     } finally {
       setLoading(false);
     }
-  };
-
-  // 当依赖项变化时加载任务列表
-  useEffect(() => {
-    loadTasks();
   }, [
-    page,
     status,
     priority,
     projectId,
     sprintId,
     parentTaskId,
     assignedToMe,
+    search,
+    page,
+    limit,
     sortBy,
-    sortOrder
+    sortOrder,
+    t,
+    commonT
   ]);
+
+  // 当依赖项变化时加载任务列表
+  useEffect(() => {
+    loadTasks();
+  }, [loadTasks]);
 
   // 当defaultProjectId变化时更新projectId
   useEffect(() => {
