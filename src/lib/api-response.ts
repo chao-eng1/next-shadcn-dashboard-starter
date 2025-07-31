@@ -97,3 +97,13 @@ export function apiBadRequest(message: string = '请求参数错误'): NextRespo
 export function apiNotFound(message: string = '资源不存在'): NextResponse {
   return apiError('NOT_FOUND', message, null, 404);
 }
+
+/**
+ * 创建验证错误响应
+ * @param errors 验证错误详情
+ * @param message 错误消息
+ * @returns NextResponse
+ */
+export function apiValidationError(errors: any, message: string = '请求参数验证失败'): NextResponse {
+  return apiError('VALIDATION_ERROR', message, errors, 400);
+}

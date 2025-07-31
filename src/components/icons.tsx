@@ -38,7 +38,9 @@ import {
   IconSend,
   IconPlant,
   IconRefreshDot,
-  IconList
+  IconList,
+  IconMessageCircle,
+  IconClipboard
 } from '@tabler/icons-react';
 
 export type Icon = React.ComponentType<IconProps>;
@@ -82,5 +84,8 @@ export const Icons = {
   seed: IconPlant,
   refresh: IconRefreshDot,
   briefcase: IconBriefcase,
-  list: IconList
+  list: IconList,
+  messageCircle: IconMessageCircle,
+  clipboard: IconClipboard,
+  fileText: IconFileText
 };

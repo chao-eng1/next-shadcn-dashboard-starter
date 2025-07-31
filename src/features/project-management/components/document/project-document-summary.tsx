@@ -243,7 +243,7 @@ export function ProjectDocumentSummary({
       {/* 查看更多 */}
       <div className='text-center'>
         <Button variant='outline' asChild>
-          <Link href={`/dashboard/projects/${projectId}/documents`}>
+          <Link href={`/dashboard/documents?tab=project&projectId=${projectId}`}>
             {t('actions.viewAll')}
           </Link>
         </Button>

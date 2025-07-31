@@ -443,7 +443,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                       asChild
                     >
                       <Link
-                        href={`/dashboard/projects/${project.id}/documents`}
+                        href={`/dashboard/documents?tab=project&projectId=${project.id}`}
                       >
                         {tdoc('view')}
                       </Link>
@@ -673,6 +673,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               </Card>
             </ProjectPermissionGate>
           </TabsContent>
+
+
 
           <TabsContent value='team'>
             <Card>

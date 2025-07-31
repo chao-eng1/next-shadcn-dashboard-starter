@@ -38,6 +38,20 @@ model User {
   documentVersions     DocumentVersion[]
   documentTemplates    DocumentTemplate[]
   taskHistories        TaskHistory[]       // 任务历史记录执行者
+  
+  // IM即时通讯相关字段
+  sentProjectMessages  ProjectMessage[]    @relation("SentProjectMessages")
+  readMessages         MessageRead[]       @relation("ReadProjectMessages")
+  onlineStatus         UserOnlineStatus?   @relation("OnlineStatus")
+  projectOnlineStatus  ProjectMemberOnline[] @relation("ProjectOnlineStatus")
+  messageNotifications MessageNotification[] @relation("ReceivedNotifications")
+  
+  // 私聊相关关联
+  privateConversations1 PrivateConversation[] @relation("PrivateConversations1")
+  privateConversations2 PrivateConversation[] @relation("PrivateConversations2")
+  sentPrivateMessages   PrivateMessage[]      @relation("SentPrivateMessages")
+  receivedPrivateMessages PrivateMessage[]    @relation("ReceivedPrivateMessages")
+  privateMessageNotifications PrivateMessageNotification[] @relation("ReceivedPrivateNotifications")
 }
 
 model Role {
@@ -184,6 +198,11 @@ model Project {
   documents      Document[]
   documentFolders DocumentFolder[]
   documentTemplates DocumentTemplate[]
+  
+  // IM即时通讯相关字段
+  chat           ProjectChat?     @relation("ProjectChat")
+  onlineMembers  ProjectMemberOnline[] @relation("ProjectOnlineMembers")
+  privateConversations PrivateConversation[] @relation("ProjectPrivateConversations")
 
   @@map("projects")
 }
@@ -596,4 +615,199 @@ model TaskHistory {
   @@map("task_histories")
   @@index([taskId])
   @@index([performedById])
+}
+
+// ===== 项目即时通讯功能扩展 =====
+
+// 项目聊天室实体
+model ProjectChat {
+  id          String           @id @default(cuid())
+  projectId   String           @unique
+  project     Project          @relation("ProjectChat", fields: [projectId], references: [id], onDelete: Cascade)
+  messages    ProjectMessage[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@map("project_chats")
+  @@index([projectId])
+}
+
+// 项目消息实体
+model ProjectMessage {
+  id          String      @id @default(cuid())
+  content     String
+  messageType MessageType @default(TEXT)
+  chatId      String
+  chat        ProjectChat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  senderId    String
+  sender      User        @relation("SentProjectMessages", fields: [senderId], references: [id])
+  replyToId   String?     // 回复消息ID
+  replyTo     ProjectMessage? @relation("MessageReply", fields: [replyToId], references: [id])
+  replies     ProjectMessage[] @relation("MessageReply")
+  isEdited    Boolean     @default(false)
+  editedAt    DateTime?
+  isDeleted   Boolean     @default(false)
+  deletedAt   DateTime?
+  readBy      MessageRead[]
+  notifications MessageNotification[] @relation("MessageNotifications")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("project_messages")
+  @@index([chatId])
+  @@index([senderId])
+  @@index([replyToId])
+  @@index([createdAt])
+}
+
+// 消息类型枚举
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  SYSTEM
+}
+
+// 消息已读状态实体
+model MessageRead {
+  id        String         @id @default(cuid())
+  messageId String
+  message   ProjectMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User           @relation("ReadProjectMessages", fields: [userId], references: [id])
+  readAt    DateTime       @default(now())
+  createdAt DateTime       @default(now())
+
+  @@unique([messageId, userId])
+  @@map("message_reads")
+  @@index([messageId])
+  @@index([userId])
+}
+
+// 用户在线状态实体
+model UserOnlineStatus {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  user         User      @relation("OnlineStatus", fields: [userId], references: [id], onDelete: Cascade)
+  isOnline     Boolean   @default(false)
+  lastSeenAt   DateTime  @default(now())
+  currentPage  String?   // 当前所在页面
+  updatedAt    DateTime  @updatedAt
+
+  @@map("user_online_status")
+  @@index([userId])
+  @@index([isOnline])
+}
+
+// 项目成员在线状态实体
+model ProjectMemberOnline {
+  id        String        @id @default(cuid())
+  projectId String
+  project   Project       @relation("ProjectOnlineMembers", fields: [projectId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User          @relation("ProjectOnlineStatus", fields: [userId], references: [id], onDelete: Cascade)
+  isOnline  Boolean       @default(false)
+  lastSeen  DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@unique([projectId, userId])
+  @@map("project_member_online")
+  @@index([projectId])
+  @@index([userId])
+  @@index([isOnline])
+}
+
+// 消息通知实体
+model MessageNotification {
+  id        String         @id @default(cuid())
+  messageId String
+  message   ProjectMessage @relation("MessageNotifications", fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User           @relation("ReceivedNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  isRead    Boolean        @default(false)
+  readAt    DateTime?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([messageId, userId])
+  @@map("message_notifications")
+  @@index([messageId])
+  @@index([userId])
+  @@index([isRead])
+}
+
+// ===== 私聊功能扩展 =====
+
+// 私聊会话实体
+model PrivateConversation {
+  id           String              @id @default(cuid())
+  participant1Id String
+  participant1   User              @relation("PrivateConversations1", fields: [participant1Id], references: [id], onDelete: Cascade)
+  participant2Id String
+  participant2   User              @relation("PrivateConversations2", fields: [participant2Id], references: [id], onDelete: Cascade)
+  projectId      String            // 私聊发生在哪个项目上下文中
+  project        Project           @relation("ProjectPrivateConversations", fields: [projectId], references: [id], onDelete: Cascade)
+  messages       PrivateMessage[]
+  lastMessageAt  DateTime?         // 最后一条消息时间
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@unique([participant1Id, participant2Id, projectId])
+  @@map("private_conversations")
+  @@index([participant1Id])
+  @@index([participant2Id])
+  @@index([projectId])
+  @@index([lastMessageAt])
+}
+
+// 私聊消息实体
+model PrivateMessage {
+  id             String              @id @default(cuid())
+  content        String
+  messageType    MessageType         @default(TEXT)
+  conversationId String
+  conversation   PrivateConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User                @relation("SentPrivateMessages", fields: [senderId], references: [id])
+  receiverId     String
+  receiver       User                @relation("ReceivedPrivateMessages", fields: [receiverId], references: [id])
+  replyToId      String?             // 回复消息ID
+  replyTo        PrivateMessage?     @relation("PrivateMessageReply", fields: [replyToId], references: [id])
+  replies        PrivateMessage[]    @relation("PrivateMessageReply")
+  isEdited       Boolean             @default(false)
+  editedAt       DateTime?
+  isDeleted      Boolean             @default(false)
+  deletedAt      DateTime?
+  isRead         Boolean             @default(false)
+  readAt         DateTime?
+  notifications  PrivateMessageNotification[] @relation("PrivateMessageNotifications")
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@map("private_messages")
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([replyToId])
+  @@index([createdAt])
+  @@index([isRead])
+}
+
+// 私聊消息通知实体
+model PrivateMessageNotification {
+  id        String         @id @default(cuid())
+  messageId String
+  message   PrivateMessage @relation("PrivateMessageNotifications", fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User           @relation("ReceivedPrivateNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  isRead    Boolean        @default(false)
+  readAt    DateTime?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([messageId, userId])
+  @@map("private_message_notifications")
+  @@index([messageId])
+  @@index([userId])
+  @@index([isRead])
 }
