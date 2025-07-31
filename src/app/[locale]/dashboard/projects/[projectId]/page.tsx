@@ -18,6 +18,8 @@ import { Heading } from '@/components/ui/heading';
 import PageContainer from '@/components/layout/page-container';
 import { RecentTaskList } from '@/features/project-management/components/task/recent-task-list';
 import { ProjectTaskSummary } from '@/features/project-management/components/task/project-task-summary';
+import { ProjectSprintSummary } from '@/features/project-management/components/sprint/project-sprint-summary';
+import { ProjectDocumentSummary } from '@/features/project-management/components/document/project-document-summary';
 import { PermissionGate } from '@/components/permission-gate';
 import { ProjectPermissionGate } from '@/components/project-permission-gate';
 
@@ -218,6 +220,30 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     user.id
   );
 
+  // 检查迭代相关权限
+  const canViewSprints = await hasProjectPermission(
+    projectId,
+    'sprint.view',
+    user.id
+  );
+  const canCreateSprint = await hasProjectPermission(
+    projectId,
+    'sprint.create',
+    user.id
+  );
+
+  // 检查文档相关权限
+  const canViewDocuments = await hasProjectPermission(
+    projectId,
+    'document.view',
+    user.id
+  );
+  const canCreateDocument = await hasProjectPermission(
+    projectId,
+    'document.create',
+    user.id
+  );
+
   return (
     <PageContainer>
       <div className='mx-auto flex w-full max-w-7xl flex-1 flex-col space-y-6 px-4 md:px-6 lg:px-8'>
@@ -304,9 +330,15 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         <Tabs defaultValue='overview' className='space-y-4'>
           <TabsList>
             <TabsTrigger value='overview'>{tnav('overview')}</TabsTrigger>
-            <TabsTrigger value='tasks'>{tnav('tasks')}</TabsTrigger>
-            <TabsTrigger value='sprints'>{t('overview.iterations')}</TabsTrigger>
-            <TabsTrigger value='docs'>{tnav('documents')}</TabsTrigger>
+            {canViewTasks && (
+              <TabsTrigger value='tasks'>{tnav('tasks')}</TabsTrigger>
+            )}
+            {canViewSprints && (
+              <TabsTrigger value='sprints'>{t('overview.iterations')}</TabsTrigger>
+            )}
+            {canViewDocuments && (
+              <TabsTrigger value='docs'>{tnav('documents')}</TabsTrigger>
+            )}
             <TabsTrigger value='team'>{t('team.title')}</TabsTrigger>
           </TabsList>
 
@@ -587,49 +619,59 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </TabsContent>
 
           <TabsContent value='sprints'>
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('overview.sprintManagement')}</CardTitle>
-                <CardDescription>{t('overview.sprintPlan')}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className='py-4 text-center'>
-                  {t('overview.sprintComingSoon')}
-                </p>
-                <div className='flex justify-center'>
-                  <Button asChild>
-                    <Link
-                      href={`/dashboard/projects/${project.id}/sprints/new`}
-                    >
-                      {tsprint('create')}
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <ProjectPermissionGate permission='sprint.view' projectId={projectId}>
+              <Card>
+                <CardHeader className='flex flex-row items-center justify-between'>
+                  <div>
+                    <CardTitle>{t('overview.sprintManagement')}</CardTitle>
+                    <CardDescription>{t('overview.sprintPlan')}</CardDescription>
+                  </div>
+                  <ProjectPermissionGate
+                    permission='sprint.create'
+                    projectId={projectId}
+                  >
+                    <Button asChild>
+                      <Link
+                        href={`/dashboard/projects/${project.id}/sprints/new`}
+                      >
+                        {tsprint('create')}
+                      </Link>
+                    </Button>
+                  </ProjectPermissionGate>
+                </CardHeader>
+                <CardContent>
+                  <ProjectSprintSummary projectId={project.id} userId={user.id} />
+                </CardContent>
+              </Card>
+            </ProjectPermissionGate>
           </TabsContent>
 
           <TabsContent value='docs'>
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('overview.documentManagement')}</CardTitle>
-                <CardDescription>{t('overview.documentKnowledge')}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className='py-4 text-center'>
-                  {t('overview.documentComingSoon')}
-                </p>
-                <div className='flex justify-center'>
-                  <Button asChild>
-                    <Link
-                      href={`/dashboard/projects/${project.id}/documents/new`}
-                    >
-                      {tdoc('create')}
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <ProjectPermissionGate permission='document.view' projectId={projectId}>
+              <Card>
+                <CardHeader className='flex flex-row items-center justify-between'>
+                  <div>
+                    <CardTitle>{t('overview.documentManagement')}</CardTitle>
+                    <CardDescription>{t('overview.documentKnowledge')}</CardDescription>
+                  </div>
+                  <ProjectPermissionGate
+                    permission='document.create'
+                    projectId={projectId}
+                  >
+                    <Button asChild>
+                      <Link
+                        href={`/dashboard/projects/${project.id}/documents/new`}
+                      >
+                        {tdoc('create')}
+                      </Link>
+                    </Button>
+                  </ProjectPermissionGate>
+                </CardHeader>
+                <CardContent>
+                   <ProjectDocumentSummary projectId={project.id} userId={user.id} />
+                 </CardContent>
+              </Card>
+            </ProjectPermissionGate>
           </TabsContent>
 
           <TabsContent value='team'>

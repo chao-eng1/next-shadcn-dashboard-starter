@@ -53,5 +53,5 @@ export function getSprintStatusLabel(
 ): string {
   const statusConfig = SPRINT_STATUS[status];
   if (!statusConfig) return status;
-  return t(`sprints.status.${statusConfig.key}`);
+  return t(`status.${statusConfig.key}`);
 }

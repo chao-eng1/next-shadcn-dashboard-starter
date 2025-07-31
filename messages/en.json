@@ -585,7 +585,8 @@
       "edit": "Edit",
       "move": "Move",
       "delete": "Delete",
-      "preview": "Preview"
+      "preview": "Preview",
+      "viewAll": "View All Documents"
     },
     "deleteDialog": {
       "title": "Confirm Delete",
@@ -616,6 +617,12 @@
       "allowedTypes": "Allowed file types",
       "uploadFailed": "Upload failed",
       "uploadSuccess": "Upload successful"
+    },
+    "overview": {
+      "totalDocuments": "Total Documents",
+      "publishedDocuments": "Published Documents",
+      "draftDocuments": "Draft Documents",
+      "recentDocuments": "Recent Documents"
     }
   },
   "system": {
@@ -849,6 +856,22 @@
       "remainingWork": "Remaining Work",
       "completedWork": "Completed Work",
       "totalWork": "Total Work"
+    },
+    "table": {
+      "progress": "Progress",
+      "time": "Time",
+      "tasks": "Tasks",
+      "noTasks": "No Tasks",
+      "noGoal": "No Goal Set",
+      "daysRemaining": "{days} days remaining",
+      "endToday": "Ends today",
+      "overdue": "Overdue by {days} days"
+    },
+    "empty": {
+      "noSprints": "No sprint data available"
+    },
+    "actions": {
+      "viewAll": "View All Sprints"
     },
     "unassignedTasks": "Unassigned Tasks",
     "otherSprintTasks": "Tasks from Other Sprints",

@@ -587,7 +587,8 @@
       "edit": "编辑",
       "move": "移动",
       "delete": "删除",
-      "preview": "预览"
+      "preview": "预览",
+      "viewAll": "查看全部文档"
     },
     "deleteDialog": {
       "title": "确认删除",
@@ -618,6 +619,12 @@
       "allowedTypes": "支持的文件类型",
       "uploadFailed": "上传失败",
       "uploadSuccess": "上传成功"
+    },
+    "overview": {
+      "totalDocuments": "总文档数",
+      "publishedDocuments": "已发布文档",
+      "draftDocuments": "草稿文档",
+      "recentDocuments": "最近文档"
     }
   },
   "system": {
@@ -856,6 +863,22 @@
       "remainingWork": "剩余工作",
       "completedWork": "已完成工作",
       "totalWork": "总工作量"
+    },
+    "table": {
+      "progress": "进度",
+      "time": "时间",
+      "tasks": "任务",
+      "noTasks": "无任务",
+      "noGoal": "未设置目标",
+      "daysRemaining": "剩余 {days} 天",
+      "endToday": "今天结束",
+      "overdue": "已超期 {days} 天"
+    },
+    "empty": {
+      "noSprints": "暂无迭代数据"
+    },
+    "actions": {
+      "viewAll": "查看所有迭代"
     }
   },
   "messages": {
