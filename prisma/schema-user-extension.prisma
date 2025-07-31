@@ -1,0 +1,16 @@
+# 用户模型扩展
+# 这部分需要添加到现有User模型中
+
+model User {
+  // 现有字段...
+  
+  // 项目管理相关字段
+  ownedProjects      Project[]         @relation("OwnedProjects")
+  projectMemberships ProjectMember[]
+  comments           Comment[]
+  attachments        Attachment[]
+  createdDocuments   Document[]        @relation("CreatedDocuments")
+  updatedDocuments   Document[]        @relation("UpdatedDocuments")
+  documentVersions   DocumentVersion[]
+  documentTemplates  DocumentTemplate[]
+}

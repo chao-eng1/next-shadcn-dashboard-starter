@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String        @id @default(cuid())
+  name             String?
+  email            String        @unique
+  passwordHash     String
+  image            String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  sentMessages     Message[]     @relation("SentMessages")
+  sessions         Session[]
+  receivedMessages UserMessage[] @relation("ReceivedMessages")
+  roles            UserRole[]
+
+  @@map("users")
+
+  
+  // 项目管理相关字段
+ownedProjects      Project[]         @relation("OwnedProjects")
+  projectMemberships ProjectMember[]
+  comments           Comment[]
+  attachments        Attachment[]
+  createdDocuments   Document[]        @relation("CreatedDocuments")
+  updatedDocuments   Document[]        @relation("UpdatedDocuments")
+  documentVersions   DocumentVersion[]
+  documentTemplates  DocumentTemplate[]
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  permissions RolePermission[]
+  users       UserRole[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  menus       MenuPermission[]
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+model Menu {
+  id          String           @id @default(cuid())
+  name        String
+  path        String?
+  icon        String?
+  parentId    String?
+  order       Int              @default(0)
+  isVisible   Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  permissions MenuPermission[]
+  parent      Menu?            @relation("MenuToMenu", fields: [parentId], references: [id])
+  children    Menu[]           @relation("MenuToMenu")
+
+  @@map("menus")
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String
+  roleId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@map("user_roles")
+}
+
+model RolePermission {
+  id           String     @id @default(cuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model MenuPermission {
+  id           String     @id @default(cuid())
+  menuId       String
+  permissionId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  menu         Menu       @relation(fields: [menuId], references: [id], onDelete: Cascade)
+
+  @@unique([menuId, permissionId])
+  @@map("menu_permissions")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Message {
+  id         String        @id @default(cuid())
+  title      String
+  content    String
+  isGlobal   Boolean       @default(false)
+  senderId   String
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  sender     User          @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  recipients UserMessage[]
+
+  @@map("messages")
+}
+
+model UserMessage {
+  id        String    @id @default(cuid())
+  userId    String
+  messageId String
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  message   Message   @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      User      @relation("ReceivedMessages", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, messageId])
+  @@map("user_messages")
+}

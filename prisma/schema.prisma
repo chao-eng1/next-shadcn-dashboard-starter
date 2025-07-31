@@ -1,0 +1,599 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String        @id @default(cuid())
+  name             String?
+  email            String        @unique
+  passwordHash     String
+  image            String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  sentMessages     Message[]     @relation("SentMessages")
+  sessions         Session[]
+  receivedMessages UserMessage[] @relation("ReceivedMessages")
+  roles            UserRole[]
+
+  @@map("users")
+
+  
+  // 项目管理相关字段
+  ownedProjects        Project[]           @relation("OwnedProjects")
+  projectMemberships   ProjectMember[]
+  projectInvitations   ProjectInvitation[] @relation("ReceivedInvitations")
+  sentProjectInvitations ProjectInvitation[] @relation("SentInvitations")
+  comments             Comment[]
+  attachments          Attachment[]
+  documentComments     DocumentComment[]
+  documentAttachments  DocumentAttachment[]
+  documentFolders      DocumentFolder[]
+  createdDocuments     Document[]          @relation("CreatedDocuments")
+  updatedDocuments     Document[]          @relation("UpdatedDocuments")
+  documentVersions     DocumentVersion[]
+  documentTemplates    DocumentTemplate[]
+  taskHistories        TaskHistory[]       // 任务历史记录执行者
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  permissions RolePermission[]
+  users       UserRole[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  menus       MenuPermission[]
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+model Menu {
+  id          String           @id @default(cuid())
+  name        String
+  path        String?
+  icon        String?
+  parentId    String?
+  order       Int              @default(0)
+  isVisible   Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  permissions MenuPermission[]
+  parent      Menu?            @relation("MenuToMenu", fields: [parentId], references: [id])
+  children    Menu[]           @relation("MenuToMenu")
+
+  @@map("menus")
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String
+  roleId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@map("user_roles")
+}
+
+model RolePermission {
+  id           String     @id @default(cuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model MenuPermission {
+  id           String     @id @default(cuid())
+  menuId       String
+  permissionId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  menu         Menu       @relation(fields: [menuId], references: [id], onDelete: Cascade)
+
+  @@unique([menuId, permissionId])
+  @@map("menu_permissions")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Message {
+  id         String        @id @default(cuid())
+  title      String
+  content    String
+  isGlobal   Boolean       @default(false)
+  senderId   String
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  sender     User          @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  recipients UserMessage[]
+
+  @@map("messages")
+}
+
+model UserMessage {
+  id        String    @id @default(cuid())
+  userId    String
+  messageId String
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  message   Message   @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      User      @relation("ReceivedMessages", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, messageId])
+  @@map("user_messages")
+}
+
+// 项目管理模块扩展
+// 项目管理模块 - Prisma Schema 扩展
+
+// 项目实体
+model Project {
+  id             String           @id @default(cuid())
+  name           String
+  description    String?
+  startDate      DateTime?
+  endDate        DateTime?
+  status         ProjectStatus    @default(ACTIVE)
+  visibility     ProjectVisibility @default(PRIVATE)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  ownerId        String
+  owner          User             @relation("OwnedProjects", fields: [ownerId], references: [id])
+  members        ProjectMember[]
+  invitations    ProjectInvitation[]
+  tasks          Task[]
+  sprints        Sprint[]
+  attachments    Attachment[]
+  documents      Document[]
+  documentFolders DocumentFolder[]
+  documentTemplates DocumentTemplate[]
+
+  @@map("projects")
+}
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum ProjectVisibility {
+  PRIVATE
+  TEAM
+  PUBLIC
+}
+
+// 任务实体
+model Task {
+  id             String          @id @default(cuid())
+  title          String
+  description    String?
+  status         TaskStatus      @default(TODO)
+  priority       TaskPriority    @default(MEDIUM)
+  dueDate        DateTime?
+  estimatedHours Float?
+  completedAt    DateTime?
+  projectId      String
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  parentTaskId   String?
+  parentTask     Task?           @relation("TaskToSubtask", fields: [parentTaskId], references: [id])
+  subtasks       Task[]          @relation("TaskToSubtask")
+  sprintId       String?
+  sprint         Sprint?         @relation(fields: [sprintId], references: [id])
+  assignments    TaskAssignment[]
+  comments       Comment[]
+  attachments    Attachment[]
+  tags           TaskTag[]
+  documents      Document[]
+  history        TaskHistory[]   // 任务历史记录
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@map("tasks")
+  @@index([projectId])
+  @@index([sprintId])
+  @@index([parentTaskId])
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+  BLOCKED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// 迭代周期实体
+model Sprint {
+  id             String       @id @default(cuid())
+  name           String
+  description    String? // Added description field
+  goal           String?
+  startDate      DateTime
+  endDate        DateTime
+  status         SprintStatus @default(PLANNED)
+  projectId      String
+  project        Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks          Task[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("sprints")
+  @@index([projectId])
+}
+
+enum SprintStatus {
+  PLANNED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+// 项目成员实体
+model ProjectMember {
+  id           String           @id @default(cuid())
+  userId       String
+  projectId    String
+  role         ProjectMemberRole @default(MEMBER)
+  joinedAt     DateTime         @default(now())
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project      Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignments  TaskAssignment[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  invitationId String?          // 如果通过邀请加入，保存邀请ID
+
+  @@unique([userId, projectId])
+  @@map("project_members")
+  @@index([userId])
+  @@index([projectId])
+  @@index([invitationId])
+}
+
+enum ProjectMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+// 任务分配实体
+model TaskAssignment {
+  id              String    @id @default(cuid())
+  taskId          String
+  memberId        String
+  assignedAt      DateTime  @default(now())
+  task            Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  member          ProjectMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([taskId, memberId])
+  @@map("task_assignments")
+  @@index([taskId])
+  @@index([memberId])
+}
+
+// 评论实体
+model Comment {
+  id          String    @id @default(cuid())
+  content     String
+  taskId      String
+  userId      String
+  task        Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("comments")
+  @@index([taskId])
+  @@index([userId])
+}
+
+// 附件实体
+model Attachment {
+  id          String         @id @default(cuid())
+  filename    String
+  filepath    String
+  mimetype    String
+  size        Int
+  projectId   String?
+  project     Project?       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  taskId      String?
+  task        Task?          @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploaderId  String
+  uploader    User           @relation(fields: [uploaderId], references: [id])
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@map("attachments")
+  @@index([projectId])
+  @@index([taskId])
+  @@index([uploaderId])
+}
+
+// 标签实体
+model Tag {
+  id          String    @id @default(cuid())
+  name        String
+  color       String    @default("#3498db")
+  tasks       TaskTag[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("tags")
+}
+
+model TaskTag {
+  id          String    @id @default(cuid())
+  taskId      String
+  tagId       String
+  task        Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  tag         Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([taskId, tagId])
+  @@map("task_tags")
+  @@index([taskId])
+  @@index([tagId])
+}
+
+// 文档实体
+model Document {
+  id             String           @id @default(cuid())
+  title          String
+  content        String
+  format         DocumentFormat   @default(MARKDOWN)
+  status         DocumentStatus   @default(DRAFT)
+  type           DocumentType     @default(PROJECT) // 增加文档类型，区分个人和项目文档
+  projectId      String?
+  project        Project?         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  parentId       String?
+  parent         Document?        @relation("DocumentHierarchy", fields: [parentId], references: [id])
+  children       Document[]       @relation("DocumentHierarchy")
+  taskId         String?
+  task           Task?            @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  folderId       String?         // 增加文件夹字段
+  folder         DocumentFolder? @relation(fields: [folderId], references: [id])
+  authorId       String         // 作者字段，连接到User
+  author         User           @relation("CreatedDocuments", fields: [authorId], references: [id])
+  updatedById    String
+  updatedBy      User           @relation("UpdatedDocuments", fields: [updatedById], references: [id])
+  versions       DocumentVersion[]
+  templateId     String?
+  template       DocumentTemplate? @relation(fields: [templateId], references: [id])
+  tags           String   // 标签数组，使用逗号分隔的字符串
+  isPrivate      Boolean         @default(false) // 文档是否私有
+  attachments    DocumentAttachment[] // 文档附件
+  comments       DocumentComment[] // 文档评论
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  
+  @@map("documents")
+  @@index([projectId])
+  @@index([taskId])
+  @@index([parentId])
+  @@index([folderId])
+  @@index([templateId])
+  @@index([authorId])
+  @@index([updatedById])
+}
+
+// 文档版本实体
+model DocumentVersion {
+  id             String           @id @default(cuid())
+  versionNumber  Int
+  content        String
+  documentId     String
+  document       Document         @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  createdById    String
+  createdBy      User             @relation(fields: [createdById], references: [id])
+  createdAt      DateTime         @default(now())
+  
+  @@unique([documentId, versionNumber])
+  @@map("document_versions")
+  @@index([documentId])
+  @@index([createdById])
+}
+
+// 文档模板实体
+model DocumentTemplate {
+  id             String           @id @default(cuid())
+  title          String
+  description    String?
+  content        String
+  format         DocumentFormat   @default(MARKDOWN)
+  category       String?
+  isGlobal       Boolean          @default(false)
+  projectId      String?
+  project        Project?         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  documents      Document[]
+  createdById    String
+  createdBy      User             @relation(fields: [createdById], references: [id])
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  
+  @@map("document_templates")
+  @@index([projectId])
+  @@index([createdById])
+}
+
+// 文档格式枚举
+enum DocumentFormat {
+  MARKDOWN
+  RICH_TEXT
+  PLAIN_TEXT
+}
+
+// 文档状态枚举
+enum DocumentStatus {
+  DRAFT
+  REVIEW
+  PUBLISHED
+  ARCHIVED
+}
+
+// 文档类型枚举
+enum DocumentType {
+  PERSONAL // 个人文档
+  PROJECT  // 项目文档
+}
+
+// 文件夹实体
+model DocumentFolder {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  type        DocumentType @default(PROJECT) // 文件夹类型，个人或项目
+  parentId    String?
+  parent      DocumentFolder? @relation("FolderHierarchy", fields: [parentId], references: [id])
+  children    DocumentFolder[] @relation("FolderHierarchy")
+  projectId   String?
+  project     Project?   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  ownerId     String
+  owner       User       @relation(fields: [ownerId], references: [id])
+  documents   Document[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  
+  @@map("document_folders")
+  @@index([parentId])
+  @@index([projectId])
+  @@index([ownerId])
+}
+
+// 文档附件实体
+model DocumentAttachment {
+  id          String    @id @default(cuid())
+  name        String
+  fileName    String
+  filePath    String
+  fileSize    Int
+  fileType    String
+  documentId  String
+  document    Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  uploaderId  String
+  uploader    User      @relation(fields: [uploaderId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@map("document_attachments")
+  @@index([documentId])
+  @@index([uploaderId])
+}
+
+// 文档评论实体
+model DocumentComment {
+  id          String    @id @default(cuid())
+  content     String
+  documentId  String
+  document    Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@map("document_comments")
+  @@index([documentId])
+  @@index([authorId])
+}
+
+// 项目邀请实体
+model ProjectInvitation {
+  id           String               @id @default(cuid())
+  email        String               // 受邀者邮箱
+  token        String               @unique // 邀请令牌
+  message      String?              // 邀请消息
+  role         ProjectMemberRole    @default(MEMBER) // 邀请加入的角色
+  status       InvitationStatus     @default(PENDING) // 邀请状态
+  expiresAt    DateTime             // 过期时间
+  projectId    String
+  project      Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  inviterId    String
+  inviter      User                 @relation("SentInvitations", fields: [inviterId], references: [id])
+  inviteeId    String?              // 如果邀请了现有用户，则关联用户ID
+  invitee      User?                @relation("ReceivedInvitations", fields: [inviteeId], references: [id])
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  @@map("project_invitations")
+  @@index([projectId])
+  @@index([inviterId])
+  @@index([inviteeId])
+  @@index([email])
+  @@index([token])
+}
+
+// 邀请状态枚举
+enum InvitationStatus {
+  PENDING   // 等待接受
+  ACCEPTED  // 已接受
+  REJECTED  // 已拒绝
+  EXPIRED   // 已过期
+}
+
+// 任务历史记录实体
+model TaskHistory {
+  id              String       @id @default(cuid())
+  taskId          String
+  task            Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  performedById   String
+  performedBy     User         @relation(fields: [performedById], references: [id])
+  fromStatus      TaskStatus?
+  toStatus        TaskStatus?
+  fromAssigneeId  String?     // 变更前的负责人ID
+  toAssigneeId    String?     // 变更后的负责人ID
+  changeSummary   String      // JSON字符串，包含更改的字段和值
+  comment         String?     // 变更备注
+  createdAt       DateTime    @default(now())
+
+  @@map("task_histories")
+  @@index([taskId])
+  @@index([performedById])
+}

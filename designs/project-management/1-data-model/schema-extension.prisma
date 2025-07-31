@@ -1,0 +1,205 @@
+# 项目管理模块 - Prisma Schema 扩展
+
+# 项目实体
+model Project {
+  id             String           @id @default(cuid())
+  name           String
+  description    String?
+  startDate      DateTime?
+  endDate        DateTime?
+  status         ProjectStatus    @default(ACTIVE)
+  visibility     ProjectVisibility @default(PRIVATE)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  ownerId        String
+  owner          User             @relation("OwnedProjects", fields: [ownerId], references: [id])
+  members        ProjectMember[]
+  tasks          Task[]
+  sprints        Sprint[]
+  attachments    Attachment[]
+
+  @@map("projects")
+}
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum ProjectVisibility {
+  PRIVATE
+  TEAM
+  PUBLIC
+}
+
+# 任务实体
+model Task {
+  id             String          @id @default(cuid())
+  title          String
+  description    String?
+  status         TaskStatus      @default(TODO)
+  priority       TaskPriority    @default(MEDIUM)
+  dueDate        DateTime?
+  estimatedHours Float?
+  completedAt    DateTime?
+  projectId      String
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  parentTaskId   String?
+  parentTask     Task?           @relation("TaskToSubtask", fields: [parentTaskId], references: [id])
+  subtasks       Task[]          @relation("TaskToSubtask")
+  sprintId       String?
+  sprint         Sprint?         @relation(fields: [sprintId], references: [id])
+  assignments    TaskAssignment[]
+  comments       Comment[]
+  attachments    Attachment[]
+  tags           TaskTag[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@map("tasks")
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+  BLOCKED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+# 迭代周期实体
+model Sprint {
+  id             String       @id @default(cuid())
+  name           String
+  goal           String?
+  startDate      DateTime
+  endDate        DateTime
+  status         SprintStatus @default(PLANNED)
+  projectId      String
+  project        Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks          Task[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("sprints")
+}
+
+enum SprintStatus {
+  PLANNED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+# 项目成员实体
+model ProjectMember {
+  id           String           @id @default(cuid())
+  userId       String
+  projectId    String
+  role         ProjectMemberRole @default(MEMBER)
+  joinedAt     DateTime         @default(now())
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project      Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignments  TaskAssignment[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@unique([userId, projectId])
+  @@map("project_members")
+}
+
+enum ProjectMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+# 任务分配实体
+model TaskAssignment {
+  id              String    @id @default(cuid())
+  taskId          String
+  memberId        String
+  assignedAt      DateTime  @default(now())
+  task            Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  member          ProjectMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([taskId, memberId])
+  @@map("task_assignments")
+}
+
+# 评论实体
+model Comment {
+  id          String    @id @default(cuid())
+  content     String
+  taskId      String
+  userId      String
+  task        Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("comments")
+}
+
+# 附件实体
+model Attachment {
+  id          String         @id @default(cuid())
+  filename    String
+  filepath    String
+  mimetype    String
+  size        Int
+  projectId   String?
+  project     Project?       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  taskId      String?
+  task        Task?          @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploaderId  String
+  uploader    User           @relation(fields: [uploaderId], references: [id])
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@map("attachments")
+}
+
+# 标签实体
+model Tag {
+  id          String    @id @default(cuid())
+  name        String
+  color       String    @default("#3498db")
+  tasks       TaskTag[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("tags")
+}
+
+model TaskTag {
+  id          String    @id @default(cuid())
+  taskId      String
+  tagId       String
+  task        Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  tag         Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([taskId, tagId])
+  @@map("task_tags")
+}
+
+# 用户实体扩展 (在现有User模型上添加)
+// 需添加到现有User模型:
+// ownedProjects    Project[]        @relation("OwnedProjects")
+// projectMemberships ProjectMember[]
+// comments         Comment[]
+// attachments      Attachment[]
