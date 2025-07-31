@@ -290,6 +290,30 @@
       "admin": "管理员",
       "member": "成员",
       "viewer": "查看者"
+    },
+    "overview": {
+      "statistics": "统计",
+      "taskStats": "项目任务的状态分布",
+      "completedTasks": "已完成任务",
+      "totalSprints": "总迭代数",
+      "totalDocuments": "总文档数",
+      "recentTasks": "最近更新的任务",
+      "noTasks": "项目暂无任务",
+      "projectTeam": "项目团队",
+      "moreMembers": "还有 {count} 位成员未显示",
+      "viewAllMembers": "查看所有成员",
+      "viewAllTasks": "查看所有任务",
+      "taskManagement": "任务管理",
+      "recentTasksDesc": "最近的任务（最多显示10条）",
+      "sprintManagement": "迭代管理",
+      "sprintPlan": "项目的迭代计划",
+      "sprintComingSoon": "迭代管理功能即将上线",
+      "documentManagement": "文档管理",
+      "documentKnowledge": "项目文档和知识库",
+      "documentComingSoon": "文档管理功能即将上线",
+      "teamManagement": "团队成员和权限管理",
+      "manageTeam": "管理团队成员",
+      "iterations": "迭代"
     }
   },
   "products": {
@@ -441,6 +465,7 @@
       "unassigned": "未分配",
       "subtasks": "子任务",
       "comments": "评论",
+      "attachments": "附件",
       "level": "层级",
       "warning": "警告",
       "totalTasks": "共 {count} 个任务"
@@ -785,6 +810,11 @@
     "complete": "完成迭代",
     "cancel": "取消迭代",
     "view": "查看迭代",
+    "unassignedTasks": "未分配到迭代的任务",
+    "otherSprintTasks": "其他迭代的任务",
+    "noMatchingTasks": "没有找到匹配的任务",
+    "noAvailableTasks": "项目中没有可添加的任务",
+    "selectedTasks": "已选择 {count} 个任务",
     "form": {
       "name": "迭代名称",
       "goal": "迭代目标",

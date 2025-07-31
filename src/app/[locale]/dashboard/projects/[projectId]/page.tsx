@@ -304,7 +304,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <TabsList>
             <TabsTrigger value='overview'>{tnav('overview')}</TabsTrigger>
             <TabsTrigger value='tasks'>{tnav('tasks')}</TabsTrigger>
-            <TabsTrigger value='sprints'>迭代</TabsTrigger>
+            <TabsTrigger value='sprints'>{t('overview.iterations')}</TabsTrigger>
             <TabsTrigger value='docs'>{tnav('documents')}</TabsTrigger>
             <TabsTrigger value='team'>{t('team.title')}</TabsTrigger>
           </TabsList>
@@ -314,16 +314,16 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               <Card>
                 <CardHeader className='pb-2'>
                   <CardTitle className='text-base'>
-                    {ttask('title')}统计
+                    {ttask('title')}{t('overview.statistics')}
                   </CardTitle>
-                  <CardDescription>项目任务的状态分布</CardDescription>
+                  <CardDescription>{t('overview.taskStats')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className='text-2xl font-bold'>
                     {completedTasks}/{totalTasks} ({completionRate}%)
                   </div>
                   <p className='text-muted-foreground text-xs'>
-                    已完成{ttask('title')}
+                    {t('overview.completedTasks')}
                   </p>
 
                   <div className='mt-4 grid grid-cols-2 gap-2'>
@@ -368,13 +368,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   <CardTitle className='text-base'>
                     {tsprint('title')}
                   </CardTitle>
-                  <CardDescription>项目迭代计划</CardDescription>
+                  <CardDescription>{t('overview.sprintPlan')}</CardDescription>
                 </CardHeader>
                 <CardContent className='space-y-2'>
                   <div className='text-2xl font-bold'>
                     {project._count.sprints}
                   </div>
-                  <p className='text-muted-foreground text-xs'>总迭代数</p>
+                  <p className='text-muted-foreground text-xs'>{t('overview.totalSprints')}</p>
 
                   <div className='mt-4'>
                     <Button
@@ -394,13 +394,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               <Card>
                 <CardHeader className='pb-2'>
                   <CardTitle className='text-base'>{tdoc('title')}</CardTitle>
-                  <CardDescription>项目文档和知识库</CardDescription>
+                  <CardDescription>{t('overview.documentKnowledge')}</CardDescription>
                 </CardHeader>
                 <CardContent className='space-y-2'>
                   <div className='text-2xl font-bold'>
                     {project._count.documents}
                   </div>
-                  <p className='text-muted-foreground text-xs'>总文档数</p>
+                  <p className='text-muted-foreground text-xs'>{t('overview.totalDocuments')}</p>
 
                   <div className='mt-4'>
                     <Button
@@ -424,13 +424,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               <Card>
                 <CardHeader>
                   <CardTitle className='text-base'>
-                    最近更新的{ttask('title')}
+                    {t('overview.recentTasks')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {recentTasks.length === 0 ? (
                     <p className='text-muted-foreground py-4 text-center text-sm'>
-                      项目暂无{ttask('title')}
+                      {t('overview.noTasks')}
                     </p>
                   ) : (
                     <div className='space-y-4'>
@@ -475,9 +475,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                       asChild
                     >
                       <Link href={`/dashboard/projects/${project.id}/tasks`}>
-                        {tc('view')}
-                        {tc('all')}
-                        {ttask('title')}
+                        {t('overview.viewAllTasks')}
                       </Link>
                     </Button>
                   </div>
@@ -490,7 +488,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                     <CardTitle className='text-base'>
                       {t('team.title')}
                     </CardTitle>
-                    <CardDescription>项目团队</CardDescription>
+                    <CardDescription>{t('overview.projectTeam')}</CardDescription>
                   </div>
                   {canManageMembers && (
                     <Button variant='outline' size='sm' asChild>
@@ -534,7 +532,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                       <div className='pt-2'>
                         <Separator className='my-2' />
                         <p className='text-muted-foreground text-center text-sm'>
-                          还有 {project.members.length - 5} 位成员未显示
+                          {t('overview.moreMembers', { count: project.members.length - 5 })}
                         </p>
                       </div>
                     )}
@@ -548,8 +546,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                       asChild
                     >
                       <Link href={`/dashboard/projects/${project.id}/team`}>
-                        {tc('view')}
-                        {tc('all')}成员
+                        {t('overview.viewAllMembers')}
                       </Link>
                     </Button>
                   </div>
@@ -563,9 +560,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               <Card>
                 <CardHeader className='flex flex-row items-center justify-between'>
                   <div>
-                    <CardTitle>{ttask('title')}管理</CardTitle>
+                    <CardTitle>{t('overview.taskManagement')}</CardTitle>
                     <CardDescription>
-                      最近的{ttask('title')}（最多显示10条）
+                      {t('overview.recentTasksDesc')}
                     </CardDescription>
                   </div>
                   <PermissionGate
@@ -591,12 +588,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <TabsContent value='sprints'>
             <Card>
               <CardHeader>
-                <CardTitle>{tsprint('title')}管理</CardTitle>
-                <CardDescription>项目的迭代计划</CardDescription>
+                <CardTitle>{t('overview.sprintManagement')}</CardTitle>
+                <CardDescription>{t('overview.sprintPlan')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <p className='py-4 text-center'>
-                  {tsprint('title')}管理功能即将上线
+                  {t('overview.sprintComingSoon')}
                 </p>
                 <div className='flex justify-center'>
                   <Button asChild>
@@ -614,12 +611,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <TabsContent value='docs'>
             <Card>
               <CardHeader>
-                <CardTitle>{tdoc('title')}管理</CardTitle>
-                <CardDescription>项目文档和知识库</CardDescription>
+                <CardTitle>{t('overview.documentManagement')}</CardTitle>
+                <CardDescription>{t('overview.documentKnowledge')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <p className='py-4 text-center'>
-                  {tdoc('title')}管理功能即将上线
+                  {t('overview.documentComingSoon')}
                 </p>
                 <div className='flex justify-center'>
                   <Button asChild>
@@ -638,7 +635,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             <Card>
               <CardHeader>
                 <CardTitle>{t('team.title')}</CardTitle>
-                <CardDescription>项目团队成员和权限管理</CardDescription>
+                <CardDescription>{t('overview.teamManagement')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className='py-4'>
@@ -679,7 +676,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                       <div className='pt-2'>
                         <Separator className='my-2' />
                         <p className='text-muted-foreground text-center text-sm'>
-                          还有 {project.members.length - 5} 位成员未显示
+                          {t('overview.moreMembers', { count: project.members.length - 5 })}
                         </p>
                       </div>
                     )}
@@ -688,7 +685,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 <div className='flex justify-center'>
                   <Button asChild>
                     <Link href={`/dashboard/projects/${project.id}/team`}>
-                      管理{t('team.title')}
+                      {t('overview.manageTeam')}
                     </Link>
                   </Button>
                 </div>

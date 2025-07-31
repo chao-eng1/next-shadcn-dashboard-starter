@@ -16,6 +16,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { useTranslations } from 'next-intl';
 
 interface Task {
   id: string;
@@ -56,6 +57,7 @@ interface SimpleTaskListProps {
 }
 
 export function SimpleTaskList({ tasks }: SimpleTaskListProps) {
+  const t = useTranslations('tasks');
   const [filteredTasks, setFilteredTasks] = useState(tasks);
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
@@ -244,7 +246,7 @@ export function SimpleTaskList({ tasks }: SimpleTaskListProps) {
                       <div className='flex items-center space-x-1'>
                         <CheckCircle2 className='text-muted-foreground h-4 w-4' />
                         <span className='text-muted-foreground text-xs'>
-                          {task._count.subtasks} 子任务
+                          {task._count.subtasks} {t('labels.subtasks')}
                         </span>
                       </div>
                     )}

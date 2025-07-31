@@ -24,6 +24,7 @@ export function EditProjectDialog({
   projectId
 }: EditProjectDialogProps) {
   const t = useTranslations('projects');
+  const tm = useTranslations('messages');
   const tCommon = useTranslations('common');
 
   const [open, setOpen] = useState(false);
@@ -42,7 +43,7 @@ export function EditProjectDialog({
       const response = await fetch(`/api/projects/${projectId}`);
 
       if (!response.ok) {
-        throw new Error('Failed to fetch project details');
+        throw new Error(tm('fetchError'));
       }
 
       const data = await response.json();
@@ -51,7 +52,7 @@ export function EditProjectDialog({
         setProject(data.data);
       } else {
         throw new Error(
-          data.error?.message || 'Failed to fetch project details'
+          data.error?.message || tm('fetchError')
         );
       }
     } catch (err) {

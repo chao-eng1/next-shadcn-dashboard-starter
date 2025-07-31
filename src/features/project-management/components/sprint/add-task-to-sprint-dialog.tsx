@@ -26,6 +26,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { TASK_STATUS, TASK_PRIORITY } from '@/constants/project';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 interface Task {
   id: string;
@@ -66,6 +67,8 @@ export function AddTaskToSprintDialog({
   children
 }: AddTaskToSprintDialogProps) {
   const router = useRouter();
+  const t = useTranslations('sprints');
+  const tc = useTranslations('common');
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
@@ -226,7 +229,7 @@ export function AddTaskToSprintDialog({
                 {unassignedTasks.length > 0 && (
                   <div className='space-y-2'>
                     <h3 className='text-muted-foreground text-sm font-medium'>
-                      未分配到迭代的任务 ({unassignedTasks.length})
+                      {t('unassignedTasks')} ({unassignedTasks.length})
                     </h3>
                     <div className='space-y-2'>
                       {unassignedTasks.map((task) => (
@@ -245,7 +248,7 @@ export function AddTaskToSprintDialog({
                 {assignedTasks.length > 0 && (
                   <div className='space-y-2'>
                     <h3 className='text-muted-foreground text-sm font-medium'>
-                      其他迭代的任务 ({assignedTasks.length})
+                      {t('otherSprintTasks')} ({assignedTasks.length})
                     </h3>
                     <div className='space-y-2'>
                       {assignedTasks.map((task) => (
@@ -263,8 +266,8 @@ export function AddTaskToSprintDialog({
                 {filteredTasks.length === 0 && (
                   <div className='text-muted-foreground py-8 text-center'>
                     {searchQuery
-                      ? '没有找到匹配的任务'
-                      : '项目中没有可添加的任务'}
+                      ? t('noMatchingTasks')
+                      : t('noAvailableTasks')}
                   </div>
                 )}
               </div>
@@ -272,7 +275,7 @@ export function AddTaskToSprintDialog({
               {selectedTasks.length > 0 && (
                 <div className='flex items-center justify-between border-t pt-4'>
                   <span className='text-muted-foreground text-sm'>
-                    已选择 {selectedTasks.length} 个任务
+                    {t('selectedTasks', { count: selectedTasks.length })}
                   </span>
                   <Button onClick={handleAddTasks} disabled={isSubmitting}>
                     {isSubmitting && (

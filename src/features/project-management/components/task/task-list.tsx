@@ -55,6 +55,7 @@ import {
 } from 'lucide-react';
 import { TASK_STATUS, TASK_PRIORITY } from '@/constants/project';
 import { format } from 'date-fns';
+import { useTranslations } from 'next-intl';
 
 interface TaskListProps {
   projectId: string;
@@ -113,6 +114,8 @@ interface ApiResponse {
 
 export function TaskList({ projectId, userId, sprints }: TaskListProps) {
   const router = useRouter();
+  const t = useTranslations('tasks');
+  const tc = useTranslations('common');
 
   // 分页和排序状态
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -361,13 +364,13 @@ export function TaskList({ projectId, userId, sprints }: TaskListProps) {
         className='w-full'
       >
         <TabsList className='mb-4 grid grid-cols-4 md:grid-cols-7 lg:w-[600px]'>
-          <TabsTrigger value='all'>全部</TabsTrigger>
-          <TabsTrigger value='todo'>待处理</TabsTrigger>
-          <TabsTrigger value='in_progress'>进行中</TabsTrigger>
-          <TabsTrigger value='review'>审核中</TabsTrigger>
-          <TabsTrigger value='done'>已完成</TabsTrigger>
-          <TabsTrigger value='blocked'>已阻塞</TabsTrigger>
-          <TabsTrigger value='my_tasks'>我的任务</TabsTrigger>
+          <TabsTrigger value='all'>{tc('all')}</TabsTrigger>
+          <TabsTrigger value='todo'>{t('status.todo')}</TabsTrigger>
+          <TabsTrigger value='in_progress'>{t('status.inProgress')}</TabsTrigger>
+          <TabsTrigger value='review'>{t('status.review')}</TabsTrigger>
+          <TabsTrigger value='done'>{t('status.done')}</TabsTrigger>
+          <TabsTrigger value='blocked'>{t('status.blocked')}</TabsTrigger>
+          <TabsTrigger value='my_tasks'>{t('filters.assigned')}</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -377,14 +380,14 @@ export function TaskList({ projectId, userId, sprints }: TaskListProps) {
           <div className='relative flex-1'>
             <SearchIcon className='text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4' />
             <Input
-              placeholder='搜索任务标题或描述...'
+              placeholder={t('form.placeholder.search')}
               className='pl-8'
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             />
           </div>
-          <Button onClick={handleSearch}>搜索</Button>
+          <Button onClick={handleSearch}>{tc('search')}</Button>
         </div>
 
         <div className='flex gap-2'>
@@ -578,12 +581,12 @@ export function TaskList({ projectId, userId, sprints }: TaskListProps) {
                         <div className='mt-1 flex gap-2'>
                           {task._count.subtasks > 0 && (
                             <span className='text-muted-foreground text-xs'>
-                              子任务: {task._count.subtasks}
+                              {t('labels.subtasks')}: {task._count.subtasks}
                             </span>
                           )}
                           {task._count.comments > 0 && (
                             <span className='text-muted-foreground text-xs'>
-                              评论: {task._count.comments}
+                              {t('labels.comments')}: {task._count.comments}
                             </span>
                           )}
                         </div>

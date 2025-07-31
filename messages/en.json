@@ -290,6 +290,30 @@
       "admin": "Admin",
       "member": "Member",
       "viewer": "Viewer"
+    },
+    "overview": {
+      "statistics": "Statistics",
+      "taskStats": "Project task status distribution",
+      "completedTasks": "Completed Tasks",
+      "totalSprints": "Total Sprints",
+      "totalDocuments": "Total Documents",
+      "recentTasks": "Recently Updated Tasks",
+      "noTasks": "No tasks in this project yet",
+      "projectTeam": "Project Team",
+      "moreMembers": "{count} more members not shown",
+      "viewAllMembers": "View All Members",
+      "viewAllTasks": "View All Tasks",
+      "taskManagement": "Task Management",
+      "recentTasksDesc": "Recent tasks (showing up to 10)",
+      "sprintManagement": "Sprint Management",
+      "sprintPlan": "Project sprint planning",
+      "sprintComingSoon": "Sprint management features coming soon",
+      "documentManagement": "Document Management",
+      "documentKnowledge": "Project documents and knowledge base",
+      "documentComingSoon": "Document management features coming soon",
+      "teamManagement": "Team member and permission management",
+      "manageTeam": "Manage Team Members",
+      "iterations": "Iterations"
     }
   },
   "products": {
@@ -440,6 +464,7 @@
       "unassigned": "Unassigned",
       "subtasks": "Subtasks",
       "comments": "Comments",
+      "attachments": "Attachments",
       "level": "Level",
       "warning": "Warning",
       "totalTasks": "Total {count} tasks"
@@ -824,7 +849,12 @@
       "remainingWork": "Remaining Work",
       "completedWork": "Completed Work",
       "totalWork": "Total Work"
-    }
+    },
+    "unassignedTasks": "Unassigned Tasks",
+    "otherSprintTasks": "Tasks from Other Sprints",
+    "noMatchingTasks": "No matching tasks found",
+    "noAvailableTasks": "No available tasks in project",
+    "selectedTasks": "Selected {count} tasks"
   },
   "messages": {
     "title": "Messages",

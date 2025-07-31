@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { EyeIcon, PencilIcon, Loader2, AlertCircleIcon } from 'lucide-react';
 import { TASK_STATUS, TASK_PRIORITY } from '@/constants/project';
 import { format } from 'date-fns';
+import { useTranslations } from 'next-intl';
 
 interface RecentTaskListProps {
   projectId: string;
@@ -69,6 +70,7 @@ interface ApiResponse {
 
 export function RecentTaskList({ projectId, userId }: RecentTaskListProps) {
   const router = useRouter();
+  const t = useTranslations('tasks');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -173,17 +175,17 @@ export function RecentTaskList({ projectId, userId }: RecentTaskListProps) {
                     <div className='flex gap-2'>
                       {task._count.subtasks > 0 && (
                         <span className='text-muted-foreground text-xs'>
-                          子任务: {task._count.subtasks}
+                          {t('labels.subtasks')}: {task._count.subtasks}
                         </span>
                       )}
                       {task._count.attachments > 0 && (
                         <span className='text-muted-foreground text-xs'>
-                          附件: {task._count.attachments}
+                          {t('labels.attachments')}: {task._count.attachments}
                         </span>
                       )}
                       {task._count.comments > 0 && (
                         <span className='text-muted-foreground text-xs'>
-                          评论: {task._count.comments}
+                          {t('labels.comments')}: {task._count.comments}
                         </span>
                       )}
                     </div>
