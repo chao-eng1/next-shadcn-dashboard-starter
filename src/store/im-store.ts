@@ -168,7 +168,7 @@ export const useIMStore = create<IMState>((set, get) => ({
   
   setIsConnected: (connected) => set({ isConnected: connected }),
   
-  setProjects: (projects) => set({ projects }),
+  setProjects: (projects) => set({ projects: Array.isArray(projects) ? projects : [] }),
   
   setCurrentProject: (project) => set({ currentProject: project }),
   

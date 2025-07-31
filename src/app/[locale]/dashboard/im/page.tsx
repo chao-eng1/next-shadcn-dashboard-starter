@@ -309,12 +309,12 @@ export default function IMPage() {
                       className="w-full p-2 border rounded-md"
                       value={selectedProjectForChat?.id || ''}
                       onChange={(e) => {
-                        const project = (Array.isArray(projects) ? projects : []).find(p => p.id === e.target.value);
+                        const project = projects.find(p => p.id === e.target.value);
                         if (project) setSelectedProjectForChat(project);
                       }}
                     >
                       <option value="">请选择项目</option>
-                      {(Array.isArray(projects) ? projects : []).map(project => (
+                      {projects.map(project => (
                         <option key={project.id} value={project.id}>{project.name}</option>
                       ))}
                     </select>
@@ -509,7 +509,7 @@ export default function IMPage() {
                                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
                                 onClick={() => {
                                   // 点击成员可以开始私聊
-                                  const project = (Array.isArray(projects) ? projects : []).find(p => p.id === currentConversation.projectId);
+                                  const project = projects.find(p => p.id === currentConversation.projectId);
                                   if (project) {
                                     setSelectedProjectForChat(project);
                                     handleStartPrivateChat(member);

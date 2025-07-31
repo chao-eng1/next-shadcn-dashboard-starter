@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Download, RefreshCw } from 'lucide-react';
+import PageContainer from '@/components/layout/page-container';
 import { ProjectStatsCards } from './project-stats-cards';
 import { TaskStatusChart } from './task-status-chart';
 import { ProjectProgressChart } from './project-progress-chart';
@@ -27,7 +28,8 @@ export function ProjectManagementOverview() {
   };
 
   return (
-    <div className='flex-1 space-y-4 p-4 md:p-8 pt-6' key={refreshKey}>
+    <PageContainer scrollable>
+      <div className='flex-1 space-y-4' key={refreshKey}>
       <div className='flex items-center justify-between space-y-2'>
         <h2 className='text-3xl font-bold tracking-tight'>项目管理概览</h2>
         <div className='flex items-center space-x-2'>
@@ -103,6 +105,7 @@ export function ProjectManagementOverview() {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </PageContainer>
   );
 }

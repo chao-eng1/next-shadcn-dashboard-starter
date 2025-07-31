@@ -7,6 +7,7 @@ import { z } from 'zod';
 const createConversationSchema = z.object({
   type: z.enum(['project', 'private']),
   projectId: z.string().optional(),
+  participantId: z.string().optional(),
   participantIds: z.array(z.string()).optional(),
   name: z.string().optional()
 });
@@ -102,18 +103,57 @@ export async function GET(request: NextRequest) {
         }
       });
 
-      conversations.push(...projectChats.map(chat => ({
-        id: chat.id,
-        type: 'project',
-        name: chat.project.name,
-        projectId: chat.projectId,
-        project: chat.project,
-        participants: [], // 项目成员通过项目关联获取
-        lastMessage: chat.messages[0] || null,
-        unreadCount: chat._count.messages,
-        createdAt: chat.createdAt,
-        updatedAt: chat.updatedAt
-      })));
+      // 处理项目聊天，获取每个项目的成员信息
+      const projectConversations = await Promise.all(
+        projectChats.map(async (chat) => {
+          // 获取项目成员信息
+          const projectMembers = await prisma.projectMember.findMany({
+            where: {
+              projectId: chat.projectId
+            },
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  image: true
+                }
+              }
+            }
+          });
+
+          return {
+            id: chat.id,
+            type: 'project',
+            name: chat.project.name,
+            description: chat.project.description,
+            projectId: chat.projectId,
+            project: chat.project,
+            participants: projectMembers.map(member => ({
+              id: member.user.id,
+              name: member.user.name,
+              email: member.user.email,
+              image: member.user.image,
+              role: member.role,
+              status: 'offline' as const // 默认状态，实际状态需要从在线用户列表获取
+            })),
+            lastMessage: chat.messages[0] ? {
+              id: chat.messages[0].id,
+              content: chat.messages[0].content,
+              senderId: chat.messages[0].sender.id,
+              senderName: chat.messages[0].sender.name,
+              timestamp: chat.messages[0].createdAt.toISOString(),
+              messageType: chat.messages[0].messageType
+            } : null,
+            unreadCount: chat._count.messages,
+            createdAt: chat.createdAt.toISOString(),
+            updatedAt: chat.updatedAt.toISOString()
+          };
+        })
+      );
+
+      conversations.push(...projectConversations);
     }
 
     if (type === 'private' || !type) {
@@ -230,7 +270,7 @@ export async function POST(request: NextRequest) {
       return apiBadRequest('请求参数验证失败');
     }
 
-    const { type, projectId, participantIds, name } = validation.data;
+    const { type, projectId, participantId, participantIds, name } = validation.data;
 
     let conversation: any;
 
@@ -278,7 +318,9 @@ export async function POST(request: NextRequest) {
       };
     } else if (type === 'private') {
       // 创建私聊会话
-      if (!participantIds || participantIds.length !== 1) {
+      const otherUserId = participantId || (participantIds && participantIds[0]);
+      
+      if (!otherUserId) {
         return apiBadRequest('私聊需要指定一个参与者');
       }
 
@@ -286,7 +328,6 @@ export async function POST(request: NextRequest) {
         return apiBadRequest('私聊需要指定项目上下文');
       }
 
-      const otherUserId = participantIds[0];
       const participant1Id = user.id < otherUserId ? user.id : otherUserId;
       const participant2Id = user.id < otherUserId ? otherUserId : user.id;
 

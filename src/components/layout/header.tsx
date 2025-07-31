@@ -6,7 +6,7 @@ import SearchInput from '../search-input';
 import { UserNav } from './user-nav';
 import { ThemeSelector } from '../theme-selector';
 import { ModeToggle } from './ThemeToggle/theme-toggle';
-import { MessageNotification } from '../message-notification';
+
 import { LanguageSwitcher } from '../language-switcher';
 
 export default function Header() {
@@ -22,7 +22,7 @@ export default function Header() {
         <div className='hidden md:flex'>
           <SearchInput />
         </div>
-        <MessageNotification />
+
         <LanguageSwitcher />
         <UserNav />
         <ModeToggle />

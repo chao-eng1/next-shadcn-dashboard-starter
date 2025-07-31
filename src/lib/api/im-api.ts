@@ -70,6 +70,12 @@ export const userAPI = {
       method: 'PUT',
       body: JSON.stringify({ status })
     });
+  },
+  
+  // 搜索用户
+  searchUsers: async (query: string): Promise<User[]> => {
+    const result = await apiRequest<User[]>(`/users/search?q=${encodeURIComponent(query)}`);
+    return result.data;
   }
 };
 
@@ -196,6 +202,12 @@ export const messageAPI = {
     await apiRequest(`/messages/${messageId}/read`, {
       method: 'PUT'
     });
+  },
+  
+  // 获取未读消息数量
+  getUnreadCount: async (): Promise<number> => {
+    const result = await apiRequest<{ count: number }>('/messages/unread-count');
+    return result.data.count;
   }
 };
 

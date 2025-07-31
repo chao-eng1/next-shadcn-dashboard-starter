@@ -264,12 +264,12 @@ export const useIM = () => {
   }, [setOnlineUsers]);
   
   // 创建私聊会话
-  const createPrivateConversation = useCallback(async (userId: string) => {
+  const createPrivateConversation = useCallback(async (userId: string, projectId?: string) => {
     try {
       setLoading('conversations', true);
       setError(null);
       
-      const conversation = await imAPI.conversation.createPrivateConversation(userId);
+      const conversation = await imAPI.conversation.createPrivateConversation(userId, projectId);
       
       // 添加到会话列表
       setConversations([conversation, ...conversations]);

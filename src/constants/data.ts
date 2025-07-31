@@ -29,29 +29,7 @@ export const navItems: NavItem[] = [
     isActive: false,
     items: []
   },
-  {
-    title: 'navigation.messages',
-    url: '/dashboard/messages',
-    icon: 'mailbox',
-    shortcut: ['m', 's'],
-    isActive: false,
-    items: [
-      {
-        title: 'navigation.viewMessages',
-        url: '/dashboard/messages',
-        icon: 'mailbox',
-        shortcut: ['m', 'v']
-      },
-      {
-        title: 'navigation.sendMessage',
-        url: '/system-management/messages/send',
-        icon: 'send',
-        shortcut: ['m', 's'],
-        role: 'admin',
-        permission: 'message:manage'
-      }
-    ]
-  },
+
   {
     title: 'navigation.projectManagement',
     url: '/dashboard/projects',
@@ -134,27 +112,7 @@ export const navItems: NavItem[] = [
         shortcut: ['s', 'm'],
         permission: 'menu:list'
       },
-      {
-        title: 'navigation.messages',
-        url: '/system-management/messages',
-        icon: 'mailbox',
-        shortcut: ['s', 'g'],
-        permission: 'message:manage',
-        items: [
-          {
-            title: 'navigation.viewMessages',
-            url: '/system-management/messages',
-            icon: 'mailbox',
-            permission: 'message:manage'
-          },
-          {
-            title: 'navigation.sendMessage',
-            url: '/system-management/messages/send',
-            icon: 'send',
-            permission: 'message:manage'
-          }
-        ]
-      }
+
     ]
   },
   {
