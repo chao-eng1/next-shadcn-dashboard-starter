@@ -48,7 +48,7 @@ const getTasksQuerySchema = z.object({
 // 获取任务列表
 export async function GET(
   request: NextRequest,
-  { params }: { params: { projectId: string } }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   const user = await getCurrentUser();
 
@@ -56,7 +56,7 @@ export async function GET(
     return apiUnauthorized();
   }
 
-  const projectId = params.projectId;
+  const { projectId } = await params;
 
   // 检查用户是否有查看项目的权限
   const hasPermission = await hasProjectPermission(
@@ -203,7 +203,7 @@ export async function GET(
 // 创建任务
 export async function POST(
   request: NextRequest,
-  { params }: { params: { projectId: string } }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   const user = await getCurrentUser();
 
@@ -211,7 +211,7 @@ export async function POST(
     return apiUnauthorized();
   }
 
-  const projectId = params.projectId;
+  const { projectId } = await params;
 
   // 检查用户是否有创建任务的权限
   const hasPermission = await hasProjectPermission(

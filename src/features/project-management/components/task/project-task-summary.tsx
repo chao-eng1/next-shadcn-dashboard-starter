@@ -85,7 +85,8 @@ export function ProjectTaskSummary({
           method: 'GET',
           headers: {
             'Content-Type': 'application/json'
-          }
+          },
+          credentials: 'include'
         }
       );
 
@@ -94,10 +95,14 @@ export function ProjectTaskSummary({
       }
 
       const data = await response.json();
-      setTasks(data.tasks || []);
+      if (data.success) {
+        setTasks(data.data.tasks || []);
+      } else {
+        throw new Error(data.error?.message || 'Failed to fetch tasks');
+      }
     } catch (err) {
-      console.error('Error loading tasks:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load tasks');
+      console.error('ProjectTaskSummary: 加载任务时出错:', err);
+      setError(err instanceof Error ? err.message : '加载任务失败');
     } finally {
       setLoading(false);
     }
@@ -119,6 +124,7 @@ export function ProjectTaskSummary({
           headers: {
             'Content-Type': 'application/json'
           },
+          credentials: 'include',
           body: JSON.stringify({ status: newStatus })
         }
       );

@@ -81,6 +81,15 @@ export function apiForbidden(message: string = '禁止访问'): NextResponse {
 }
 
 /**
+ * 创建错误请求响应
+ * @param message 错误消息
+ * @returns NextResponse
+ */
+export function apiBadRequest(message: string = '请求参数错误'): NextResponse {
+  return apiError('BAD_REQUEST', message, null, 400);
+}
+
+/**
  * 创建资源不存在错误响应
  * @param message 错误消息
  * @returns NextResponse

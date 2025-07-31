@@ -19,6 +19,7 @@ import PageContainer from '@/components/layout/page-container';
 import { RecentTaskList } from '@/features/project-management/components/task/recent-task-list';
 import { ProjectTaskSummary } from '@/features/project-management/components/task/project-task-summary';
 import { PermissionGate } from '@/components/permission-gate';
+import { ProjectPermissionGate } from '@/components/project-permission-gate';
 
 import { format } from 'date-fns';
 import { prisma } from '@/lib/prisma';
@@ -556,7 +557,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </TabsContent>
 
           <TabsContent value='tasks'>
-            <PermissionGate permission='task.view' projectId={projectId}>
+            <ProjectPermissionGate permission='task.view' projectId={projectId}>
               <Card>
                 <CardHeader className='flex flex-row items-center justify-between'>
                   <div>
@@ -565,7 +566,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                       {t('overview.recentTasksDesc')}
                     </CardDescription>
                   </div>
-                  <PermissionGate
+                  <ProjectPermissionGate
                     permission='task.create'
                     projectId={projectId}
                   >
@@ -576,13 +577,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                         {ttask('create')}
                       </Link>
                     </Button>
-                  </PermissionGate>
+                  </ProjectPermissionGate>
                 </CardHeader>
                 <CardContent>
                   <ProjectTaskSummary projectId={project.id} userId={user.id} />
                 </CardContent>
               </Card>
-            </PermissionGate>
+            </ProjectPermissionGate>
           </TabsContent>
 
           <TabsContent value='sprints'>

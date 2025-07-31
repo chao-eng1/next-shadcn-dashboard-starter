@@ -166,7 +166,7 @@ export function TaskList({ projectId, userId, sprints }: TaskListProps) {
       }
 
       const data: ApiResponse = await response.json();
-
+      debugger
       if (data.success) {
         setTasks(data.data.tasks);
         setTotal(data.data.pagination.total);
@@ -191,6 +191,7 @@ export function TaskList({ projectId, userId, sprints }: TaskListProps) {
     sprintId,
     parentTaskId,
     assignedToMe,
+    search,
     sortBy,
     sortOrder
   ]);
@@ -758,9 +759,8 @@ export function TaskList({ projectId, userId, sprints }: TaskListProps) {
                 <PaginationContent className='flex-nowrap overflow-hidden'>
                   <PaginationItem>
                     <PaginationPrevious
-                      onClick={() => setPage(Math.max(1, page - 1))}
-                      isActive={false}
-                      disabled={page === 1}
+                      onClick={page === 1 ? undefined : () => setPage(Math.max(1, page - 1))}
+                      className={page === 1 ? 'pointer-events-none opacity-50' : ''}
                     />
                   </PaginationItem>
 
@@ -768,9 +768,8 @@ export function TaskList({ projectId, userId, sprints }: TaskListProps) {
 
                   <PaginationItem>
                     <PaginationNext
-                      onClick={() => setPage(Math.min(totalPages, page + 1))}
-                      isActive={false}
-                      disabled={page === totalPages}
+                      onClick={page === totalPages ? undefined : () => setPage(Math.min(totalPages, page + 1))}
+                      className={page === totalPages ? 'pointer-events-none opacity-50' : ''}
                     />
                   </PaginationItem>
                 </PaginationContent>

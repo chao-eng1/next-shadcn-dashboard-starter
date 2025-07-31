@@ -89,7 +89,14 @@ export function RecentTaskList({ projectId, userId }: RecentTaskListProps) {
       params.set('sortOrder', 'desc');
 
       const response = await fetch(
-        `/api/projects/${projectId}/tasks?${params.toString()}`
+        `/api/projects/${projectId}/tasks?${params.toString()}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        }
       );
 
       if (!response.ok) {

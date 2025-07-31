@@ -29,7 +29,7 @@ const updateTaskSchema = z.object({
 // 获取单个任务详情
 export async function GET(
   request: NextRequest,
-  { params }: { params: { projectId: string; taskId: string } }
+  { params }: { params: Promise<{ projectId: string; taskId: string }> }
 ) {
   const user = await getCurrentUser();
 
@@ -37,7 +37,7 @@ export async function GET(
     return apiUnauthorized();
   }
 
-  const { projectId, taskId } = params;
+  const { projectId, taskId } = await params;
 
   // 检查用户是否有查看项目的权限
   const hasPermission = await hasProjectPermission(
@@ -146,7 +146,7 @@ export async function GET(
 // 更新任务
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { projectId: string; taskId: string } }
+  { params }: { params: Promise<{ projectId: string; taskId: string }> }
 ) {
   const user = await getCurrentUser();
 
@@ -154,7 +154,7 @@ export async function PATCH(
     return apiUnauthorized();
   }
 
-  const { projectId, taskId } = params;
+  const { projectId, taskId } = await params;
 
   // 检查任务是否存在
   const task = await prisma.task.findUnique({
@@ -280,7 +280,7 @@ export async function PATCH(
 // 删除任务
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { projectId: string; taskId: string } }
+  { params }: { params: Promise<{ projectId: string; taskId: string }> }
 ) {
   const user = await getCurrentUser();
 
@@ -288,7 +288,7 @@ export async function DELETE(
     return apiUnauthorized();
   }
 
-  const { projectId, taskId } = params;
+  const { projectId, taskId } = await params;
 
   // 检查任务是否存在
   const task = await prisma.task.findUnique({
