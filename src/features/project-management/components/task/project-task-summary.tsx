@@ -181,14 +181,14 @@ export function ProjectTaskSummary({
           ) : (
             tasks.map((task) => (
               <TableRow key={task.id}>
-                <TableCell>
+                {/* <TableCell>
                   <Checkbox
                     checked={task.status === 'DONE'}
                     onCheckedChange={(checked) =>
                       handleTaskCompletion(task, checked as boolean)
                     }
                   />
-                </TableCell>
+                </TableCell> */}
                 <TableCell className='font-medium'>
                   <Link
                     href={`/dashboard/projects/${task.projectId}/tasks/${task.id}`}

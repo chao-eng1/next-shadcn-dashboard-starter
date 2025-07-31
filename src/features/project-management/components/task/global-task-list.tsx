@@ -40,7 +40,7 @@ import {
   PaginationPrevious
 } from '@/components/ui/pagination';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
@@ -443,33 +443,7 @@ export function GlobalTaskList({
     );
   };
 
-  // 任务完成状态切换
-  const handleTaskCompletion = async (task: Task, completed: boolean) => {
-    try {
-      const response = await fetch(
-        `/api/projects/${task.projectId}/tasks/${task.id}`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            status: completed ? 'DONE' : 'TODO',
-            completedAt: completed ? new Date().toISOString() : null
-          })
-        }
-      );
 
-      if (!response.ok) {
-        throw new Error(t('messages.updateFailed'));
-      }
-
-      // 重新加载任务列表
-      loadTasks();
-    } catch (error) {
-      console.error(t('messages.updateFailed'), error);
-    }
-  };
 
   // 根据项目ID过滤迭代
   const getSprintsByProject = (projectId?: string) => {
@@ -681,12 +655,12 @@ export function GlobalTaskList({
                 </div>
 
                 <div className='flex items-center space-x-2'>
-                  <Checkbox
+                  <input
+                    type='checkbox'
                     id='assignedToMe'
                     checked={assignedToMe}
-                    onCheckedChange={(checked) =>
-                      setAssignedToMe(checked as boolean)
-                    }
+                    onChange={(e) => setAssignedToMe(e.target.checked)}
+                    className='h-4 w-4 rounded border-gray-300'
                   />
                   <label
                     htmlFor='assignedToMe'
@@ -738,7 +712,7 @@ export function GlobalTaskList({
             </TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead className='w-[40px]'></TableHead>
+
                 <TableHead>
                   <Button
                     variant='ghost'
@@ -769,21 +743,14 @@ export function GlobalTaskList({
             <TableBody>
               {tasks.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className='py-8 text-center'>
+                  <TableCell colSpan={7} className='py-8 text-center'>
                     {t('messages.noTasksFound')}
                   </TableCell>
                 </TableRow>
               ) : (
                 tasks.map((task) => (
                   <TableRow key={task.id}>
-                    <TableCell>
-                      <Checkbox
-                        checked={task.status === 'DONE'}
-                        onCheckedChange={(checked) =>
-                          handleTaskCompletion(task, checked as boolean)
-                        }
-                      />
-                    </TableCell>
+
                     <TableCell className='font-medium'>
                       <Link
                         href={`/dashboard/projects/${task.projectId}/tasks/${task.id}`}

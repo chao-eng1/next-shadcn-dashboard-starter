@@ -39,7 +39,7 @@ import {
   PaginationPrevious
 } from '@/components/ui/pagination';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   ArrowUpDown,
@@ -329,33 +329,7 @@ export function TaskList({ projectId, userId, sprints }: TaskListProps) {
     );
   };
 
-  // 任务完成状态切换
-  const handleTaskCompletion = async (task: Task, completed: boolean) => {
-    try {
-      const response = await fetch(
-        `/api/projects/${projectId}/tasks/${task.id}`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            status: completed ? 'DONE' : 'TODO',
-            completedAt: completed ? new Date().toISOString() : null
-          })
-        }
-      );
 
-      if (!response.ok) {
-        throw new Error('更新任务状态失败');
-      }
-
-      // 重新加载任务列表
-      loadTasks();
-    } catch (error) {
-      console.error('更新任务状态失败:', error);
-    }
-  };
 
   return (
     <div className='space-y-4'>
@@ -463,21 +437,7 @@ export function TaskList({ projectId, userId, sprints }: TaskListProps) {
                   </Select>
                 </div>
 
-                <div className='flex items-center space-x-2'>
-                  <Checkbox
-                    id='assignedToMe'
-                    checked={assignedToMe}
-                    onCheckedChange={(checked) =>
-                      setAssignedToMe(checked as boolean)
-                    }
-                  />
-                  <label
-                    htmlFor='assignedToMe'
-                    className='text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
-                  >
-                    仅显示分配给我的任务
-                  </label>
-                </div>
+
 
                 <div className='flex justify-between pt-2'>
                   <Button variant='outline' size='sm' onClick={clearFilters}>
@@ -519,7 +479,6 @@ export function TaskList({ projectId, userId, sprints }: TaskListProps) {
             <TableCaption>共 {total} 个任务</TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead className='w-[40px]'></TableHead>
                 <TableHead>
                   <Button
                     variant='ghost'
@@ -549,21 +508,13 @@ export function TaskList({ projectId, userId, sprints }: TaskListProps) {
             <TableBody>
               {tasks.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className='py-8 text-center'>
+                  <TableCell colSpan={6} className='py-8 text-center'>
                     没有找到匹配的任务
                   </TableCell>
                 </TableRow>
               ) : (
                 tasks.map((task) => (
                   <TableRow key={task.id}>
-                    <TableCell>
-                      <Checkbox
-                        checked={task.status === 'DONE'}
-                        onCheckedChange={(checked) =>
-                          handleTaskCompletion(task, checked as boolean)
-                        }
-                      />
-                    </TableCell>
                     <TableCell className='font-medium'>
                       <Link
                         href={`/dashboard/projects/${projectId}/tasks/${task.id}`}
