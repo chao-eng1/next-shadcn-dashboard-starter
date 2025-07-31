@@ -92,7 +92,7 @@ export function ProjectDocumentSummary({
 
       const data = await response.json();
       if (data.success) {
-        setDocuments(data.data || []);
+        setDocuments(Array.isArray(data.data) ? data.data : []);
       } else {
         throw new Error(data.message || '获取文档列表失败');
       }
@@ -147,18 +147,18 @@ export function ProjectDocumentSummary({
       {/* 统计信息 */}
       <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
         <div className='rounded-lg border p-4'>
-          <div className='text-2xl font-bold'>{documents.length}</div>
+          <div className='text-2xl font-bold'>{Array.isArray(documents) ? documents.length : 0}</div>
           <p className='text-muted-foreground text-sm'>{t('overview.totalDocuments')}</p>
         </div>
         <div className='rounded-lg border p-4'>
           <div className='text-2xl font-bold'>
-            {documents.filter(doc => doc.status === 'PUBLISHED').length}
+            {Array.isArray(documents) ? documents.filter(doc => doc.status === 'PUBLISHED').length : 0}
           </div>
           <p className='text-muted-foreground text-sm'>{t('status.published')}</p>
         </div>
         <div className='rounded-lg border p-4'>
           <div className='text-2xl font-bold'>
-            {documents.filter(doc => doc.status === 'DRAFT').length}
+            {Array.isArray(documents) ? documents.filter(doc => doc.status === 'DRAFT').length : 0}
           </div>
           <p className='text-muted-foreground text-sm'>{t('status.draft')}</p>
         </div>
@@ -178,7 +178,7 @@ export function ProjectDocumentSummary({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {documents.map((document) => {
+            {Array.isArray(documents) && documents.map((document) => {
               const statusInfo = getDocumentStatusLabel(document.status);
               return (
                 <TableRow key={document.id}>
