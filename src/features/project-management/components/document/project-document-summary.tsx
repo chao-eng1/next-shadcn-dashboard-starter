@@ -28,7 +28,7 @@ interface Document {
   parentId: string | null;
   createdAt: string;
   updatedAt: string;
-  createdBy: {
+  author: {
     id: string;
     name: string | null;
     image: string | null;
@@ -85,14 +85,19 @@ export function ProjectDocumentSummary({
       const response = await fetch(
         getApiUrl(`/api/projects/${projectId}/documents?limit=10`)
       );
+      console.log('API响应状态:', response.status, response.statusText);
 
       if (!response.ok) {
-        throw new Error('获取文档列表失败');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('API错误:', errorData);
+        throw new Error(errorData.message || `HTTP错误: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('API返回的数据:', data);
+      
       if (data.success) {
-        setDocuments(Array.isArray(data.data) ? data.data : []);
+        setDocuments(Array.isArray(data.data.documents) ? data.data.documents : []);
       } else {
         throw new Error(data.message || '获取文档列表失败');
       }
@@ -209,7 +214,7 @@ export function ProjectDocumentSummary({
                   </TableCell>
                   <TableCell>
                     <span className='text-sm'>
-                      {document.createdBy.name || 'Unknown'}
+                      {document.author.name || 'Unknown'}
                     </span>
                   </TableCell>
                   <TableCell>

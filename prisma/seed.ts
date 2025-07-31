@@ -266,6 +266,78 @@ async function main() {
     console.log('Assigned user role to test user');
   }
 
+  // 创建测试项目
+  let testProject = await prisma.project.findFirst({
+    where: { 
+      name: 'Test Project',
+      ownerId: adminUser.id
+    }
+  });
+
+  if (!testProject) {
+    testProject = await prisma.project.create({
+      data: {
+        name: 'Test Project',
+        description: 'This is a test project with documents',
+        status: 'ACTIVE',
+        visibility: 'PRIVATE',
+        ownerId: adminUser.id,
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+      }
+    });
+    console.log('✅ Test project created:', testProject.name);
+  } else {
+    console.log('ℹ️ Test project already exists');
+  }
+
+  // 创建测试文档
+  const testDocuments = [
+    {
+      title: 'Project Requirements',
+      content: '# Project Requirements\n\nThis document outlines the requirements for the test project.',
+      format: 'MARKDOWN' as const,
+      status: 'PUBLISHED' as const
+    },
+    {
+      title: 'API Documentation',
+      content: '# API Documentation\n\n## Overview\n\nThis is the API documentation.',
+      format: 'MARKDOWN' as const,
+      status: 'DRAFT' as const
+    },
+    {
+      title: 'Meeting Notes',
+      content: '# Meeting Notes\n\n## Date: 2024-01-15\n\nAttendees: Team members\n\nTopics discussed...',
+      format: 'MARKDOWN' as const,
+      status: 'PUBLISHED' as const
+    }
+  ];
+
+  for (const docData of testDocuments) {
+    const existingDoc = await prisma.document.findFirst({
+      where: { 
+        title: docData.title,
+        projectId: testProject.id
+      }
+    });
+
+    if (!existingDoc) {
+      await prisma.document.create({
+        data: {
+          ...docData,
+          projectId: testProject.id,
+          authorId: adminUser.id,
+          updatedById: adminUser.id,
+          type: 'PROJECT',
+          isPrivate: false,
+          tags: ''
+        }
+      });
+    }
+  }
+
+  console.log('✅ Test documents created');
+
   console.log('Database seeded successfully!');
 }
 

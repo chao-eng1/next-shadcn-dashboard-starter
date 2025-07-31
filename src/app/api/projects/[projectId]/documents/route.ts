@@ -53,6 +53,13 @@ export async function GET(
     user.id
   );
 
+  console.log('项目文档权限检查:', {
+    projectId,
+    userId: user.id,
+    hasPermission,
+    permissionName: 'project.view'
+  });
+
   if (!hasPermission) {
     return apiForbidden('您没有权限查看此项目');
   }
@@ -131,11 +138,21 @@ export async function GET(
         },
         _count: {
           select: {
+            children: true,
+            versions: true,
             comments: true,
             attachments: true
           }
         }
       }
+    });
+
+    console.log('查询到的文档数据:', {
+      projectId,
+      total,
+      documentsCount: documents.length,
+      query,
+      where
     });
 
     return apiResponse({

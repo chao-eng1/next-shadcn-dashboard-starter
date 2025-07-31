@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import PageContainer from '@/components/layout/page-container';
+import { ProjectDocumentSummary } from '@/features/project-management/components/document/project-document-summary';
 
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
@@ -103,22 +104,7 @@ export default async function ProjectDocumentsPage({
             )}
           </CardHeader>
           <CardContent className='px-6'>
-            <div className='flex flex-col items-center justify-center p-10'>
-              <FileTextIcon className='text-muted-foreground/60 mb-6 h-16 w-16' />
-              <h3 className='mb-2 text-2xl font-medium'>
-                {tProjects('title')} {tDocuments('title')}
-              </h3>
-              <p className='text-muted-foreground mb-6 max-w-md text-center'>
-                {tDocuments('messages.notFound')}
-              </p>
-              {canCreateDocument && (
-                <Button asChild>
-                  <Link href={`/dashboard/projects/${projectId}/documents/new`}>
-                    {tDocuments('create')}
-                  </Link>
-                </Button>
-              )}
-            </div>
+            <ProjectDocumentSummary projectId={projectId} userId={user.id} />
           </CardContent>
         </Card>
       </div>
