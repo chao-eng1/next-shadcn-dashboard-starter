@@ -48,6 +48,8 @@ import { OrgSwitcher } from '../org-switcher';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getApiUrl } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import { useUnreadMessages } from '@/hooks/use-unread-messages';
+import { NotificationBadge } from '@/components/ui/notification-badge';
 
 export const company = {
   name: 'Acme Inc',
@@ -104,6 +106,7 @@ export default function AppSidebar() {
   const { isOpen } = useMediaQuery();
   const router = useRouter();
   const t = useTranslations();
+  const { unreadCount } = useUnreadMessages();
 
   // Helper function to check if a path is active, ignoring the locale prefix
   const isPathActive = (itemUrl: string, currentPath: string): boolean => {
@@ -166,6 +169,10 @@ export default function AppSidebar() {
     }
   };
 
+  const handleNotificationClick = () => {
+    router.push('/dashboard/messages');
+  };
+
   const handleSwitchTenant = (_tenantId: string) => {
     // Tenant switching functionality would be implemented here
   };
@@ -190,7 +197,7 @@ export default function AppSidebar() {
           <SidebarGroupLabel>{t('sidebar.overview')}</SidebarGroupLabel>
           <SidebarMenu>
             {navItems.map((item) => {
-              const Icon = item.icon ? Icons[item.icon] : Icons.logo;
+              const IconComponent = item.icon ? Icons[item.icon as keyof typeof Icons] : null;
               return item?.items && item?.items?.length > 0 ? (
                 <PermissionGate
                   key={item.title}
@@ -211,14 +218,16 @@ export default function AppSidebar() {
                           tooltip={t(item.title)}
                           isActive={isPathActive(item.url, pathname)}
                         >
-                          {item.icon && <Icon />}
+                          {IconComponent && <IconComponent />}
                           <span>{t(item.title)}</span>
                           <IconChevronRight className='ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
                         </SidebarMenuButton>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <SidebarMenuSub>
-                          {item.items?.map((subItem) => (
+                          {item.items?.map((subItem) => {
+                            const SubIconComponent = subItem.icon ? Icons[subItem.icon as keyof typeof Icons] : null;
+                            return (
                             <PermissionGate
                               key={subItem.title}
                               permission={subItem.permission}
@@ -230,12 +239,14 @@ export default function AppSidebar() {
                                   isActive={isPathActive(subItem.url, pathname)}
                                 >
                                   <Link href={subItem.url}>
+                                    {SubIconComponent && <SubIconComponent />}
                                     <span>{t(subItem.title)}</span>
                                   </Link>
                                 </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
                             </PermissionGate>
-                          ))}
+                            );
+                          })}
                         </SidebarMenuSub>
                       </CollapsibleContent>
                     </SidebarMenuItem>
@@ -253,9 +264,16 @@ export default function AppSidebar() {
                       tooltip={t(item.title)}
                       isActive={isPathActive(item.url, pathname)}
                     >
-                      <Link href={item.url}>
-                        <Icon />
+                      <Link href={item.url} className="relative">
+                        {IconComponent && <IconComponent />}
                         <span>{t(item.title)}</span>
+                        {item.url === '/dashboard/messages' && unreadCount > 0 && (
+                          <NotificationBadge 
+                            count={unreadCount} 
+                            className="absolute -top-1 -right-1" 
+                            size="sm"
+                          />
+                        )}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -304,9 +322,14 @@ export default function AppSidebar() {
                     <IconCreditCard className='mr-2 h-4 w-4' />
                     {t('sidebar.billing')}
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <IconBell className='mr-2 h-4 w-4' />
-                    {t('sidebar.notifications')}
+                  <DropdownMenuItem onClick={handleNotificationClick}>
+                    <div className='flex items-center'>
+                      <IconBell className='mr-2 h-4 w-4' />
+                      {t('sidebar.notifications')}
+                      {unreadCount > 0 && (
+                        <NotificationBadge count={unreadCount} className='ml-auto' />
+                      )}
+                    </div>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />

@@ -203,8 +203,7 @@ export async function POST(request: NextRequest) {
           userId,
           messageId: message.id,
           isRead: false
-        })),
-        skipDuplicates: true
+        }))
       });
     }
 

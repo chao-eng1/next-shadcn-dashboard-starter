@@ -29,6 +29,14 @@ export const navItems: NavItem[] = [
     isActive: false,
     items: []
   },
+  {
+    title: 'navigation.messages',
+    url: '/dashboard/messages',
+    icon: 'bell',
+    shortcut: ['m', 's'],
+    isActive: false,
+    items: []
+  },
 
   {
     title: 'navigation.requirementManagement',

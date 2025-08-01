@@ -40,7 +40,11 @@ import {
   IconRefreshDot,
   IconList,
   IconMessageCircle,
-  IconClipboard
+  IconClipboard,
+  IconBell,
+  IconMessage,
+  IconChartBar,
+  IconLink
 } from '@tabler/icons-react';
 
 export type Icon = React.ComponentType<IconProps>;
@@ -87,5 +91,9 @@ export const Icons = {
   list: IconList,
   messageCircle: IconMessageCircle,
   clipboard: IconClipboard,
-  fileText: IconFileText
+  fileText: IconFileText,
+  bell: IconBell,
+  messageSquare: IconMessage,
+  barChart3: IconChartBar,
+  link2: IconLink
 };

@@ -66,6 +66,8 @@ export function MessageManagementPage({
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [previewData, setPreviewData] = useState<MessageFormValues | null>(null);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [lastSentMessage, setLastSentMessage] = useState<string | null>(null);
 
   // 加载消息历史
   const loadMessages = async () => {
@@ -93,11 +95,20 @@ export function MessageManagementPage({
 
   // 发送成功后的回调
   const handleSendSuccess = () => {
-    toast.success('消息发送成功');
-    // 如果当前在历史记录标签，重新加载消息
-    if (activeTab === 'history') {
-      loadMessages();
-    }
+    // 显示成功提示
+    setShowSuccessMessage(true);
+    setLastSentMessage(previewData?.title || '系统消息');
+    
+    // 3秒后隐藏成功提示
+    setTimeout(() => {
+      setShowSuccessMessage(false);
+    }, 3000);
+    
+    // 自动切换到历史记录标签页
+    setActiveTab('history');
+    
+    // 加载最新的消息列表
+    loadMessages();
   };
 
   // 格式化时间
@@ -125,6 +136,33 @@ export function MessageManagementPage({
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      {/* 成功提示区域 */}
+      {showSuccessMessage && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3 animate-in slide-in-from-top-2 duration-300">
+          <div className="flex-shrink-0">
+            <svg className="h-5 w-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-medium text-green-800">
+              消息发送成功！
+            </h3>
+            <p className="text-sm text-green-700 mt-1">
+              消息「{lastSentMessage}」已成功发送，您可以在下方的消息历史中查看详情。
+            </p>
+          </div>
+          <button
+            onClick={() => setShowSuccessMessage(false)}
+            className="flex-shrink-0 text-green-600 hover:text-green-800 transition-colors"
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">系统消息管理</h1>
