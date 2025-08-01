@@ -373,7 +373,7 @@ export function DocumentList({
 
         <TabsContent value='personal' className='mt-0'>
           <Card>
-            <ScrollArea className='h-[calc(100vh-320px)]'>
+            <ScrollArea className='max-h-[60vh]'>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -567,7 +567,7 @@ export function DocumentList({
 
         <TabsContent value='project' className='mt-0'>
           <Card>
-            <ScrollArea className='h-[calc(100vh-320px)]'>
+            <ScrollArea className='max-h-[60vh]'>
               <Table>
                 <TableHeader>
                   <TableRow>

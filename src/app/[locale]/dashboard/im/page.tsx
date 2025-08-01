@@ -217,7 +217,7 @@ export default function IMPage() {
   // 错误状态显示 - 只在严重错误时显示，WebSocket连接失败不应阻止使用
   if (error && !error.includes('WebSocket') && !error.includes('连接失败')) {
     return (
-      <div className="h-[calc(100vh-4rem)] flex items-center justify-center p-4">
+      <div className="min-h-0 flex-1 flex items-center justify-center p-4">
         <Card className="w-96">
           <CardContent className="flex flex-col items-center gap-4 p-6">
             <AlertCircle className="h-12 w-12 text-destructive" />
@@ -249,7 +249,7 @@ export default function IMPage() {
   });
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex gap-4 p-4">
+    <div className="min-h-0 flex-1 flex gap-4 p-4">
       {/* 连接状态指示器 */}
       {connectionStatus !== 'connected' && (
         <div className="fixed top-4 right-4 z-50">
