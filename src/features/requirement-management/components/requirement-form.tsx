@@ -160,31 +160,44 @@ export function RequirementForm({
       const projectsResponse = await fetch('/api/projects');
       if (projectsResponse.ok) {
         const projectsData = await projectsResponse.json();
-        setProjects(projectsData.data || []);
+        const projectsList = Array.isArray(projectsData.data) ? projectsData.data : 
+                            Array.isArray(projectsData) ? projectsData : [];
+        setProjects(projectsList);
       }
 
       // 获取用户列表
       const usersResponse = await fetch('/api/users');
       if (usersResponse.ok) {
         const usersData = await usersResponse.json();
-        setUsers(usersData.data || []);
+        const usersList = Array.isArray(usersData.data) ? usersData.data : 
+                         Array.isArray(usersData) ? usersData : [];
+        setUsers(usersList);
       }
 
       // 获取标签列表
       const tagsResponse = await fetch('/api/tags');
       if (tagsResponse.ok) {
         const tagsData = await tagsResponse.json();
-        setTags(tagsData.data || []);
+        const tagsList = Array.isArray(tagsData.data) ? tagsData.data : 
+                        Array.isArray(tagsData) ? tagsData : [];
+        setTags(tagsList);
       }
 
       // 获取需求列表（用于依赖关系）
       const requirementsResponse = await fetch('/api/requirements');
       if (requirementsResponse.ok) {
         const requirementsData = await requirementsResponse.json();
-        setRequirements(requirementsData.data || []);
+        const requirementsList = Array.isArray(requirementsData.data) ? requirementsData.data : 
+                                Array.isArray(requirementsData) ? requirementsData : [];
+        setRequirements(requirementsList);
       }
     } catch (error) {
       console.error('获取表单数据失败:', error);
+      // 确保在错误情况下也设置为空数组
+      setProjects([]);
+      setUsers([]);
+      setTags([]);
+      setRequirements([]);
     }
   };
 
@@ -198,11 +211,26 @@ export function RequirementForm({
         dependencies: selectedDependencies
       };
 
-      const url = requirementId 
-        ? `/api/requirements/${requirementId}`
-        : '/api/requirements';
+      let url: string;
+      let method: string;
       
-      const method = requirementId ? 'PUT' : 'POST';
+      if (requirementId) {
+        // 更新需求
+        if (projectId) {
+          url = `/api/projects/${projectId}/requirements/${requirementId}`;
+        } else {
+          url = `/api/requirements/${requirementId}`;
+        }
+        method = 'PATCH';
+      } else {
+        // 创建需求
+        if (projectId) {
+          url = `/api/projects/${projectId}/requirements`;
+        } else {
+          url = '/api/requirements';
+        }
+        method = 'POST';
+      }
 
       const response = await fetch(url, {
         method,

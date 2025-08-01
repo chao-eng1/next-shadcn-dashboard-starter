@@ -237,6 +237,7 @@
         "searchProject": "Search project name or description..."
       },
       "description": {
+        "label": "Project Description",
         "name": "The display name of the project",
         "description": "Brief description of project goals and content",
         "status": "The current stage of the project",

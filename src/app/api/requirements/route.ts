@@ -13,6 +13,8 @@ import {
   RequirementType,
   RequirementComplexity
 } from '@/features/requirement-management/types/requirement';
+import { createRequirementSchema } from '@/features/requirement-management/schemas/requirement-schema';
+import { z } from 'zod';
 
 // 获取全局需求列表
 export async function GET(request: NextRequest) {
@@ -190,5 +192,93 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('获取需求列表失败:', error);
     return apiError('获取需求列表失败');
+  }
+}
+
+// 创建全局需求
+export async function POST(request: NextRequest) {
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return apiUnauthorized();
+    }
+
+    const body = await request.json();
+    
+    // 验证请求数据
+    const validationResult = createRequirementSchema.safeParse(body);
+    if (!validationResult.success) {
+      return apiValidationError(validationResult.error.errors);
+    }
+
+    const data = validationResult.data;
+
+    // 生成需求ID
+    const count = await prisma.requirement.count();
+    const requirementId = `REQ-${String(count + 1).padStart(4, '0')}`;
+
+    // 创建需求
+    const requirement = await prisma.requirement.create({
+      data: {
+        title: data.title,
+        description: data.description,
+        acceptanceCriteria: data.acceptanceCriteria,
+        businessValue: data.businessValue,
+        userStory: data.userStory,
+        priority: data.priority || 'MEDIUM',
+        status: 'DRAFT',
+        type: data.type || 'FUNCTIONAL',
+        complexity: data.complexity || 'MEDIUM',
+        estimatedEffort: data.estimatedEffort,
+        dueDate: data.dueDate,
+        projectId: data.projectId,
+        assignedToId: data.assignedToId,
+        parentId: data.parentId,
+        createdById: user.id
+      },
+      include: {
+        project: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        assignedTo: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
+        tags: {
+          include: {
+            tag: true
+          }
+        }
+      }
+    });
+
+    // 处理标签关联
+    if (data.tagIds && data.tagIds.length > 0) {
+      await prisma.requirementTag.createMany({
+        data: data.tagIds.map(tagId => ({
+          requirementId: requirement.id,
+          tagId
+        })),
+        skipDuplicates: true
+      });
+    }
+
+    return apiResponse(requirement, '需求创建成功');
+  } catch (error) {
+    console.error('创建需求失败:', error);
+    return apiError('创建需求失败');
   }
 }

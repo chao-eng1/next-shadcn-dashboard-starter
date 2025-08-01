@@ -156,10 +156,9 @@ export function RequirementDetail({ requirementId }: RequirementDetailProps) {
   const [loading, setLoading] = useState(true);
   const [showStatusUpdate, setShowStatusUpdate] = useState(false);
   const [newStatus, setNewStatus] = useState('');
-  const [statusComment, setStatusComment] = useState('');
   const [updating, setUpdating] = useState(false);
-  const router = useRouter();
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     fetchRequirement();
@@ -167,20 +166,23 @@ export function RequirementDetail({ requirementId }: RequirementDetailProps) {
 
   const fetchRequirement = async () => {
     try {
-      setLoading(true);
       const response = await fetch(`/api/requirements/${requirementId}`);
-      if (!response.ok) {
-        throw new Error('获取需求详情失败');
+      if (response.ok) {
+        const data = await response.json();
+        setRequirement(data);
+      } else {
+        toast({
+          title: '错误',
+          description: '获取需求详情失败',
+          variant: 'destructive',
+        });
       }
-      
-      const data = await response.json();
-      setRequirement(data.data);
     } catch (error) {
-      console.error('获取需求详情失败:', error);
+      console.error('Error fetching requirement:', error);
       toast({
         title: '错误',
-        description: '获取需求详情失败，请稍后重试',
-        variant: 'destructive'
+        description: '获取需求详情失败',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -188,135 +190,44 @@ export function RequirementDetail({ requirementId }: RequirementDetailProps) {
   };
 
   const handleStatusUpdate = async () => {
-    if (!newStatus || !requirement) {
-      return;
-    }
+    if (!newStatus || !requirement) return;
 
+    setUpdating(true);
     try {
-      setUpdating(true);
       const response = await fetch(`/api/requirements/${requirementId}`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          status: newStatus,
-          comment: statusComment
-        })
+        body: JSON.stringify({ status: newStatus }),
       });
 
-      if (!response.ok) {
-        throw new Error('更新状态失败');
+      if (response.ok) {
+        const updatedRequirement = await response.json();
+        setRequirement(updatedRequirement);
+        setShowStatusUpdate(false);
+        setNewStatus('');
+        toast({
+          title: '成功',
+          description: '需求状态已更新',
+        });
+      } else {
+        toast({
+          title: '错误',
+          description: '更新需求状态失败',
+          variant: 'destructive',
+        });
       }
-
-      toast({
-        title: '成功',
-        description: '需求状态已更新'
-      });
-
-      setShowStatusUpdate(false);
-      setNewStatus('');
-      setStatusComment('');
-      fetchRequirement();
     } catch (error) {
-      console.error('更新状态失败:', error);
+      console.error('Error updating requirement status:', error);
       toast({
         title: '错误',
-        description: '更新状态失败，请稍后重试',
-        variant: 'destructive'
+        description: '更新需求状态失败',
+        variant: 'destructive',
       });
     } finally {
       setUpdating(false);
     }
-  };
-
-  const handleEdit = () => {
-    router.push(`/dashboard/requirements/${requirementId}/edit`);
-  };
-
-  const handleDuplicate = async () => {
-    try {
-      const response = await fetch('/api/requirements/duplicate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ids: [requirementId]
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('复制需求失败');
-      }
-
-      const result = await response.json();
-      toast({
-        title: '成功',
-        description: '需求已复制'
-      });
-
-      router.push(`/dashboard/requirements/${result.data[0].id}`);
-    } catch (error) {
-      console.error('复制需求失败:', error);
-      toast({
-        title: '错误',
-        description: '复制需求失败，请稍后重试',
-        variant: 'destructive'
-      });
-    }
-  };
-
-  const handleArchive = async () => {
-    if (!confirm('确定要归档这个需求吗？')) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/requirements/${requirementId}/archive`, {
-        method: 'POST'
-      });
-
-      if (!response.ok) {
-        throw new Error('归档需求失败');
-      }
-
-      toast({
-        title: '成功',
-        description: '需求已归档'
-      });
-
-      router.push('/dashboard/requirements');
-    } catch (error) {
-      console.error('归档需求失败:', error);
-      toast({
-        title: '错误',
-        description: '归档需求失败，请稍后重试',
-        variant: 'destructive'
-      });
-    }
-  };
-
-  const getProgressPercentage = () => {
-    if (!requirement) return 0;
-    
-    const statusProgress = {
-      DRAFT: 0,
-      PENDING: 10,
-      APPROVED: 25,
-      IN_PROGRESS: 50,
-      TESTING: 80,
-      COMPLETED: 100,
-      REJECTED: 0,
-      CANCELLED: 0
-    };
-    
-    return statusProgress[requirement.status] || 0;
-  };
-
-  const isOverdue = () => {
-    if (!requirement?.dueDate) return false;
-    return new Date(requirement.dueDate) < new Date() && requirement.status !== 'COMPLETED';
   };
 
   if (loading) {
@@ -336,9 +247,6 @@ export function RequirementDetail({ requirementId }: RequirementDetailProps) {
           <div className="text-center space-y-2">
             <h3 className="text-lg font-medium">需求不存在</h3>
             <p className="text-muted-foreground">找不到指定的需求</p>
-            <Button onClick={() => router.push('/dashboard/requirements')}>
-              返回需求列表
-            </Button>
           </div>
         </CardContent>
       </Card>
@@ -346,288 +254,242 @@ export function RequirementDetail({ requirementId }: RequirementDetailProps) {
   }
 
   const StatusIcon = statusConfig[requirement.status].icon;
+  const progress = requirement.status === 'COMPLETED' ? 100 : 
+                  requirement.status === 'IN_PROGRESS' ? 60 :
+                  requirement.status === 'TESTING' ? 80 :
+                  requirement.status === 'APPROVED' ? 20 : 0;
 
   return (
-    <div className="space-y-8">
-      {/* 美化的头部信息 */}
-      <Card className="border-0 shadow-xl bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/50 dark:from-gray-900 dark:via-blue-950/20 dark:to-indigo-950/30">
-        <CardHeader className="pb-6">
-          <div className="flex items-start justify-between">
-            <div className="space-y-4 flex-1">
-              <div className="flex items-center space-x-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20">
-                  <Target className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge className={statusConfig[requirement.status].color}>
-                    <StatusIcon className="h-3 w-3 mr-1" />
-                    {statusConfig[requirement.status].label}
-                  </Badge>
-                  <Badge className={priorityConfig[requirement.priority].color}>
-                    {priorityConfig[requirement.priority].label}
-                  </Badge>
-                  <Badge variant="outline" className={typeConfig[requirement.type].color}>
-                    {typeConfig[requirement.type].label}
-                  </Badge>
-                  {isOverdue() && (
-                    <Badge variant="destructive">
-                      <AlertCircle className="h-3 w-3 mr-1" />
-                      已逾期
-                    </Badge>
-                  )}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent leading-tight">
-                  {requirement.title}
-                </CardTitle>
-                <CardDescription className="text-base leading-relaxed text-muted-foreground">
-                  {requirement.description}
-                </CardDescription>
-              </div>
-            </div>
-            <div className="flex space-x-2 ml-4">
-              <Button onClick={handleEdit} className="hover:bg-blue-50 hover:border-blue-200 dark:hover:bg-blue-900/20">
-                <Edit className="h-4 w-4 mr-2" />
-                编辑
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold">{requirement.title}</h1>
+          <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+            <span>ID: {requirement.id}</span>
+            <span>创建于 {format(new Date(requirement.createdAt), 'yyyy-MM-dd HH:mm', { locale: zhCN })}</span>
+            <span>更新于 {formatDistanceToNow(new Date(requirement.updatedAt), { addSuffix: true, locale: zhCN })}</span>
+          </div>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button variant="outline" size="sm" onClick={() => router.push(`/dashboard/requirements/${requirementId}/edit`)}>
+            <Edit className="h-4 w-4 mr-2" />
+            编辑
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <MoreHorizontal className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="sm" className="hover:bg-green-50 hover:border-green-200 dark:hover:bg-green-900/20">
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>操作</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setShowStatusUpdate(true)}>
+                <Edit className="h-4 w-4 mr-2" />
+                更新状态
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Copy className="h-4 w-4 mr-2" />
+                复制链接
+              </DropdownMenuItem>
+              <DropdownMenuItem>
                 <Share2 className="h-4 w-4 mr-2" />
                 分享
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="icon">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>操作</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => setShowStatusUpdate(true)}>
-                    更新状态
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleDuplicate}>
-                    <Copy className="mr-2 h-4 w-4" />
-                    复制需求
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleArchive}>
-                    <Archive className="mr-2 h-4 w-4" />
-                    归档需求
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <Archive className="h-4 w-4 mr-2" />
+                归档
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      {/* Status and Progress */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <StatusIcon className="h-5 w-5" />
+              <Badge className={statusConfig[requirement.status].color}>
+                {statusConfig[requirement.status].label}
+              </Badge>
             </div>
+            <span className="text-sm text-muted-foreground">{progress}% 完成</span>
           </div>
-        </CardHeader>
-        <CardContent>
-          {/* 美化的进度条 */}
-          <div className="space-y-3 p-4 rounded-xl bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-900/10 dark:to-indigo-900/10 border border-blue-100 dark:border-blue-800/30">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-medium text-blue-700 dark:text-blue-300">完成进度</span>
-              <span className="font-bold text-blue-900 dark:text-blue-100">{getProgressPercentage()}%</span>
-            </div>
-            <Progress value={getProgressPercentage()} className="h-3 bg-blue-100 dark:bg-blue-900/20" />
-          </div>
+          <Progress value={progress} className="h-2" />
         </CardContent>
       </Card>
 
-      {/* 美化的基本信息 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 hover:shadow-xl transition-all duration-300">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold flex items-center text-blue-700 dark:text-blue-300">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30 mr-3">
-                <Zap className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              </div>
-              复杂度
-            </CardTitle>
+      {/* Basic Info */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">基本信息</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Badge className={complexityConfig[requirement.complexity].color}>
-                {complexityConfig[requirement.complexity].label}
-                ({complexityConfig[requirement.complexity].points}分)
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 hover:shadow-xl transition-all duration-300">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold flex items-center text-green-700 dark:text-green-300">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30 mr-3">
-                <Target className="h-4 w-4 text-green-600 dark:text-green-400" />
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium text-muted-foreground">优先级</Label>
+                <Badge className={`mt-1 ${priorityConfig[requirement.priority].color}`}>
+                  {priorityConfig[requirement.priority].label}
+                </Badge>
               </div>
-              业务价值
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="font-semibold text-2xl text-green-900 dark:text-green-100">{requirement.businessValue}/100</div>
-              <div className="w-full h-2 bg-green-100 dark:bg-green-900/20 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-green-400 to-emerald-400 transition-all duration-300" style={{width: `${requirement.businessValue}%`}} />
+              <div>
+                <Label className="text-sm font-medium text-muted-foreground">类型</Label>
+                <Badge className={`mt-1 ${typeConfig[requirement.type].color}`}>
+                  {typeConfig[requirement.type].label}
+                </Badge>
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-muted-foreground">复杂度</Label>
+                <Badge className={`mt-1 ${complexityConfig[requirement.complexity].color}`}>
+                  {complexityConfig[requirement.complexity].label} ({complexityConfig[requirement.complexity].points}分)
+                </Badge>
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-muted-foreground">商业价值</Label>
+                <div className="mt-1 text-sm">{requirement.businessValue}/10</div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-orange-50 to-yellow-50 dark:from-orange-950/20 dark:to-yellow-950/20 hover:shadow-xl transition-all duration-300">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold flex items-center text-orange-700 dark:text-orange-300">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/30 mr-3">
-                <Clock className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+            
+            <Separator />
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium text-muted-foreground">预估工时</Label>
+                <div className="mt-1 text-sm">{requirement.estimatedEffort} 小时</div>
               </div>
-              工作量
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="font-semibold text-2xl text-orange-900 dark:text-orange-100">{requirement.estimatedEffort}h</div>
-              <div className="text-sm text-orange-600/70 dark:text-orange-400/70">预估工时</div>
               {requirement.actualEffort && (
-                <div className="text-sm text-orange-600/70 dark:text-orange-400/70">实际: {requirement.actualEffort}h</div>
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">实际工时</Label>
+                  <div className="mt-1 text-sm">{requirement.actualEffort} 小时</div>
+                </div>
+              )}
+              {requirement.dueDate && (
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">截止日期</Label>
+                  <div className="mt-1 text-sm flex items-center">
+                    <Calendar className="h-4 w-4 mr-1" />
+                    {format(new Date(requirement.dueDate), 'yyyy-MM-dd', { locale: zhCN })}
+                  </div>
+                </div>
               )}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/20 dark:to-violet-950/20 hover:shadow-xl transition-all duration-300">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold flex items-center text-purple-700 dark:text-purple-300">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30 mr-3">
-                <Calendar className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-              </div>
-              截止日期
-            </CardTitle>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">人员信息</CardTitle>
           </CardHeader>
-          <CardContent>
-            {requirement.dueDate ? (
-              <div className="space-y-2">
-                <div className={cn(
-                  "font-semibold text-purple-900 dark:text-purple-100",
-                  isOverdue() && "text-red-600 dark:text-red-400"
-                )}>
-                  {format(new Date(requirement.dueDate), 'MM月dd日', { locale: zhCN })}
+          <CardContent className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium text-muted-foreground">创建者</Label>
+              <div className="mt-2 flex items-center space-x-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback>{requirement.creator.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <div className="text-sm font-medium">{requirement.creator.name}</div>
+                  <div className="text-xs text-muted-foreground">{requirement.creator.email}</div>
                 </div>
-                <Badge className={isOverdue() 
-                  ? 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800'
-                  : 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800'
-                }>
-                  {isOverdue() ? '已逾期' : '进行中'}
-                </Badge>
               </div>
-            ) : (
-              <div className="text-muted-foreground text-sm">未设置</div>
+            </div>
+            
+            {requirement.assignee && (
+              <div>
+                <Label className="text-sm font-medium text-muted-foreground">负责人</Label>
+                <div className="mt-2 flex items-center space-x-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback>{requirement.assignee.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="text-sm font-medium">{requirement.assignee.name}</div>
+                    <div className="text-xs text-muted-foreground">{requirement.assignee.email}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {requirement.project && (
+              <div>
+                <Label className="text-sm font-medium text-muted-foreground">所属项目</Label>
+                <div className="mt-1 text-sm">{requirement.project.name}</div>
+              </div>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* 时间信息 */}
-      <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50">
+      {/* Description */}
+      <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 mr-3">
-              <Clock className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-            </div>
-            时间信息
-          </CardTitle>
+          <CardTitle className="text-lg">需求描述</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
-              <Label className="text-sm text-muted-foreground">创建时间</Label>
-              <div className="mt-1 text-sm font-medium">
-                {format(new Date(requirement.createdAt), 'yyyy年MM月dd日 HH:mm', { locale: zhCN })}
-              </div>
-            </div>
-            <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
-              <Label className="text-sm text-muted-foreground">更新时间</Label>
-              <div className="mt-1 text-sm font-medium">
-                {formatDistanceToNow(new Date(requirement.updatedAt), {
-                  addSuffix: true,
-                  locale: zhCN
-                })}
-              </div>
-            </div>
+          <div className="prose max-w-none">
+            <p className="text-sm leading-relaxed">{requirement.description}</p>
           </div>
         </CardContent>
       </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">项目和人员</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* 关联项目 */}
-            {requirement.project ? (
-              <div>
-                <Label className="text-sm text-muted-foreground">关联项目</Label>
-                <div className="mt-1 flex items-center space-x-2">
-                  <Tag className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">{requirement.project.name}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => router.push(`/dashboard/projects/${requirement.project?.id}`)}
-                  >
-                    <ExternalLink className="h-3 w-3" />
-                  </Button>
+      {/* Additional Details */}
+      {(requirement.acceptanceCriteria || requirement.businessRules || requirement.technicalNotes) && (
+        <div className="grid grid-cols-1 gap-6">
+          {requirement.acceptanceCriteria && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center">
+                  <CheckCircle className="h-5 w-5 mr-2" />
+                  验收标准
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose max-w-none">
+                  <p className="text-sm leading-relaxed">{requirement.acceptanceCriteria}</p>
                 </div>
-              </div>
-            ) : (
-              <div>
-                <Label className="text-sm text-muted-foreground">关联项目</Label>
-                <div className="mt-1 text-sm text-muted-foreground">未关联项目</div>
-              </div>
-            )}
-
-            {/* 负责人 */}
-            {requirement.assignee ? (
-              <div>
-                <Label className="text-sm text-muted-foreground">负责人</Label>
-                <div className="mt-1 flex items-center space-x-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="" />
-                    <AvatarFallback>
-                      {requirement.assignee.name.slice(0, 2)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-medium">{requirement.assignee.name}</div>
-                    <div className="text-sm text-muted-foreground">{requirement.assignee.email}</div>
-                  </div>
+              </CardContent>
+            </Card>
+          )}
+          
+          {requirement.businessRules && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center">
+                  <Target className="h-5 w-5 mr-2" />
+                  业务规则
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose max-w-none">
+                  <p className="text-sm leading-relaxed">{requirement.businessRules}</p>
                 </div>
-              </div>
-            ) : (
-              <div>
-                <Label className="text-sm text-muted-foreground">负责人</Label>
-                <div className="mt-1 text-sm text-muted-foreground">未分配负责人</div>
-              </div>
-            )}
-
-            {/* 创建人 */}
-            <div>
-              <Label className="text-sm text-muted-foreground">创建人</Label>
-              <div className="mt-1 flex items-center space-x-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="" />
-                  <AvatarFallback>
-                    {requirement.creator.name.slice(0, 2)}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <div className="font-medium">{requirement.creator.name}</div>
-                  <div className="text-sm text-muted-foreground">{requirement.creator.email}</div>
+              </CardContent>
+            </Card>
+          )}
+          
+          {requirement.technicalNotes && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center">
+                  <Zap className="h-5 w-5 mr-2" />
+                  技术说明
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose max-w-none">
+                  <p className="text-sm leading-relaxed">{requirement.technicalNotes}</p>
                 </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
 
-      {/* 标签 */}
+      {/* Tags */}
       {requirement.tags.length > 0 && (
         <Card>
           <CardHeader>
@@ -638,16 +500,13 @@ export function RequirementDetail({ requirementId }: RequirementDetailProps) {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {requirement.tags.map(({ tag }) => (
+              {requirement.tags.map((tagRelation) => (
                 <Badge
-                  key={tag.id}
+                  key={tagRelation.tag.id}
                   variant="outline"
-                  style={{ 
-                    backgroundColor: tag.color + '20', 
-                    borderColor: tag.color 
-                  }}
+                  style={{ backgroundColor: tagRelation.tag.color + '20', borderColor: tagRelation.tag.color }}
                 >
-                  {tag.name}
+                  {tagRelation.tag.name}
                 </Badge>
               ))}
             </div>
@@ -655,49 +514,7 @@ export function RequirementDetail({ requirementId }: RequirementDetailProps) {
         </Card>
       )}
 
-      {/* 详细描述 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {requirement.acceptanceCriteria && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">验收标准</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="whitespace-pre-wrap text-sm">
-                {requirement.acceptanceCriteria}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {requirement.businessRules && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">业务规则</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="whitespace-pre-wrap text-sm">
-                {requirement.businessRules}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {requirement.technicalNotes && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">技术说明</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="whitespace-pre-wrap text-sm">
-              {requirement.technicalNotes}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* 依赖关系 */}
+      {/* Dependencies */}
       {(requirement.dependencies.length > 0 || requirement.dependents.length > 0) && (
         <Card>
           <CardHeader>
@@ -709,29 +526,29 @@ export function RequirementDetail({ requirementId }: RequirementDetailProps) {
           <CardContent className="space-y-4">
             {requirement.dependencies.length > 0 && (
               <div>
-                <Label className="text-sm font-medium">依赖的需求</Label>
+                <Label className="text-sm font-medium text-muted-foreground">依赖需求</Label>
                 <div className="mt-2 space-y-2">
-                  {requirement.dependencies.map(({ dependency }) => (
-                    <div key={dependency.id} className="flex items-center justify-between p-2 border rounded">
-                      <span className="text-sm">{dependency.title}</span>
-                      <Badge className={statusConfig[dependency.status as keyof typeof statusConfig].color}>
-                        {statusConfig[dependency.status as keyof typeof statusConfig].label}
+                  {requirement.dependencies.map((dep) => (
+                    <div key={dep.dependency.id} className="flex items-center justify-between p-2 border rounded">
+                      <span className="text-sm">{dep.dependency.title}</span>
+                      <Badge className={statusConfig[dep.dependency.status as keyof typeof statusConfig]?.color || 'bg-gray-100 text-gray-800'}>
+                        {statusConfig[dep.dependency.status as keyof typeof statusConfig]?.label || dep.dependency.status}
                       </Badge>
                     </div>
                   ))}
                 </div>
               </div>
             )}
-
+            
             {requirement.dependents.length > 0 && (
               <div>
-                <Label className="text-sm font-medium">被依赖的需求</Label>
+                <Label className="text-sm font-medium text-muted-foreground">被依赖需求</Label>
                 <div className="mt-2 space-y-2">
-                  {requirement.dependents.map(({ dependent }) => (
-                    <div key={dependent.id} className="flex items-center justify-between p-2 border rounded">
-                      <span className="text-sm">{dependent.title}</span>
-                      <Badge className={statusConfig[dependent.status as keyof typeof statusConfig].color}>
-                        {statusConfig[dependent.status as keyof typeof statusConfig].label}
+                  {requirement.dependents.map((dep) => (
+                    <div key={dep.dependent.id} className="flex items-center justify-between p-2 border rounded">
+                      <span className="text-sm">{dep.dependent.title}</span>
+                      <Badge className={statusConfig[dep.dependent.status as keyof typeof statusConfig]?.color || 'bg-gray-100 text-gray-800'}>
+                        {statusConfig[dep.dependent.status as keyof typeof statusConfig]?.label || dep.dependent.status}
                       </Badge>
                     </div>
                   ))}
@@ -742,38 +559,33 @@ export function RequirementDetail({ requirementId }: RequirementDetailProps) {
         </Card>
       )}
 
-      {/* 状态更新对话框 */}
+      {/* Status Update Dialog */}
       <Dialog open={showStatusUpdate} onOpenChange={setShowStatusUpdate}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>更新需求状态</DialogTitle>
             <DialogDescription>
-              更新需求的状态并添加说明
+              选择新的状态来更新需求进度
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>新状态</Label>
+            <div>
+              <Label htmlFor="status">状态</Label>
               <Select value={newStatus} onValueChange={setNewStatus}>
                 <SelectTrigger>
-                  <SelectValue placeholder="选择新状态" />
+                  <SelectValue placeholder="选择状态" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(statusConfig).map(([value, config]) => (
-                    <SelectItem key={value} value={value}>
-                      {config.label}
+                  {Object.entries(statusConfig).map(([key, config]) => (
+                    <SelectItem key={key} value={key}>
+                      <div className="flex items-center space-x-2">
+                        <config.icon className="h-4 w-4" />
+                        <span>{config.label}</span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>更新说明</Label>
-              <Textarea
-                placeholder="请输入状态更新的说明（可选）"
-                value={statusComment}
-                onChange={(e) => setStatusComment(e.target.value)}
-              />
             </div>
           </div>
           <DialogFooter>
@@ -789,3 +601,5 @@ export function RequirementDetail({ requirementId }: RequirementDetailProps) {
     </div>
   );
 }
+
+export default RequirementDetail;

@@ -242,6 +242,7 @@
         "searchProject": "搜索项目名称或描述..."
       },
       "description": {
+        "label": "项目描述",
         "name": "项目的显示名称",
         "description": "简要描述项目的目标和内容",
         "status": "项目的当前阶段",

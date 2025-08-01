@@ -4,15 +4,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 
 export const metadata: Metadata = {
   title: '创建需求',
   description: '创建新的需求项目'
 };
 
-export default function NewRequirementPage() {
-  const t = useTranslations('requirements');
+export default async function NewRequirementPage() {
+  const t = await getTranslations('requirements');
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
