@@ -6,8 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, Clock, CheckCircle, Globe, Users, UserCheck, Eye } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { MessageSquare, Clock, CheckCircle, Globe, Users, Eye, Search, Mail, MailOpen } from 'lucide-react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface UserMessage {
   id: string;
@@ -39,6 +41,8 @@ export function UserMessagesPage({ currentUser }: UserMessagesPageProps) {
   const [messages, setMessages] = useState<UserMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedMessage, setSelectedMessage] = useState<string | null>(null);
 
   // 加载用户消息
   const loadMessages = async () => {
@@ -46,8 +50,8 @@ export function UserMessagesPage({ currentUser }: UserMessagesPageProps) {
       setLoading(true);
       const response = await fetch('/api/user-messages');
       if (response.ok) {
-        const data = await response.json();
-        setMessages(data.messages || []);
+        let data = await response.json();
+        setMessages(Array.isArray(data.data.messages) ? data.data.messages : []);
       }
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -127,94 +131,83 @@ export function UserMessagesPage({ currentUser }: UserMessagesPageProps) {
 
   // 过滤消息
   const filteredMessages = messages.filter(msg => {
-    if (filter === 'unread') return !msg.isRead;
-    if (filter === 'read') return msg.isRead;
-    return true;
+    // 状态过滤
+    let statusMatch = true;
+    if (filter === 'unread') statusMatch = !msg.isRead;
+    if (filter === 'read') statusMatch = msg.isRead;
+    
+    // 搜索过滤
+    let searchMatch = true;
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      searchMatch = 
+        msg.message.title.toLowerCase().includes(query) ||
+        msg.message.content.toLowerCase().includes(query) ||
+        msg.message.sender.name.toLowerCase().includes(query) ||
+        msg.message.sender.email.toLowerCase().includes(query);
+    }
+    
+    return statusMatch && searchMatch;
   });
 
   const unreadCount = messages.filter(msg => !msg.isRead).length;
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      {/* 页面头部 */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">我的消息</h1>
-          <p className="text-muted-foreground mt-2">
-            查看和管理您收到的系统消息
+          <h1 className="text-2xl font-semibold tracking-tight">我的消息</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            共 {messages.length} 条消息，{unreadCount} 条未读
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          {unreadCount > 0 && (
-            <Button onClick={markAllAsRead} variant="outline">
-              <CheckCircle className="h-4 w-4 mr-2" />
-              全部标记为已读
-            </Button>
-          )}
+        {unreadCount > 0 && (
+          <Button onClick={markAllAsRead} variant="outline">
+            <CheckCircle className="h-4 w-4 mr-2" />
+            全部标记为已读
+          </Button>
+        )}
+      </div>
+
+
+      {/* 搜索和过滤区域 */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        {/* 搜索框 */}
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="搜索消息..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
         </div>
-      </div>
-
-      {/* 统计信息 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">总消息数</p>
-                <p className="text-2xl font-bold">{messages.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
         
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-orange-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">未读消息</p>
-                <p className="text-2xl font-bold text-orange-600">{unreadCount}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">已读消息</p>
-                <p className="text-2xl font-bold text-green-600">{messages.length - unreadCount}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* 过滤器 */}
-      <div className="flex gap-2">
-        <Button 
-          variant={filter === 'all' ? 'default' : 'outline'}
-          onClick={() => setFilter('all')}
-          size="sm"
-        >
-          全部 ({messages.length})
-        </Button>
-        <Button 
-          variant={filter === 'unread' ? 'default' : 'outline'}
-          onClick={() => setFilter('unread')}
-          size="sm"
-        >
-          未读 ({unreadCount})
-        </Button>
-        <Button 
-          variant={filter === 'read' ? 'default' : 'outline'}
-          onClick={() => setFilter('read')}
-          size="sm"
-        >
-          已读 ({messages.length - unreadCount})
-        </Button>
+        {/* 过滤器按钮 */}
+        <div className="flex gap-2">
+          <Button 
+            variant={filter === 'all' ? 'default' : 'outline'}
+            onClick={() => setFilter('all')}
+            size="sm"
+          >
+            全部 ({messages.length})
+          </Button>
+          <Button 
+            variant={filter === 'unread' ? 'default' : 'outline'}
+            onClick={() => setFilter('unread')}
+            size="sm"
+          >
+            未读 ({unreadCount})
+          </Button>
+          <Button 
+            variant={filter === 'read' ? 'default' : 'outline'}
+            onClick={() => setFilter('read')}
+            size="sm"
+          >
+            已读 ({messages.length - unreadCount})
+          </Button>
+        </div>
       </div>
 
       {/* 消息列表 */}
@@ -223,18 +216,31 @@ export function UserMessagesPage({ currentUser }: UserMessagesPageProps) {
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
             消息列表
+            {filteredMessages.length > 0 && (
+              <Badge variant="secondary" className="ml-auto">
+                {filteredMessages.length}
+              </Badge>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-2 text-muted-foreground">加载中...</p>
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <span className="ml-2 text-sm text-muted-foreground">加载中...</span>
             </div>
           ) : filteredMessages.length === 0 ? (
-            <div className="text-center text-muted-foreground py-8">
-              <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>暂无消息</p>
+            <div className="text-center py-12">
+              <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">
+                {searchQuery ? '未找到匹配的消息' : '暂无消息'}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {searchQuery 
+                  ? '尝试使用不同的关键词搜索' 
+                  : `您目前没有任何${filter === 'all' ? '' : filter === 'unread' ? '未读' : '已读'}消息`
+                }
+              </p>
             </div>
           ) : (
             <ScrollArea className="h-[600px]">
@@ -246,28 +252,57 @@ export function UserMessagesPage({ currentUser }: UserMessagesPageProps) {
                   return (
                     <Card 
                       key={userMessage.id} 
-                      className={`p-4 transition-colors ${
-                        !userMessage.isRead 
-                          ? 'bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800' 
-                          : ''
-                      }`}
+                      className={cn(
+                        "transition-colors",
+                        !userMessage.isRead && "border-l-4 border-l-primary bg-muted/50"
+                      )}
                     >
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between">
-                          <div className="space-y-1 flex-1">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 space-y-2">
                             <div className="flex items-center gap-2">
-                              <h3 className="font-semibold">{message.title}</h3>
+                              <h3 className="font-medium leading-none">
+                                {message.title}
+                              </h3>
                               {!userMessage.isRead && (
                                 <Badge variant="destructive" className="text-xs">
-                                  未读
+                                  新消息
                                 </Badge>
                               )}
                             </div>
-                            <p className="text-sm text-muted-foreground">
-                              发送者: {message.sender.name} ({message.sender.email})
-                            </p>
+                            
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <div className="w-6 h-6 bg-muted rounded-full flex items-center justify-center">
+                                <span className="text-xs font-medium">
+                                  {message.sender.name.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                              <span>{message.sender.name}</span>
+                              <span>•</span>
+                              <span>{message.sender.email}</span>
+                            </div>
+                            
+                            <div className="text-sm text-muted-foreground bg-muted/50 rounded p-3">
+                              <div className="line-clamp-3">
+                                {message.content}
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center justify-between text-xs text-muted-foreground">
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                <span>发送时间: {formatTime(message.createdAt)}</span>
+                              </div>
+                              {userMessage.isRead && userMessage.readAt && (
+                                <div className="flex items-center gap-1 text-green-600">
+                                  <CheckCircle className="h-3 w-3" />
+                                  <span>已读时间: {formatTime(userMessage.readAt)}</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2">
+                          
+                          <div className="flex flex-col items-end gap-2">
                             <Badge variant={typeInfo.variant} className="flex items-center gap-1">
                               {typeInfo.icon}
                               {typeInfo.text}
@@ -275,7 +310,6 @@ export function UserMessagesPage({ currentUser }: UserMessagesPageProps) {
                             {!userMessage.isRead && (
                               <Button
                                 size="sm"
-                                variant="outline"
                                 onClick={() => markAsRead(userMessage.id)}
                               >
                                 <Eye className="h-4 w-4 mr-1" />
@@ -284,20 +318,7 @@ export function UserMessagesPage({ currentUser }: UserMessagesPageProps) {
                             )}
                           </div>
                         </div>
-                        
-                        <Separator />
-                        
-                        <div className="text-sm whitespace-pre-wrap">
-                          {message.content}
-                        </div>
-                        
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span>发送时间: {formatTime(message.createdAt)}</span>
-                          {userMessage.isRead && userMessage.readAt && (
-                            <span>已读时间: {formatTime(userMessage.readAt)}</span>
-                          )}
-                        </div>
-                      </div>
+                      </CardContent>
                     </Card>
                   );
                 })}

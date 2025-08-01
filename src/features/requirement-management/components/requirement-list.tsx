@@ -24,7 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Eye, Edit, Trash2, MoreHorizontal, ExternalLink, Calendar, User, Flag, Clock, CheckCircle2, AlertCircle, XCircle } from 'lucide-react';
+import { Eye, Edit, Trash2, MoreHorizontal, ExternalLink, Calendar, User, Clock, CheckCircle2, AlertCircle, XCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
@@ -119,7 +119,7 @@ export function RequirementList({ projectId, filters }: RequirementListProps) {
   };
 
   const getPriorityIcon = (priority: string) => {
-    return <Flag className="h-3 w-3" />;
+    return null;
   };
 
   useEffect(() => {
@@ -263,83 +263,62 @@ export function RequirementList({ projectId, filters }: RequirementListProps) {
         </Card>
       )}
 
-      <Card className="border-0 shadow-sm overflow-hidden">
+      <Card>
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/30 hover:bg-muted/50 border-b">
-              <TableHead className="w-12 pl-6">
+            <TableRow>
+              <TableHead className="w-12">
                 <Checkbox
                   checked={selectedItems.length === requirements.length}
                   onCheckedChange={handleSelectAll}
-                  className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                 />
               </TableHead>
-              <TableHead className="font-semibold">需求信息</TableHead>
-              <TableHead className="font-semibold">状态</TableHead>
-              <TableHead className="font-semibold">优先级</TableHead>
-              <TableHead className="font-semibold">类型</TableHead>
-              <TableHead className="font-semibold">项目</TableHead>
-              <TableHead className="font-semibold">负责人</TableHead>
-              <TableHead className="font-semibold">进度</TableHead>
-              <TableHead className="font-semibold">创建时间</TableHead>
+              <TableHead>需求信息</TableHead>
+              <TableHead>状态</TableHead>
+              <TableHead>优先级</TableHead>
+              <TableHead>类型</TableHead>
+              <TableHead>项目</TableHead>
+              <TableHead>负责人</TableHead>
+              <TableHead>进度</TableHead>
+              <TableHead>创建时间</TableHead>
               <TableHead className="w-12"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {requirements.map((requirement, index) => (
-              <TableRow 
-                key={requirement.id} 
-                className="group hover:bg-muted/30 transition-colors border-b border-border/50"
-              >
-                <TableCell className="pl-6">
+              <TableRow key={requirement.id}>
+                <TableCell>
                   <Checkbox
                     checked={selectedItems.includes(requirement.id)}
                     onCheckedChange={(checked) => 
                       handleSelectItem(requirement.id, checked as boolean)
                     }
-                    className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                   />
                 </TableCell>
-                <TableCell className="py-4">
-                  <div className="space-y-2">
-                    <div className="flex items-start gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs font-medium">
-                        #{requirement.id.slice(-4)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-foreground group-hover:text-blue-600 transition-colors">
-                          {requirement.title}
-                        </div>
-                        <div className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                          {requirement.description}
-                        </div>
-                        {requirement.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {requirement.tags.map(({ tag }) => (
-                              <Badge
-                                key={tag.id}
-                                variant="outline"
-                                className="text-xs"
-                                style={{ backgroundColor: tag.color + '20', borderColor: tag.color }}
-                              >
-                                {tag.name}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                <TableCell>
+                  <div className="space-y-1">
+                    <div className="font-medium">{requirement.title}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {requirement.description}
                     </div>
+                    {requirement.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {requirement.tags.map(({ tag }) => (
+                          <Badge key={tag.id} variant="outline" className="text-xs">
+                            {tag.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge className={`${statusConfig[requirement.status].color} flex items-center gap-1 font-medium border`}>
-                    {getStatusIcon(requirement.status)}
+                  <Badge className={statusConfig[requirement.status].color}>
                     {statusConfig[requirement.status].label}
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge className={`${priorityConfig[requirement.priority].color} flex items-center gap-1 font-medium border`}>
-                    {getPriorityIcon(requirement.priority)}
+                  <Badge className={priorityConfig[requirement.priority].color}>
                     {priorityConfig[requirement.priority].label}
                   </Badge>
                 </TableCell>
@@ -350,96 +329,64 @@ export function RequirementList({ projectId, filters }: RequirementListProps) {
                 </TableCell>
                 <TableCell>
                   {requirement.project ? (
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm">{requirement.project.name}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => router.push(`/dashboard/projects/${requirement.project?.id}`)}
-                      >
-                        <ExternalLink className="h-3 w-3" />
-                      </Button>
-                    </div>
+                    <span className="text-sm">{requirement.project.name}</span>
                   ) : (
                     <span className="text-muted-foreground text-sm">未关联</span>
                   )}
                 </TableCell>
                 <TableCell>
                   {requirement.assignee ? (
-                    <div className="flex items-center space-x-3">
-                      <Avatar className="h-8 w-8 border-2 border-background shadow-sm">
-                        <AvatarImage src="" />
-                        <AvatarFallback className="text-xs font-medium bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20">
+                    <div className="flex items-center space-x-2">
+                      <Avatar className="h-6 w-6">
+                        <AvatarFallback className="text-xs">
                           {requirement.assignee.name.slice(0, 2)}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium">{requirement.assignee.name}</span>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <User className="h-3 w-3" />
-                          成员
-                        </span>
-                      </div>
+                      <span className="text-sm">{requirement.assignee.name}</span>
                     </div>
                   ) : (
                     <span className="text-muted-foreground text-sm">未分配</span>
                   )}
                 </TableCell>
                 <TableCell>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">完成度</span>
-                      <span className="font-medium">{Math.floor(Math.random() * 100)}%</span>
+                  <div className="space-y-1">
+                    <div className="text-xs text-muted-foreground">
+                      {Math.floor(Math.random() * 100)}%
                     </div>
-                    <Progress 
-                      value={Math.floor(Math.random() * 100)} 
-                      className="h-2 bg-muted"
-                    />
+                    <Progress value={Math.floor(Math.random() * 100)} className="h-2" />
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="flex flex-col space-y-1">
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <Calendar className="h-3 w-3" />
-                      {formatDistanceToNow(new Date(requirement.createdAt), {
-                        addSuffix: true,
-                        locale: zhCN
-                      })}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {new Date(requirement.createdAt).toLocaleTimeString('zh-CN', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
-                    </div>
+                  <div className="text-sm text-muted-foreground">
+                    {formatDistanceToNow(new Date(requirement.createdAt), {
+                      addSuffix: true,
+                      locale: zhCN
+                    })}
                   </div>
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted"
-                      >
+                      <Button variant="ghost" className="h-8 w-8 p-0">
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuContent align="end">
                       <DropdownMenuLabel>操作</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => handleView(requirement.id)} className="flex items-center gap-2 cursor-pointer">
-                        <Eye className="h-4 w-4" />
+                      <DropdownMenuItem onClick={() => handleView(requirement.id)}>
+                        <Eye className="h-4 w-4 mr-2" />
                         查看详情
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleEdit(requirement.id)} className="flex items-center gap-2 cursor-pointer">
-                        <Edit className="h-4 w-4" />
+                      <DropdownMenuItem onClick={() => handleEdit(requirement.id)}>
+                        <Edit className="h-4 w-4 mr-2" />
                         编辑需求
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem 
                         onClick={() => handleDelete(requirement.id)}
-                        className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600"
+                        className="text-red-600"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4 mr-2" />
                         删除需求
                       </DropdownMenuItem>
                     </DropdownMenuContent>
