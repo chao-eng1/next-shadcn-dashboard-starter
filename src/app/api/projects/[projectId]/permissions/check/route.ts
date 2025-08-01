@@ -5,11 +5,10 @@ import { apiResponse, apiUnauthorized, apiBadRequest } from '@/lib/api-response'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { projectId: string } }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   try {
     const user = await getCurrentUser();
-
     if (!user) {
       return apiUnauthorized();
     }
@@ -21,7 +20,7 @@ export async function GET(
       return apiBadRequest('Permission parameter is required');
     }
 
-    const projectId = params.projectId;
+    const { projectId } = await params;
 
     // 检查用户在项目中的权限
     const hasPermissionResult = await hasProjectPermission(

@@ -24,7 +24,7 @@ async function ensureUploadDir(dir: string) {
 // 获取文档的附件列表
 export async function GET(
   request: NextRequest,
-  { params }: { params: { documentId: string } }
+  { params }: { params: Promise<{ documentId: string }> }
 ) {
   const user = await getCurrentUser();
 
@@ -32,7 +32,7 @@ export async function GET(
     return apiUnauthorized();
   }
 
-  const documentId = params.documentId;
+  const { documentId } = await params;
 
   try {
     // 检查文档是否存在并且用户有权访问
@@ -100,7 +100,7 @@ export async function GET(
 // 上传文档附件
 export async function POST(
   request: NextRequest,
-  { params }: { params: { documentId: string } }
+  { params }: { params: Promise<{ documentId: string }> }
 ) {
   const user = await getCurrentUser();
 
@@ -108,7 +108,7 @@ export async function POST(
     return apiUnauthorized();
   }
 
-  const documentId = params.documentId;
+  const { documentId } = await params;
 
   try {
     // 检查文档是否存在并且用户有权访问

@@ -18,9 +18,9 @@ const responseInvitationSchema = z.object({
 // 通过令牌获取邀请详情
 export async function GET(
   request: NextRequest,
-  { params }: { params: { token: string } }
+  { params }: { params: Promise<{ token: string }> }
 ) {
-  const token = params.token;
+  const { token } = await params;
 
   try {
     // 查询邀请
@@ -83,7 +83,7 @@ export async function GET(
 // 接受或拒绝邀请
 export async function POST(
   request: NextRequest,
-  { params }: { params: { token: string } }
+  { params }: { params: Promise<{ token: string }> }
 ) {
   const user = await getCurrentUser();
 
@@ -91,7 +91,7 @@ export async function POST(
     return apiUnauthorized();
   }
 
-  const token = params.token;
+  const { token } = await params;
 
   try {
     // 查询邀请

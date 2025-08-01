@@ -52,6 +52,13 @@ model User {
   sentPrivateMessages   PrivateMessage[]      @relation("SentPrivateMessages")
   receivedPrivateMessages PrivateMessage[]    @relation("ReceivedPrivateMessages")
   privateMessageNotifications PrivateMessageNotification[] @relation("ReceivedPrivateNotifications")
+  
+  // 需求管理相关关联
+  createdRequirements   Requirement[]         @relation("CreatedRequirements")
+  assignedRequirements  Requirement[]         @relation("AssignedRequirements")
+  requirementVersions   RequirementVersion[]  @relation("CreatedRequirementVersions")
+  requirementComments   RequirementComment[]  @relation("RequirementComments")
+  requirementAttachments RequirementAttachment[] @relation("RequirementAttachments")
 }
 
 model Role {
@@ -203,6 +210,9 @@ model Project {
   chat           ProjectChat?     @relation("ProjectChat")
   onlineMembers  ProjectMemberOnline[] @relation("ProjectOnlineMembers")
   privateConversations PrivateConversation[] @relation("ProjectPrivateConversations")
+  
+  // 需求管理相关字段
+  requirements   Requirement[]
 
   @@map("projects")
 }
@@ -243,6 +253,7 @@ model Task {
   tags           TaskTag[]
   documents      Document[]
   history        TaskHistory[]   // 任务历史记录
+  requirements   RequirementTask[] // 关联的需求
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 
@@ -382,6 +393,7 @@ model Tag {
   name        String
   color       String    @default("#3498db")
   tasks       TaskTag[]
+  requirements RequirementTag[] @relation("RequirementTags")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -810,4 +822,183 @@ model PrivateMessageNotification {
   @@index([messageId])
   @@index([userId])
   @@index([isRead])
+}
+
+// ===== 需求管理功能扩展 =====
+
+// 需求实体
+model Requirement {
+  id              String              @id @default(cuid())
+  requirementId   String              @unique // 业务需求ID
+  title           String              // 需求标题
+  description     String?             // 详细描述
+  acceptanceCriteria String?          // 验收标准
+  businessValue   String?             // 业务价值描述
+  userStory       String?             // 用户故事
+  priority        RequirementPriority @default(MEDIUM)
+  status          RequirementStatus   @default(DRAFT)
+  type            RequirementType     @default(FUNCTIONAL)
+  complexity      RequirementComplexity @default(MEDIUM)
+  estimatedEffort Float?              // 预估工作量(人天)
+  actualEffort    Float?              // 实际工作量
+  
+  // 关联关系
+  projectId       String
+  project         Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdById     String
+  createdBy       User                @relation("CreatedRequirements", fields: [createdById], references: [id])
+  assignedToId    String?
+  assignedTo      User?               @relation("AssignedRequirements", fields: [assignedToId], references: [id])
+  
+  // 层级关系
+  parentId        String?
+  parent          Requirement?        @relation("RequirementHierarchy", fields: [parentId], references: [id])
+  children        Requirement[]       @relation("RequirementHierarchy")
+  
+  // 关联的任务
+  tasks           RequirementTask[]
+  
+  // 版本控制
+  versions        RequirementVersion[]
+  currentVersion  Int                 @default(1)
+  
+  // 评论和附件
+  comments        RequirementComment[]
+  attachments     RequirementAttachment[]
+  
+  // 标签
+  tags            RequirementTag[]
+  
+  // 时间戳
+  dueDate         DateTime?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  
+  @@map("requirements")
+  @@index([projectId])
+  @@index([createdById])
+  @@index([assignedToId])
+  @@index([parentId])
+}
+
+// 需求优先级
+enum RequirementPriority {
+  CRITICAL    // 关键
+  HIGH        // 高
+  MEDIUM      // 中
+  LOW         // 低
+}
+
+// 需求状态
+enum RequirementStatus {
+  DRAFT       // 草稿
+  REVIEW      // 评审中
+  APPROVED    // 已批准
+  IN_PROGRESS // 开发中
+  TESTING     // 测试中
+  COMPLETED   // 已完成
+  REJECTED    // 已拒绝
+  CANCELLED   // 已取消
+}
+
+// 需求类型
+enum RequirementType {
+  FUNCTIONAL      // 功能性需求
+  NON_FUNCTIONAL  // 非功能性需求
+  TECHNICAL       // 技术需求
+  BUSINESS        // 业务需求
+  UI_UX          // 界面/用户体验需求
+}
+
+// 需求复杂度
+enum RequirementComplexity {
+  SIMPLE      // 简单
+  MEDIUM      // 中等
+  COMPLEX     // 复杂
+  VERY_COMPLEX // 非常复杂
+}
+
+// 需求版本控制
+model RequirementVersion {
+  id              String      @id @default(cuid())
+  requirementId   String
+  requirement     Requirement @relation(fields: [requirementId], references: [id], onDelete: Cascade)
+  versionNumber   Int
+  title           String
+  description     String?
+  acceptanceCriteria String?
+  businessValue   String?
+  changeReason    String?     // 变更原因
+  createdById     String
+  createdBy       User        @relation("CreatedRequirementVersions", fields: [createdById], references: [id])
+  createdAt       DateTime    @default(now())
+  
+  @@unique([requirementId, versionNumber])
+  @@map("requirement_versions")
+  @@index([requirementId])
+  @@index([createdById])
+}
+
+// 需求与任务关联
+model RequirementTask {
+  id              String      @id @default(cuid())
+  requirementId   String
+  requirement     Requirement @relation(fields: [requirementId], references: [id], onDelete: Cascade)
+  taskId          String
+  task            Task        @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  createdAt       DateTime    @default(now())
+  
+  @@unique([requirementId, taskId])
+  @@map("requirement_tasks")
+  @@index([requirementId])
+  @@index([taskId])
+}
+
+// 需求评论
+model RequirementComment {
+  id              String      @id @default(cuid())
+  content         String
+  requirementId   String
+  requirement     Requirement @relation(fields: [requirementId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User        @relation("RequirementComments", fields: [userId], references: [id])
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  @@map("requirement_comments")
+  @@index([requirementId])
+  @@index([userId])
+}
+
+// 需求附件
+model RequirementAttachment {
+  id              String      @id @default(cuid())
+  filename        String
+  filepath        String
+  mimetype        String
+  size            Int
+  requirementId   String
+  requirement     Requirement @relation(fields: [requirementId], references: [id], onDelete: Cascade)
+  uploaderId      String
+  uploader        User        @relation("RequirementAttachments", fields: [uploaderId], references: [id])
+  createdAt       DateTime    @default(now())
+  
+  @@map("requirement_attachments")
+  @@index([requirementId])
+  @@index([uploaderId])
+}
+
+// 需求标签
+model RequirementTag {
+  id              String      @id @default(cuid())
+  requirementId   String
+  requirement     Requirement @relation(fields: [requirementId], references: [id], onDelete: Cascade)
+  tagId           String
+  tag             Tag         @relation("RequirementTags", fields: [tagId], references: [id], onDelete: Cascade)
+  createdAt       DateTime    @default(now())
+  
+  @@unique([requirementId, tagId])
+  @@map("requirement_tags")
+  @@index([requirementId])
+  @@index([tagId])
 }

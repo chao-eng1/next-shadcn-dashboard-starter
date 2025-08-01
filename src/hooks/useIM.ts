@@ -67,11 +67,14 @@ export const useIM = () => {
       setConnectionStatus('disconnected');
     },
     onError: () => {
+      console.warn('WebSocket连接失败，使用离线模式');
       setConnectionStatus('error');
+      setIsConnected(false);
+      // 不显示错误提示，因为WebSocket服务器可能没有启动
     },
-    autoReconnect: true,
+    autoReconnect: false, // 禁用自动重连，避免不断尝试连接不存在的服务器
     reconnectInterval: 3000,
-    maxReconnectAttempts: 5
+    maxReconnectAttempts: 0 // 设置为0，禁用重连
   }) : { sendMessage: () => false, reconnect: () => {} };
   
   const { sendMessage: sendWSMessage, reconnect } = webSocketResult;
@@ -86,9 +89,15 @@ export const useIM = () => {
       const user = await imAPI.user.getCurrentUser();
       setCurrentUser(user);
       
-      // 获取WebSocket token
-      const wsToken = await imAPI.websocket.getWebSocketToken();
-      wsTokenRef.current = wsToken;
+      // 尝试获取WebSocket token，但不因失败而中断初始化
+      try {
+        const wsToken = await imAPI.websocket.getWebSocketToken();
+        wsTokenRef.current = wsToken;
+      } catch (wsError) {
+        console.warn('无法获取WebSocket token，将使用离线模式:', wsError);
+        // 设置为离线模式但不阻止继续初始化
+        setConnectionStatus('error');
+      }
       
       // 加载用户项目
       const userProjects = await imAPI.project.getUserProjects();
@@ -106,7 +115,7 @@ export const useIM = () => {
     } finally {
       setLoading('projects', false);
     }
-  }, [currentProject, setCurrentUser, setProjects, setCurrentProject, setLoading, setError]);
+  }, [currentProject, setCurrentUser, setProjects, setCurrentProject, setLoading, setError, setConnectionStatus]);
   
   // 加载会话列表
   const loadConversations = useCallback(async (type?: 'project' | 'private') => {
@@ -176,6 +185,8 @@ export const useIM = () => {
         id: `temp_${Date.now()}`,
         conversationId: currentConversation.id,
         senderId: currentUser.id,
+        senderName: currentUser.name,
+        senderImage: currentUser.image,
         content,
         messageType,
         replyToId,
@@ -202,19 +213,24 @@ export const useIM = () => {
         updatedAt: sentMessage.updatedAt
       });
       
-      // 通过WebSocket发送消息通知
-      const wsMessage: WebSocketMessage = {
-        type: 'message',
-        data: {
-          conversationId: currentConversation.id,
-          content,
-          messageType,
-          messageId: sentMessage.id,
-          timestamp: sentMessage.createdAt
-        }
-      };
-      
-      sendWSMessage(wsMessage);
+      // 通过WebSocket发送消息通知（如果连接可用）
+      if (isConnected) {
+        const wsMessage: WebSocketMessage = {
+          type: 'message',
+          data: {
+            conversationId: currentConversation.id,
+            content,
+            messageType,
+            messageId: sentMessage.id,
+            timestamp: sentMessage.createdAt
+          }
+        };
+        
+        sendWSMessage(wsMessage);
+      } else {
+        // WebSocket不可用时，仍然可以通过HTTP API发送消息
+        console.log('WebSocket不可用，消息已通过HTTP API发送');
+      }
       
     } catch (error) {
       console.error('Failed to send message:', error);

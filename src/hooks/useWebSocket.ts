@@ -106,17 +106,17 @@ export const useWebSocket = ({
           heartbeatIntervalRef.current = null;
         }
         
-        if (!isManualClose.current && autoReconnect) {
+        if (!isManualClose.current && autoReconnect && reconnectAttempts < maxReconnectAttempts) {
           setReconnectAttempts(prev => {
             const newAttempts = prev + 1;
             if (newAttempts < maxReconnectAttempts) {
-              toast.warning(`连接断开，${reconnectInterval / 1000}秒后尝试重连...`);
+              console.log(`连接断开，${reconnectInterval / 1000}秒后尝试重连...`);
               
               reconnectTimeoutRef.current = setTimeout(() => {
                 connectRef.current?.();
               }, reconnectInterval);
             } else {
-              toast.error('连接失败，已达到最大重连次数');
+              console.log('连接失败，已达到最大重连次数');
               setConnectionStatus('error');
             }
             return newAttempts;
@@ -127,12 +127,12 @@ export const useWebSocket = ({
       wsRef.current.onerror = (error) => {
         setConnectionStatus('error');
         onError?.(error);
-        toast.error('WebSocket连接错误');
+        console.warn('WebSocket连接错误:', error);
       };
     } catch (error) {
       setConnectionStatus('error');
       console.error('Failed to create WebSocket connection:', error);
-      toast.error('无法建立WebSocket连接');
+      // 不显示错误提示，因为WebSocket服务器可能没有启动
     }
   }, [url, token, onConnect, onDisconnect, onError, onMessage, autoReconnect, reconnectInterval, maxReconnectAttempts]);
 
@@ -164,7 +164,8 @@ export const useWebSocket = ({
       wsRef.current.send(JSON.stringify(message));
       return true;
     } else {
-      toast.error('WebSocket连接未建立，无法发送消息');
+      // 不显示错误提示，静默处理WebSocket不可用的情况
+      console.log('WebSocket连接未建立，无法发送消息');
       return false;
     }
   }, []);

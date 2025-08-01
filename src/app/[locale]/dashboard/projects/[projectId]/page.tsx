@@ -220,6 +220,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     user.id
   );
 
+  // 检查需求相关权限
+  const canViewRequirements = await hasProjectPermission(
+    projectId,
+    'requirement.view',
+    user.id
+  );
+
   // 检查迭代相关权限
   const canViewSprints = await hasProjectPermission(
     projectId,
@@ -332,6 +339,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             <TabsTrigger value='overview'>{tnav('overview')}</TabsTrigger>
             {canViewTasks && (
               <TabsTrigger value='tasks'>{tnav('tasks')}</TabsTrigger>
+            )}
+            {canViewRequirements && (
+              <TabsTrigger value='requirements'>需求管理</TabsTrigger>
             )}
             {canViewSprints && (
               <TabsTrigger value='sprints'>{t('overview.iterations')}</TabsTrigger>
@@ -613,6 +623,47 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 </CardHeader>
                 <CardContent>
                   <ProjectTaskSummary projectId={project.id} userId={user.id} />
+                </CardContent>
+              </Card>
+            </ProjectPermissionGate>
+          </TabsContent>
+
+          <TabsContent value='requirements'>
+            <ProjectPermissionGate permission='requirement.view' projectId={projectId}>
+              <Card>
+                <CardHeader className='flex flex-row items-center justify-between'>
+                  <div>
+                    <CardTitle>需求管理</CardTitle>
+                    <CardDescription>
+                      管理项目需求，跟踪需求状态和进度
+                    </CardDescription>
+                  </div>
+                  <ProjectPermissionGate
+                    permission='requirement.create'
+                    projectId={projectId}
+                  >
+                    <Button asChild>
+                      <Link
+                        href={`/dashboard/projects/${project.id}/requirements/new`}
+                      >
+                        创建需求
+                      </Link>
+                    </Button>
+                  </ProjectPermissionGate>
+                </CardHeader>
+                <CardContent>
+                  <div className='space-y-4'>
+                    <div className='flex items-center justify-between'>
+                      <p className='text-sm text-muted-foreground'>
+                        查看和管理项目需求
+                      </p>
+                      <Button asChild variant='outline'>
+                        <Link href={`/dashboard/projects/${project.id}/requirements`}>
+                          查看所有需求
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </ProjectPermissionGate>

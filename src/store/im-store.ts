@@ -36,6 +36,8 @@ export interface Message {
   id: string;
   conversationId: string;
   senderId: string;
+  senderName?: string; // 发送者姓名
+  senderImage?: string; // 发送者头像
   content: string;
   messageType: 'text' | 'image' | 'file' | 'system';
   fileUrl?: string;
@@ -281,11 +283,12 @@ export const useIMStore = create<IMState>((set, get) => ({
       case 'message':
         if (message.data.conversationId && message.data.content) {
           // 这里需要根据实际的WebSocket消息格式来构造Message对象
-          // 暂时使用基本的结构
           const newMessage: Message = {
             id: message.data.messageId || Date.now().toString(),
             conversationId: message.data.conversationId,
             senderId: message.data.senderId || '',
+            senderName: message.data.senderName || 'Unknown',
+            senderImage: message.data.senderImage,
             content: message.data.content,
             messageType: message.data.messageType || 'text',
             status: 'delivered',

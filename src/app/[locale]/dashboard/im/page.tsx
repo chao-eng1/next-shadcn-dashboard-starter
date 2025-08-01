@@ -147,7 +147,7 @@ export default function IMPage() {
       setCurrentConversation(conversation);
       setShowMemberDialog(false);
       setChatType('private');
-      toast.success(`已开始与${member.name}的私聊`);
+      toast.success(`已开始与${member.name || '用户'}的私聊`);
     } catch (error) {
       console.error('创建私聊失败:', error);
       toast.error('创建私聊失败');
@@ -214,18 +214,18 @@ export default function IMPage() {
     }
   };
 
-  // 错误状态显示
-  if (error) {
+  // 错误状态显示 - 只在严重错误时显示，WebSocket连接失败不应阻止使用
+  if (error && !error.includes('WebSocket') && !error.includes('连接失败')) {
     return (
       <div className="h-[calc(100vh-4rem)] flex items-center justify-center p-4">
         <Card className="w-96">
           <CardContent className="flex flex-col items-center gap-4 p-6">
             <AlertCircle className="h-12 w-12 text-destructive" />
             <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">连接失败</h3>
+              <h3 className="text-lg font-semibold mb-2">系统错误</h3>
               <p className="text-sm text-muted-foreground mb-4">{error}</p>
               <Button onClick={() => initialize()} variant="outline">
-                重新连接
+                重新初始化
               </Button>
             </div>
           </CardContent>
@@ -239,11 +239,11 @@ export default function IMPage() {
     if (!searchTerm) return true;
     const searchLower = searchTerm.toLowerCase();
     if (conv.type === 'project') {
-      return conv.name.toLowerCase().includes(searchLower);
+      return conv.name?.toLowerCase().includes(searchLower);
     } else {
       return conv.participants.some(p => 
-        p.name.toLowerCase().includes(searchLower) || 
-        p.email.toLowerCase().includes(searchLower)
+        p.name?.toLowerCase().includes(searchLower) || 
+        p.email?.toLowerCase().includes(searchLower)
       );
     }
   });
@@ -253,10 +253,10 @@ export default function IMPage() {
       {/* 连接状态指示器 */}
       {connectionStatus !== 'connected' && (
         <div className="fixed top-4 right-4 z-50">
-          <Badge variant={connectionStatus === 'connecting' ? 'secondary' : 'destructive'} className="flex items-center gap-2">
+          <Badge variant={connectionStatus === 'connecting' ? 'secondary' : 'outline'} className="flex items-center gap-2">
             {connectionStatus === 'connecting' && <Loader2 className="h-3 w-3 animate-spin" />}
             {connectionStatus === 'connecting' ? '连接中...' : 
-             connectionStatus === 'error' ? '连接错误' : '已断开'}
+             connectionStatus === 'error' ? '离线模式' : '已断开'}
           </Badge>
         </div>
       )}
@@ -337,7 +337,7 @@ export default function IMPage() {
                               <div className="relative">
                                 <Avatar className="h-8 w-8">
                                   <AvatarImage src={member.image} />
-                                  <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                                  <AvatarFallback>{member.name?.charAt(0) || 'M'}</AvatarFallback>
                                 </Avatar>
                                 <div
                                   className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background ${
@@ -346,7 +346,7 @@ export default function IMPage() {
                                 />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">{member.name}</p>
+                                <p className="text-sm font-medium truncate">{member.name || '未知用户'}</p>
                                 <p className="text-xs text-muted-foreground truncate">{member.role}</p>
                               </div>
                               <Badge
@@ -423,11 +423,11 @@ export default function IMPage() {
                         <div className="flex items-start gap-3">
                           <Avatar className="h-10 w-10">
                             <AvatarImage src={conversation.participants[0]?.image} />
-                            <AvatarFallback>{conversation.participants[0]?.name.charAt(0)}</AvatarFallback>
+                            <AvatarFallback>{conversation.participants[0]?.name?.charAt(0) || 'U'}</AvatarFallback>
                           </Avatar>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-1">
-                              <h3 className="font-medium text-sm truncate">{conversation.participants[0]?.name}</h3>
+                              <h3 className="font-medium text-sm truncate">{conversation.participants[0]?.name || '未知用户'}</h3>
                               {conversation.unreadCount > 0 && (
                                 <Badge variant="destructive" className="text-xs px-1.5 py-0.5">
                                   {conversation.unreadCount}
@@ -470,12 +470,12 @@ export default function IMPage() {
                   {currentConversation.type === 'private' && (
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={currentConversation.participants[0]?.image} />
-                      <AvatarFallback>{currentConversation.participants[0]?.name.charAt(0)}</AvatarFallback>
+                      <AvatarFallback>{currentConversation.participants[0]?.name?.charAt(0) || 'U'}</AvatarFallback>
                     </Avatar>
                   )}
                   <div>
                     <CardTitle className="text-lg">
-                      {currentConversation.type === 'project' ? currentConversation.name : currentConversation.participants[0]?.name}
+                      {currentConversation.type === 'project' ? currentConversation.name : currentConversation.participants[0]?.name || '未知用户'}
                     </CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">
                       {currentConversation.type === 'project' 
@@ -520,7 +520,7 @@ export default function IMPage() {
                                 <div className="relative">
                                   <Avatar className="h-10 w-10">
                                     <AvatarImage src={member.image} />
-                                    <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                                    <AvatarFallback>{member.name?.charAt(0) || 'M'}</AvatarFallback>
                                   </Avatar>
                                   <div
                                     className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background ${
@@ -529,7 +529,7 @@ export default function IMPage() {
                                   />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium truncate">{member.name}</p>
+                                  <p className="text-sm font-medium truncate">{member.name || '未知用户'}</p>
                                   <p className="text-xs text-muted-foreground truncate">{member.role}</p>
                                 </div>
                                 <Badge
@@ -589,12 +589,12 @@ export default function IMPage() {
                           <Avatar className="h-8 w-8">
                             <AvatarImage src={message.senderImage} />
                             <AvatarFallback>
-                              {message.senderName.charAt(0)}
+                              {message.senderName?.charAt(0) || 'U'}
                             </AvatarFallback>
                           </Avatar>
                           <div className={`flex-1 max-w-[70%] ${message.senderId === currentUser?.id ? 'text-right' : ''}`}>
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="text-sm font-medium">{message.senderName}</span>
+                              <span className="text-sm font-medium">{message.senderName || '未知用户'}</span>
                               <span className="text-xs text-muted-foreground">{formatTime(message.timestamp)}</span>
                             </div>
                             <div

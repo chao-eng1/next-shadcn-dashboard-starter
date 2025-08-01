@@ -31,6 +31,44 @@ export const navItems: NavItem[] = [
   },
 
   {
+    title: 'navigation.requirementManagement',
+    url: '/dashboard/requirements',
+    icon: 'clipboard',
+    shortcut: ['r', 'q'],
+    isActive: false,
+    permission: 'requirement.view',
+    items: [
+      {
+        title: 'navigation.requirementList',
+        url: '/dashboard/requirements',
+        icon: 'list',
+        shortcut: ['r', 'l'],
+        permission: 'requirement.view'
+      },
+      {
+        title: 'navigation.requirementKanban',
+        url: '/dashboard/requirements/kanban',
+        icon: 'kanban',
+        shortcut: ['r', 'k'],
+        permission: 'requirement.view'
+      },
+      {
+        title: 'navigation.requirementStats',
+        url: '/dashboard/requirements/stats',
+        icon: 'barChart3',
+        shortcut: ['r', 's'],
+        permission: 'requirement.view'
+      },
+      {
+        title: 'navigation.requirementRelations',
+        url: '/dashboard/requirements/relations',
+        icon: 'link2',
+        shortcut: ['r', 'r'],
+        permission: 'requirement.view'
+      }
+    ]
+  },
+  {
     title: 'navigation.projectManagement',
     url: '/dashboard/projects',
     icon: 'briefcase',

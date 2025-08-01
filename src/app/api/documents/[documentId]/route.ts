@@ -25,7 +25,7 @@ const updateDocumentSchema = z.object({
 // 获取单个文档详情
 export async function GET(
   request: NextRequest,
-  { params }: { params: { documentId: string } }
+  { params }: { params: Promise<{ documentId: string }> }
 ) {
   const user = await getCurrentUser();
 
@@ -109,7 +109,7 @@ export async function GET(
 // 更新文档
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { documentId: string } }
+  { params }: { params: Promise<{ documentId: string }> }
 ) {
   const user = await getCurrentUser();
 

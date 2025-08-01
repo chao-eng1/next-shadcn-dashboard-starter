@@ -46,7 +46,40 @@ export async function GET(request: NextRequest) {
     let conversations: any[] = [];
 
     if (type === 'project' || !type) {
-      // 获取项目聊天室
+      // 首先获取用户参与的所有项目
+      const userProjects = await prisma.project.findMany({
+        where: {
+          members: {
+            some: {
+              userId: user.id
+            }
+          },
+          ...(projectId ? { id: projectId } : {})
+        },
+        select: {
+          id: true,
+          name: true,
+          description: true
+        }
+      });
+
+      // 为每个项目确保有对应的聊天室
+      for (const project of userProjects) {
+        const existingChat = await prisma.projectChat.findUnique({
+          where: { projectId: project.id }
+        });
+
+        if (!existingChat) {
+          // 自动创建项目聊天室
+          await prisma.projectChat.create({
+            data: {
+              projectId: project.id
+            }
+          });
+        }
+      }
+
+      // 获取用户参与的项目的聊天室
       const projectChats = await prisma.projectChat.findMany({
         where: {
           project: {

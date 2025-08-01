@@ -1132,5 +1132,53 @@
     "gettingStarted": "Getting Started",
     "userGuide": "User Guide",
     "apiDocs": "API Documentation"
+  },
+  "requirements": {
+    "title": "Requirements Management",
+    "description": "Manage project requirements, including functional and non-functional requirements",
+    "list": "Requirements List",
+    "kanban": "Kanban View",
+    "tree": "Tree View",
+    "create": "Create Requirement",
+    "edit": "Edit Requirement",
+    "delete": "Delete Requirement",
+    "view": "View Requirement",
+    "priority": "Priority",
+    "status": "Status",
+    "type": "Type",
+    "complexity": "Complexity",
+    "assignee": "Assignee",
+    "dueDate": "Due Date",
+    "estimatedEffort": "Estimated Effort",
+    "actualEffort": "Actual Effort",
+    "businessValue": "Business Value",
+    "acceptanceCriteria": "Acceptance Criteria",
+    "userStory": "User Story",
+    "noRequirements": "No requirements data",
+    "searchPlaceholder": "Search requirements...",
+    "filterByStatus": "Filter by status",
+    "filterByPriority": "Filter by priority",
+    "filterByType": "Filter by type",
+    "allStatuses": "All Statuses",
+    "allPriorities": "All Priorities",
+    "allTypes": "All Types",
+    "stats": {
+      "total": "Total Requirements",
+      "totalDesc": "Total number of requirements in the project",
+      "completed": "Completed",
+      "completedDesc": "Number of completed requirements",
+      "highPriority": "High Priority",
+      "highPriorityDesc": "Number of high priority requirements",
+      "inProgress": "In Progress",
+      "inProgressDesc": "Number of requirements in progress"
+    },
+    "views": {
+      "list": "List View",
+      "kanban": "Kanban View",
+      "tree": "Tree View",
+      "listDesc": "View requirements in table format",
+      "kanbanDesc": "Manage requirement status with kanban board",
+      "treeDesc": "View requirement hierarchy in tree structure"
+    }
   }
 }

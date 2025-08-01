@@ -26,7 +26,7 @@ const createInvitationSchema = z.object({
 // 获取项目邀请列表
 export async function GET(
   request: NextRequest,
-  { params }: { params: { projectId: string } }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   const user = await getCurrentUser();
 
@@ -34,7 +34,7 @@ export async function GET(
     return apiUnauthorized();
   }
 
-  const projectId = params.projectId;
+  const { projectId } = await params;
 
   // 检查用户是否有管理项目成员的权限
   const hasPermission = await hasProjectPermission(
@@ -104,7 +104,7 @@ export async function GET(
 // 发送项目邀请
 export async function POST(
   request: NextRequest,
-  { params }: { params: { projectId: string } }
+  { params }: { params: Promise<{ projectId: string }> }
 ) {
   const user = await getCurrentUser();
 
@@ -112,7 +112,7 @@ export async function POST(
     return apiUnauthorized();
   }
 
-  const projectId = params.projectId;
+  const { projectId } = await params;
 
   // 检查用户是否有管理项目成员的权限
   const hasPermission = await hasProjectPermission(
