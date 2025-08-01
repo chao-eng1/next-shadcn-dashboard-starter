@@ -88,6 +88,7 @@
     "roles": "Roles",
     "permissions": "Permissions",
     "menus": "Menus",
+    "messageManagement": "Message Management",
     "home": "Home",
     "notification": "Notification",
     "search": "Search",
@@ -1181,5 +1182,34 @@
       "kanbanDesc": "Manage requirement status with kanban board",
       "treeDesc": "View requirement hierarchy in tree structure"
     }
+  },
+  "messageManagement": {
+    "title": "Message Management",
+    "sendMessage": "Send Message",
+    "messageHistory": "Message History",
+    "messageTitle": "Message Title",
+    "messageContent": "Message Content",
+    "recipientType": "Recipient Type",
+    "global": "Global Message",
+    "roles": "Send by Role",
+    "users": "Send by User",
+    "selectRoles": "Select Roles",
+    "selectUsers": "Select Users",
+    "sendSuccess": "Message sent successfully",
+    "sendFailed": "Failed to send message",
+    "titleRequired": "Please enter message title",
+    "contentRequired": "Please enter message content",
+    "recipientRequired": "Please select recipients",
+    "noMessages": "No messages",
+    "createdAt": "Created At",
+    "sender": "Sender",
+    "recipients": "Recipients",
+    "globalMessage": "Global Message",
+    "roleMessage": "Role Message",
+    "userMessage": "User Message",
+    "systemMessage": "System Message",
+    "systemMessageDesc": "System message functionality requires administrator privileges. To send system messages, please go to the system management page.",
+    "goToManagement": "Go to Management",
+    "systemMessageManagement": "System Message Management"
   }
 }

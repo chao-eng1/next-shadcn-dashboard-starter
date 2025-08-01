@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { MessageCircle, Send, Users, Search, Plus, UserPlus, MessageSquare, Loader2, AlertCircle } from 'lucide-react';
+import { MessageCircle, Send, Users, Search, Plus, UserPlus, MessageSquare, Loader2, AlertCircle, Settings } from 'lucide-react';
 import { useTranslations } from "next-intl";
 import { useIM } from '@/hooks/useIM';
 import { imAPI } from '@/lib/api/im-api';
@@ -177,7 +177,7 @@ export default function IMPage() {
   
   // 处理聊天类型切换
   const handleTabChange = (value: string) => {
-    setChatType(value as 'project' | 'private');
+    setChatType(value as 'project' | 'private' | 'system');
   };
   
   // 格式化时间
@@ -270,7 +270,7 @@ export default function IMPage() {
             {isConnected && <div className="h-2 w-2 bg-green-500 rounded-full" />}
           </CardTitle>
           <Tabs value={chatType} onValueChange={handleTabChange} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="project" className="flex items-center gap-1">
                 <Users className="h-4 w-4" />
                 项目群聊
@@ -278,6 +278,10 @@ export default function IMPage() {
               <TabsTrigger value="private" className="flex items-center gap-1">
                 <MessageSquare className="h-4 w-4" />
                 私聊
+              </TabsTrigger>
+              <TabsTrigger value="system" className="flex items-center gap-1">
+                <Settings className="h-4 w-4" />
+                系统消息
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -368,6 +372,22 @@ export default function IMPage() {
               </DialogContent>
             </Dialog>
           )}
+          {chatType === 'system' && (
+            <div className="mt-2">
+              <p className="text-sm text-muted-foreground mb-2">
+                {t('messageManagement.systemMessageDesc')}
+              </p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full"
+                onClick={() => window.open('/system-management/messages', '_blank')}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                {t('messageManagement.goToManagement')}
+              </Button>
+            </div>
+          )}
         </CardHeader>
         <CardContent className="flex-1 p-0">
           <ScrollArea className="h-full">
@@ -377,7 +397,13 @@ export default function IMPage() {
               </div>
             ) : (
               <div className="space-y-2 p-4">
-                {filteredConversations.length === 0 ? (
+                {chatType === 'system' ? (
+                  <div className="text-center text-muted-foreground py-8">
+                    <Settings className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>{t('messageManagement.systemMessageManagement')}</p>
+                     <p className="text-xs mt-2">{t('messageManagement.systemMessageDesc')}</p>
+                  </div>
+                ) : filteredConversations.length === 0 ? (
                   <div className="text-center text-muted-foreground py-8">
                     <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>暂无{chatType === 'project' ? '项目群聊' : '私聊会话'}</p>
@@ -595,7 +621,7 @@ export default function IMPage() {
                           <div className={`flex-1 max-w-[70%] ${message.senderId === currentUser?.id ? 'text-right' : ''}`}>
                             <div className="flex items-center gap-2 mb-1">
                               <span className="text-sm font-medium">{message.senderName || '未知用户'}</span>
-                              <span className="text-xs text-muted-foreground">{formatTime(message.timestamp)}</span>
+                              <span className="text-xs text-muted-foreground">{formatTime(message.createdAt)}</span>
                             </div>
                             <div
                               className={`p-3 rounded-lg text-sm ${
@@ -604,15 +630,15 @@ export default function IMPage() {
                                   : 'bg-muted'
                               }`}
                             >
-                              {message.type === 'text' ? (
+                              {message.messageType === 'text' ? (
                                 message.content
-                              ) : message.type === 'image' ? (
+                              ) : message.messageType === 'image' ? (
                                 <img
                                   src={message.content}
                                   alt="Shared image"
                                   className="max-w-xs rounded-lg border"
                                 />
-                              ) : message.type === 'file' ? (
+                              ) : message.messageType === 'file' ? (
                                 <div className="flex items-center gap-2 p-3 bg-muted rounded-lg max-w-xs">
                                   <div className="flex-1 min-w-0">
                                     <p className="text-sm font-medium truncate">{message.fileName}</p>

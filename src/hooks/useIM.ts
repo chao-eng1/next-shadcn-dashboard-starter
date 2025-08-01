@@ -118,13 +118,18 @@ export const useIM = () => {
   }, [currentProject, setCurrentUser, setProjects, setCurrentProject, setLoading, setError, setConnectionStatus]);
   
   // 加载会话列表
-  const loadConversations = useCallback(async (type?: 'project' | 'private') => {
+  const loadConversations = useCallback(async (type?: 'project' | 'private' | 'system') => {
     try {
       setLoading('conversations', true);
       setError(null);
       
-      const conversationList = await imAPI.conversation.getConversations(type);
-      setConversations(conversationList);
+      if (type === 'system') {
+        // 系统消息不需要加载会话列表，保持空数组
+        setConversations([]);
+      } else {
+        const conversationList = await imAPI.conversation.getConversations(type);
+        setConversations(conversationList);
+      }
       
     } catch (error) {
       console.error('Failed to load conversations:', error);

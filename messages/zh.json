@@ -88,6 +88,7 @@
     "roles": "角色管理",
     "permissions": "权限管理",
     "menus": "菜单管理",
+    "messageManagement": "消息管理",
     "home": "首页",
     "notification": "通知",
     "search": "搜索",
@@ -1189,5 +1190,34 @@
       "kanbanDesc": "以看板形式管理需求状态",
       "treeDesc": "以树形结构查看需求层级关系"
     }
+  },
+  "messageManagement": {
+    "title": "消息管理",
+    "sendMessage": "发送消息",
+    "messageHistory": "消息历史",
+    "messageTitle": "消息标题",
+    "messageContent": "消息内容",
+    "recipientType": "接收者类型",
+    "global": "全局消息",
+    "roles": "按角色发送",
+    "users": "按用户发送",
+    "selectRoles": "选择角色",
+    "selectUsers": "选择用户",
+    "sendSuccess": "消息发送成功",
+    "sendFailed": "消息发送失败",
+    "titleRequired": "请输入消息标题",
+    "contentRequired": "请输入消息内容",
+    "recipientRequired": "请选择接收者",
+    "noMessages": "暂无消息",
+    "createdAt": "创建时间",
+    "sender": "发送者",
+    "recipients": "接收者",
+    "globalMessage": "全局消息",
+    "roleMessage": "角色消息",
+    "userMessage": "用户消息",
+    "systemMessage": "系统消息",
+    "systemMessageDesc": "系统消息功能需要管理员权限。如需发送系统消息，请前往系统管理页面。",
+    "goToManagement": "前往管理页面",
+    "systemMessageManagement": "系统消息管理"
   }
 }

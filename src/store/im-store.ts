@@ -83,7 +83,7 @@ interface IMState {
   onlineUsers: User[];
   
   // UI状态
-  chatType: 'project' | 'private';
+  chatType: 'project' | 'private' | 'system';
   searchTerm: string;
   isTyping: { [conversationId: string]: string[] }; // 正在输入的用户列表
   
@@ -124,7 +124,7 @@ interface IMState {
   updateUserStatus: (userId: string, status: User['status']) => void;
   
   // UI状态
-  setChatType: (type: 'project' | 'private') => void;
+  setChatType: (type: 'project' | 'private' | 'system') => void;
   setSearchTerm: (term: string) => void;
   setTyping: (conversationId: string, userIds: string[]) => void;
   

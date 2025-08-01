@@ -150,7 +150,13 @@ export const navItems: NavItem[] = [
         shortcut: ['s', 'm'],
         permission: 'menu:list'
       },
-
+      {
+        title: 'navigation.messageManagement',
+        url: '/system-management/messages',
+        icon: 'messageSquare',
+        shortcut: ['s', 'msg'],
+        permission: 'message.manage'
+      }
     ]
   },
   {
