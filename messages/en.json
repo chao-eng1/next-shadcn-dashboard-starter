@@ -285,6 +285,10 @@
     "team": {
       "title": "Team Members",
       "add": "Add Member",
+      "addNewMember": "Add New Member",
+      "addMemberDescription": "Add users to your project team. Users will be directly added to the project.",
+      "emailDescription": "Enter the email address of the person to be added",
+      "roleDescription": "Select the member's role in the project",
       "remove": "Remove Member",
       "invite": "Invite Member",
       "role": "Role",
@@ -292,7 +296,11 @@
       "owner": "Project Owner",
       "admin": "Admin",
       "member": "Member",
-      "viewer": "Viewer"
+      "viewer": "Viewer",
+      "ownerDescription": "Has full control over the project",
+      "adminDescription": "Can manage project settings and members",
+      "memberDescription": "Can create and edit tasks and documents",
+      "viewerDescription": "Can only view project content"
     },
     "overview": {
       "statistics": "Statistics",

@@ -214,11 +214,15 @@ export function ProjectMembersList({
           <SelectContent>
             {Object.entries(PROJECT_MEMBER_ROLE)
               .filter(([key]) => key !== 'OWNER') // 过滤掉 OWNER 角色
-              .map(([key, { label, description }]) => (
+              .map(([key, _]) => (
                 <SelectItem key={key} value={key}>
                   <div className='flex items-center'>
                     {getRoleIcon(key)}
-                    <span className='ml-2'>{label}</span>
+                    <span className='ml-2'>
+                      {key === 'ADMIN' && '管理员'}
+                      {key === 'MEMBER' && '成员'}
+                      {key === 'VIEWER' && '观察者'}
+                    </span>
                   </div>
                 </SelectItem>
               ))}

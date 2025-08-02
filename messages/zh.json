@@ -290,6 +290,10 @@
     "team": {
       "title": "团队成员",
       "add": "添加成员",
+      "addNewMember": "添加新成员",
+      "addMemberDescription": "添加用户到您的项目团队。将直接添加用户到项目中。",
+      "emailDescription": "输入被添加人的电子邮箱地址",
+      "roleDescription": "选择成员在项目中的角色",
       "remove": "移除成员",
       "invite": "邀请成员",
       "role": "角色",
@@ -297,7 +301,11 @@
       "owner": "项目负责人",
       "admin": "管理员",
       "member": "成员",
-      "viewer": "查看者"
+      "viewer": "查看者",
+      "ownerDescription": "拥有项目的完全控制权",
+      "adminDescription": "可以管理项目设置和成员",
+      "memberDescription": "可以创建和编辑任务、文档",
+      "viewerDescription": "只能查看项目内容"
     },
     "overview": {
       "statistics": "统计",

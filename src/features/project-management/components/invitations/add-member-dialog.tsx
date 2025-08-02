@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Loader2, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -34,15 +35,15 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { PROJECT_MEMBER_ROLE } from '@/constants/project';
+import { getProjectMemberRoleLabels } from '@/constants/project';
 
 // 添加成员表单验证
-const addMemberFormSchema = z.object({
-  email: z.string().email('请输入有效的邮箱地址'),
+const createAddMemberFormSchema = (t: (key: string) => string) => z.object({
+  email: z.string().email(t('validation.invalidEmail')),
   role: z.enum(['ADMIN', 'MEMBER', 'VIEWER']).default('MEMBER')
 });
 
-type AddMemberFormValues = z.infer<typeof addMemberFormSchema>;
+type AddMemberFormValues = z.infer<ReturnType<typeof createAddMemberFormSchema>>;
 
 interface AddMemberDialogProps {
   projectId: string;
@@ -65,6 +66,13 @@ export function AddMemberDialog({
 }: AddMemberDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const t = useTranslations();
+
+  // 获取国际化的角色标签
+  const roleLabels = getProjectMemberRoleLabels(t);
+  
+  // 创建带有翻译的表单验证 schema
+  const addMemberFormSchema = createAddMemberFormSchema(t);
 
   // 表单
   const form = useForm<AddMemberFormValues>({
@@ -92,7 +100,7 @@ export function AddMemberDialog({
       const data = await response.json();
 
       if (data.success) {
-        toast.success('成员添加成功');
+        toast.success(t('projects.messages.created'));
         setOpen(false);
         form.reset();
 
@@ -102,10 +110,10 @@ export function AddMemberDialog({
           onMemberAdded();
         }
       } else {
-        throw new Error(data.error?.message || '添加成员失败');
+        throw new Error(data.error?.message || t('projects.messages.createFailed'));
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : '添加成员失败');
+      toast.error(error instanceof Error ? error.message : t('projects.messages.createFailed'));
     } finally {
       setIsSubmitting(false);
     }
@@ -116,14 +124,14 @@ export function AddMemberDialog({
       <DialogTrigger asChild>
         <Button variant={variant} size={size}>
           <UserPlus className='mr-2 h-4 w-4' />
-          添加成员
+          {t('projects.team.add')}
         </Button>
       </DialogTrigger>
       <DialogContent className='sm:max-w-[425px]'>
         <DialogHeader>
-          <DialogTitle>添加新成员</DialogTitle>
+          <DialogTitle>{t('projects.team.addNewMember')}</DialogTitle>
           <DialogDescription>
-            添加用户到您的项目团队。将直接添加用户到项目中。
+            {t('projects.team.addMemberDescription')}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -133,11 +141,11 @@ export function AddMemberDialog({
               name='email'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>电子邮箱</FormLabel>
+                  <FormLabel>{t('common.email')}</FormLabel>
                   <FormControl>
                     <Input placeholder='user@example.com' {...field} />
                   </FormControl>
-                  <FormDescription>输入被添加人的电子邮箱地址</FormDescription>
+                  <FormDescription>{t('projects.team.emailDescription')}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -148,18 +156,18 @@ export function AddMemberDialog({
               name='role'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>角色</FormLabel>
+                  <FormLabel>{t('projects.team.role')}</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder='选择角色' />
+                        <SelectValue placeholder={t('forms.placeholder.select')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {Object.entries(PROJECT_MEMBER_ROLE)
+                      {Object.entries(roleLabels)
                         .filter(([key]) => key !== 'OWNER') // 过滤掉 OWNER 角色，因为所有者只能有一个
                         .map(([key, { label, description }]) => (
                           <SelectItem key={key} value={key}>
@@ -168,7 +176,7 @@ export function AddMemberDialog({
                         ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription>选择成员在项目中的角色</FormDescription>
+                  <FormDescription>{t('projects.team.roleDescription')}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -181,13 +189,13 @@ export function AddMemberDialog({
                 onClick={() => setOpen(false)}
                 disabled={isSubmitting}
               >
-                取消
+                {t('common.cancel')}
               </Button>
               <Button type='submit' disabled={isSubmitting}>
                 {isSubmitting && (
                   <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                 )}
-                添加成员
+                {t('projects.team.add')}
               </Button>
             </DialogFooter>
           </form>

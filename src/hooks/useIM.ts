@@ -355,6 +355,30 @@ export const useIM = () => {
     }
   }, []);
   
+  // 选择会话
+  const selectConversation = useCallback(async (conversationId: string) => {
+    try {
+      setError(null);
+      
+      // 从当前会话列表中找到选中的会话
+      const currentConversations = getStoreState().conversations;
+      const conversation = currentConversations.find(conv => conv.id === conversationId);
+      
+      if (conversation) {
+        setCurrentConversation(conversation);
+        // 加载会话消息
+        await loadMessages(conversationId);
+      } else {
+        setError('会话不存在');
+        toast.error('会话不存在');
+      }
+    } catch (error) {
+      console.error('Failed to select conversation:', error);
+      setError('选择会话失败');
+      toast.error('选择会话失败');
+    }
+  }, [setCurrentConversation, loadMessages, setError, getStoreState]);
+
   // 上传文件
   const uploadFile = useCallback(async (file: File, conversationId?: string) => {
     try {
@@ -389,6 +413,7 @@ export const useIM = () => {
     initialize,
     loadConversations,
     loadMessages,
+    selectConversation,
     sendMessage,
     sendFile,
     uploadFile,
@@ -399,6 +424,7 @@ export const useIM = () => {
     getUnreadCount,
     
     // 设置状态
+    setCurrentUser,
     setCurrentProject,
     setCurrentConversation,
     setChatType,

@@ -46,6 +46,14 @@ export const PROJECT_MEMBER_ROLE = {
   VIEWER: { key: 'viewer', descriptionKey: 'viewerDescription' }
 };
 
+// 获取项目成员角色的翻译标签
+export const getProjectMemberRoleLabels = (t: (key: string) => string) => ({
+  OWNER: { label: t('projects.team.owner'), description: t('projects.team.ownerDescription') },
+  ADMIN: { label: t('projects.team.admin'), description: t('projects.team.adminDescription') },
+  MEMBER: { label: t('projects.team.member'), description: t('projects.team.memberDescription') },
+  VIEWER: { label: t('projects.team.viewer'), description: t('projects.team.viewerDescription') }
+});
+
 // 邀请状态
 export const INVITATION_STATUS = {
   PENDING: { key: 'pending', color: 'blue' },

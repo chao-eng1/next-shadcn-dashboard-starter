@@ -27,7 +27,7 @@ export async function GET(
     return apiUnauthorized();
   }
 
-  const { projectId, memberId } = params;
+  const { projectId, memberId } = await params;
 
   // 检查用户是否有查看项目的权限
   const hasPermission = await hasProjectPermission(
@@ -86,7 +86,7 @@ export async function PATCH(
     return apiUnauthorized();
   }
 
-  const { projectId, memberId } = params;
+  const { projectId, memberId } = await params;
 
   // 检查用户是否有管理项目成员的权限
   const hasPermission = await hasProjectPermission(
@@ -172,7 +172,7 @@ export async function DELETE(
     return apiUnauthorized();
   }
 
-  const { projectId, memberId } = params;
+  const { projectId, memberId } = await params;
 
   // 检查用户是否有管理项目成员的权限
   const hasPermission = await hasProjectPermission(
