@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Check, X, ChevronDown, Users, UserCheck, Globe } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -42,6 +43,7 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@/components/ui/popover';
+import { useRealtime } from '@/components/realtime/realtime-provider';
 
 import {
   messageFormSchema,
@@ -84,6 +86,7 @@ export function MessageForm({
   const [previewData, setPreviewData] = useState({ title: '', content: '' });
   const [rolePopoverOpen, setRolePopoverOpen] = useState(false);
   const [userPopoverOpen, setUserPopoverOpen] = useState(false);
+  const { refreshMessages } = useRealtime();
 
   const form = useForm<MessageFormValues>({
     resolver: zodResolver(messageFormSchema),
@@ -120,7 +123,8 @@ export function MessageForm({
       const payload: any = {
         title: data.title,
         content: data.content,
-        isGlobal: data.recipientType === 'global'
+        isGlobal: data.recipientType === 'global',
+        includeSender: data.includeSender
       };
 
       if (data.recipientType === 'roles' && data.roleIds?.length) {
@@ -143,6 +147,10 @@ export function MessageForm({
       }
 
       toast.success('消息发送成功');
+      
+      // 立即刷新消息通知
+      refreshMessages();
+      
       router.refresh();
 
       if (onSuccess) {
@@ -427,6 +435,32 @@ export function MessageForm({
                 )}
               />
             )}
+          </div>
+
+          {/* 发送者选项 */}
+          <div className='mt-6 space-y-4 border-t px-0 py-3 pt-6'>
+            <FormField
+              control={form.control}
+              name='includeSender'
+              render={({ field }) => (
+                <FormItem className='flex flex-row items-start space-x-3 space-y-0'>
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className='space-y-1 leading-none'>
+                    <FormLabel className='text-sm font-medium'>
+                      给自己也发送一份
+                    </FormLabel>
+                    <p className='text-xs text-gray-500'>
+                      勾选此项，您也会收到自己发送的消息副本
+                    </p>
+                  </div>
+                </FormItem>
+              )}
+            />
           </div>
 
           <div className='flex justify-end space-x-4 pt-6'>

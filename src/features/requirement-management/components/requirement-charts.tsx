@@ -168,7 +168,13 @@ export function RequirementCharts({ projectId }: RequirementChartsProps) {
       }
       params.append('timeRange', timeRange);
       
-      const response = await fetch(`/api/requirements/charts?${params}`);
+      const response = await fetch(`/api/requirements/charts?${params}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
       if (!response.ok) {
         throw new Error('获取图表数据失败');
       }

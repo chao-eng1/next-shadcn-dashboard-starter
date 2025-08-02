@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, content, isGlobal, roleIds, recipientIds } = body;
+    const { title, content, isGlobal, roleIds, recipientIds, includeSender = false } = body;
 
     if (!title || !content) {
       return NextResponse.json(
@@ -159,6 +159,8 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    console.log('Creating message with data:', { title, content, isGlobal, roleIds, recipientIds, includeSender, senderId: currentUser.id });
 
     // 创建消息
     const message = await prisma.message.create({
@@ -178,6 +180,11 @@ export async function POST(request: NextRequest) {
         select: { id: true }
       });
       recipientUserIds = allUsers.map(user => user.id);
+      
+      // 如果不包含发送者，则从列表中移除
+      if (!includeSender) {
+        recipientUserIds = recipientUserIds.filter(id => id !== currentUser.id);
+      }
     } else if (roleIds && roleIds.length > 0) {
       // 按角色发送：获取指定角色的所有用户
       const usersInRoles = await prisma.userRole.findMany({
@@ -191,21 +198,45 @@ export async function POST(request: NextRequest) {
         }
       });
       recipientUserIds = [...new Set(usersInRoles.map(ur => ur.userId))];
+      
+      // 如果不包含发送者，则从列表中移除
+      if (!includeSender) {
+        recipientUserIds = recipientUserIds.filter(id => id !== currentUser.id);
+      }
     } else if (recipientIds && recipientIds.length > 0) {
       // 指定用户：直接使用提供的用户ID
       recipientUserIds = recipientIds;
+      
+      // 如果不包含发送者，则从列表中移除
+      if (!includeSender) {
+        recipientUserIds = recipientUserIds.filter(id => id !== currentUser.id);
+      }
     }
 
     // 创建用户消息关联记录
     if (recipientUserIds.length > 0) {
+      const userMessageData = recipientUserIds.map(userId => ({
+        userId,
+        messageId: message.id,
+        isRead: false
+      }));
+      
+      console.log('Creating UserMessage records:', userMessageData);
+      
       await prisma.userMessage.createMany({
-        data: recipientUserIds.map(userId => ({
-          userId,
-          messageId: message.id,
-          isRead: false
-        }))
+        data: userMessageData
       });
+      
+      console.log(`Created ${userMessageData.length} UserMessage records`);
+    } else {
+      console.log('No recipients found for message:', message.id);
     }
+
+    // 这里可以触发实时通知
+    // 在实际项目中，这里会通过WebSocket、SSE或推送服务发送实时通知
+    console.log('Message sent to recipients:', recipientUserIds);
+    console.log('Sender ID:', currentUser.id);
+    console.log('Message type:', isGlobal ? 'global' : (roleIds?.length ? 'role-based' : 'specific'));
 
     // 返回创建的消息和接收者数量
     return NextResponse.json({

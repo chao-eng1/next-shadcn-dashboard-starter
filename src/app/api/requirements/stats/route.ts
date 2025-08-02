@@ -279,7 +279,6 @@ export async function GET(request: NextRequest) {
         actualEffort: true
       },
       _avg: {
-        businessValue: true,
         estimatedEffort: true
       }
     });
@@ -297,7 +296,7 @@ export async function GET(request: NextRequest) {
       })),
       byAssignee: [],
       completionRate: Math.round(completionRate * 100) / 100,
-      averageBusinessValue: effortStats._avg.businessValue || 0,
+      averageBusinessValue: 0, // businessValue是字符串类型，无法计算平均值
       averageEstimatedEffort: effortStats._avg.estimatedEffort || 0,
       totalEstimatedEffort: effortStats._sum.estimatedEffort || 0,
       totalActualEffort: effortStats._sum.actualEffort || 0,

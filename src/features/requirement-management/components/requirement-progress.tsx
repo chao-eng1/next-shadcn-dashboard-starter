@@ -161,7 +161,13 @@ export function RequirementProgress({ projectId }: RequirementProgressProps) {
       }
       params.append('timeRange', timeRange);
       
-      const response = await fetch(`/api/requirements/progress?${params}`);
+      const response = await fetch(`/api/requirements/progress?${params}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
       if (!response.ok) {
         throw new Error('获取进度数据失败');
       }

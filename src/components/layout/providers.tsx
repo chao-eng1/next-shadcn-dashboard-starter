@@ -3,6 +3,7 @@ import React from 'react';
 import { ActiveThemeProvider } from '../active-theme';
 import { AuthProvider } from '../auth-provider';
 import { RBACProvider } from '@/features/system-management/rbac-context';
+import { RealtimeProvider } from '../realtime/realtime-provider';
 
 export default function Providers({
   activeThemeValue,
@@ -14,7 +15,11 @@ export default function Providers({
   return (
     <ActiveThemeProvider initialTheme={activeThemeValue}>
       <AuthProvider>
-        <RBACProvider>{children}</RBACProvider>
+        <RBACProvider>
+          <RealtimeProvider>
+            {children}
+          </RealtimeProvider>
+        </RBACProvider>
       </AuthProvider>
     </ActiveThemeProvider>
   );

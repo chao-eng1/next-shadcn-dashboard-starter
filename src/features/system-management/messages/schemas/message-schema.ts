@@ -7,7 +7,8 @@ export const messageFormSchema = z.object({
   isGlobal: z.boolean().default(false),
   recipientType: z.enum(['global', 'roles', 'users']),
   roleIds: z.array(z.string()).optional(),
-  recipientIds: z.array(z.string()).optional()
+  recipientIds: z.array(z.string()).optional(),
+  includeSender: z.boolean().default(false)
 });
 
 // Type for the form values
@@ -20,5 +21,6 @@ export const defaultMessageValues: Partial<MessageFormValues> = {
   isGlobal: false,
   recipientType: 'global',
   roleIds: [],
-  recipientIds: []
+  recipientIds: [],
+  includeSender: false
 };
