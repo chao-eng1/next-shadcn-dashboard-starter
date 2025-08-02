@@ -25,7 +25,7 @@ export interface Conversation {
     senderId: string;
     senderName: string;
     timestamp: string;
-    messageType: 'text' | 'image' | 'file';
+    messageType: 'text' | 'image' | 'file' | 'system';
   };
   unreadCount: number;
   createdAt: string;
@@ -93,6 +93,7 @@ interface IMState {
     conversations: boolean;
     messages: boolean;
     sending: boolean;
+    members: boolean;
   };
   
   // 错误状态
@@ -157,6 +158,7 @@ const initialState = {
     conversations: false,
     messages: false,
     sending: false,
+    members: false,
   },
   error: null,
 };

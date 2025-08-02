@@ -12,7 +12,7 @@ async function apiRequest<T>(
 ): Promise<{ data: T; success: boolean; message?: string }> {
   const url = `${API_BASE_URL}${endpoint}`;
   
-  const defaultHeaders = {
+  const defaultHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
   };
   

@@ -67,21 +67,24 @@ export default function IMPage() {
   // 初始化IM系统
   useEffect(() => {
     initialize();
-  }, [initialize]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // 移除 initialize 依赖，使用空依赖数组
   
   // 当聊天类型改变时加载对应的会话列表
   useEffect(() => {
     if (currentUser) {
       loadConversations(chatType);
     }
-  }, [chatType, currentUser, loadConversations]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatType, currentUser]); // 移除 loadConversations 依赖
   
   // 当选择会话时加载消息
   useEffect(() => {
     if (currentConversation) {
       loadMessages(currentConversation.id);
     }
-  }, [currentConversation, loadMessages]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentConversation?.id]); // 只依赖会话ID，移除 loadMessages 依赖
   
   // 发送消息
   const handleSendMessage = async () => {
@@ -174,7 +177,8 @@ export default function IMPage() {
     if (selectedProjectForChat && showMemberDialog) {
       handleLoadProjectMembers(selectedProjectForChat.id);
     }
-  }, [selectedProjectForChat, showMemberDialog]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProjectForChat, showMemberDialog]); // 移除 handleLoadProjectMembers 依赖
   
   // 处理聊天类型切换
   const handleTabChange = (value: string) => {

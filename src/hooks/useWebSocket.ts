@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { toast } from 'sonner';
 
 interface WebSocketMessage {
-  type: 'message' | 'typing' | 'read' | 'join' | 'leave' | 'error' | 'connected' | 'user_status';
+  type: 'message' | 'typing' | 'read' | 'join' | 'leave' | 'error' | 'connected' | 'user_status' | 'pong';
   data: {
     conversationId?: string;
     content?: string;
@@ -10,6 +10,8 @@ interface WebSocketMessage {
     timestamp?: string;
     messageId?: string;
     senderId?: string;
+    senderName?: string;
+    senderImage?: string;
     receiverId?: string;
     userId?: string;
     status?: 'online' | 'away' | 'offline';
@@ -50,8 +52,8 @@ export const useWebSocket = ({
   const isManualClose = useRef(false);
 
   // 使用ref存储函数引用以避免循环依赖
-  const connectRef = useRef<() => void>();
-  const disconnectRef = useRef<() => void>();
+  const connectRef = useRef<() => void>(() => {});
+  const disconnectRef = useRef<() => void>(() => {});
 
   const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {

@@ -6,7 +6,7 @@ import { z } from 'zod';
 
 const sendMessageSchema = z.object({
   content: z.string().min(1),
-  messageType: z.enum(['text', 'image', 'file']).default('text'),
+  messageType: z.enum(['text', 'image', 'file', 'system']).default('text'),
   replyToId: z.string().optional()
 });
 
@@ -153,7 +153,7 @@ export async function GET(
       senderName: message.sender.name,
       senderImage: message.sender.image,
       content: message.content,
-      messageType: message.messageType,
+      messageType: message.messageType.toLowerCase(), // 转换回小写以保持前端一致性
       replyToId: message.replyToId,
       replyTo: message.replyTo ? {
         id: message.replyTo.id,
@@ -214,6 +214,9 @@ export async function POST(
 
     const { content, messageType, replyToId } = validation.data;
 
+    // 转换消息类型为 Prisma 枚举格式
+    const prismaMessageType = messageType.toUpperCase() as 'TEXT' | 'IMAGE' | 'FILE' | 'SYSTEM';
+
     // 确定会话类型
     const projectChat = await prisma.projectChat.findUnique({
       where: { id: conversationId },
@@ -264,7 +267,7 @@ export async function POST(
       message = await prisma.projectMessage.create({
         data: {
           content,
-          messageType,
+          messageType: prismaMessageType,
           chatId: conversationId,
           senderId: user.id,
           replyToId
@@ -295,7 +298,7 @@ export async function POST(
       message = await prisma.privateMessage.create({
         data: {
           content,
-          messageType,
+          messageType: prismaMessageType,
           conversationId: conversationId,
           senderId: user.id,
           receiverId,
@@ -331,7 +334,7 @@ export async function POST(
       senderName: message.sender.name,
       senderImage: message.sender.image,
       content: message.content,
-      messageType: message.messageType,
+      messageType: message.messageType.toLowerCase(), // 转换回小写以保持前端一致性
       replyToId: message.replyToId,
       status: 'sent',
       createdAt: message.createdAt.toISOString(),

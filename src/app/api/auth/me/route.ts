@@ -62,7 +62,7 @@ export async function GET() {
       safeUser.id
     );
 
-    console.log('API response data:', JSON.stringify({ user: safeUser }, null, 2));
+    // console.log('API response data:', JSON.stringify({ user: safeUser }, null, 2));
     return NextResponse.json({ user: safeUser });
   } catch (error) {
     console.error('Auth verification error:', error);

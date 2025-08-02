@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import type { User, Conversation, Message, Project } from '@/store/im-store';
 
 export const useIM = () => {
+  const store = useIMStore();
   const {
     // 状态
     currentUser,
@@ -46,7 +47,10 @@ export const useIM = () => {
     setError,
     handleWebSocketMessage,
     reset
-  } = useIMStore();
+  } = store;
+
+  // 获取store状态的辅助函数
+  const getStoreState = useCallback(() => useIMStore.getState(), []);
   
   const wsTokenRef = useRef<string>('');
   const typingTimeoutRef = useRef<{ [conversationId: string]: NodeJS.Timeout }>({});
@@ -103,8 +107,9 @@ export const useIM = () => {
       const userProjects = await imAPI.project.getUserProjects();
       setProjects(userProjects);
       
-      // 设置默认项目
-      if (userProjects.length > 0 && !currentProject) {
+      // 设置默认项目 - 使用getStoreState获取当前状态
+      const currentProj = getStoreState().currentProject;
+      if (userProjects.length > 0 && !currentProj) {
         setCurrentProject(userProjects[0]);
       }
       
@@ -115,7 +120,7 @@ export const useIM = () => {
     } finally {
       setLoading('projects', false);
     }
-  }, [currentProject, setCurrentUser, setProjects, setCurrentProject, setLoading, setError, setConnectionStatus]);
+  }, [setCurrentUser, setProjects, setCurrentProject, setLoading, setError, setConnectionStatus, getStoreState]);
   
   // 加载会话列表
   const loadConversations = useCallback(async (type?: 'project' | 'private' | 'system') => {
@@ -151,8 +156,9 @@ export const useIM = () => {
       if (page === 1) {
         setMessages(result.messages);
       } else {
-        // 分页加载，追加到现有消息前面
-        setMessages([...result.messages, ...messages]);
+        // 分页加载，追加到现有消息前面 - 使用getStoreState读取当前消息
+        const currentMessages = getStoreState().messages;
+        setMessages([...result.messages, ...currentMessages]);
       }
       
       // 标记会话为已读
@@ -168,7 +174,7 @@ export const useIM = () => {
     } finally {
       setLoading('messages', false);
     }
-  }, [messages, setMessages, setLoading, setError, updateConversation]);
+  }, [setMessages, setLoading, setError, updateConversation, getStoreState]);
   
   // 发送消息
   const sendMessage = useCallback(async (
@@ -292,8 +298,9 @@ export const useIM = () => {
       
       const conversation = await imAPI.conversation.createPrivateConversation(userId, projectId);
       
-      // 添加到会话列表
-      setConversations([conversation, ...conversations]);
+      // 添加到会话列表 - 使用getStoreState读取当前会话列表
+      const currentConversations = getStoreState().conversations;
+      setConversations([conversation, ...currentConversations]);
       
       // 设置为当前会话
       setCurrentConversation(conversation);
@@ -308,7 +315,7 @@ export const useIM = () => {
     } finally {
       setLoading('conversations', false);
     }
-  }, [conversations, setConversations, setCurrentConversation, setLoading, setError]);
+  }, [setConversations, setCurrentConversation, setLoading, setError, getStoreState]);
   
   // 加载项目成员
   const loadProjectMembers = useCallback(async (projectId: string) => {
