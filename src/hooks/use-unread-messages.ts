@@ -18,8 +18,8 @@ export function useUnreadMessages() {
       setLoading(true);
       const response = await fetch('/api/user-messages/unread-count');
       if (response.ok) {
-        const data = await response.json();
-        setUnreadCount(data.unreadCount || 0);
+        let data = await response.json();
+        setUnreadCount(data.data.unreadCount || 0);
       }
     } catch (error) {
       console.error('Error fetching unread count:', error);
@@ -46,8 +46,8 @@ export function useUnreadMessages() {
   useEffect(() => {
     fetchUnreadCount();
     
-    // 设置定期刷新未读数量（每30秒）
-    const interval = setInterval(fetchUnreadCount, 30000);
+    // 设置定期刷新未读数量（每15秒）
+    const interval = setInterval(fetchUnreadCount, 15000);
     
     return () => clearInterval(interval);
   }, [fetchUnreadCount]);

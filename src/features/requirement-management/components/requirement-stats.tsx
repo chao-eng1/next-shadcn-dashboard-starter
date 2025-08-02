@@ -132,7 +132,13 @@ export function RequirementStats({ projectId }: RequirementStatsProps) {
       }
       params.append('timeRange', timeRange);
       
-      const response = await fetch(`/api/requirements/stats?${params}`);
+      const response = await fetch(`/api/requirements/stats?${params}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
       if (!response.ok) {
         throw new Error('获取统计数据失败');
       }

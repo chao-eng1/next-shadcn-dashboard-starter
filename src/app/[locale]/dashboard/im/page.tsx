@@ -11,12 +11,13 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { MessageCircle, Send, Users, Search, Plus, UserPlus, MessageSquare, Loader2, AlertCircle, Settings } from 'lucide-react';
+import { MessageCircle, Send, Users, Search, Plus, UserPlus, MessageSquare, Loader2, AlertCircle, Settings, Sparkles } from 'lucide-react';
 import { useTranslations } from "next-intl";
 import { useIM } from '@/hooks/useIM';
 import { imAPI } from '@/lib/api/im-api';
 import { toast } from 'sonner';
 import type { User, Project } from '@/store/im-store';
+import Link from 'next/link';
 
 
 
@@ -249,7 +250,22 @@ export default function IMPage() {
   });
 
   return (
-    <div className="min-h-0 flex-1 flex gap-4 p-4">
+    <div className="min-h-0 flex-1 flex flex-col gap-4 p-4">
+      {/* 新版本导航 */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">即时通讯</h1>
+          <p className="text-sm text-muted-foreground">与团队成员进行实时沟通</p>
+        </div>
+        <Link href="/dashboard/enhanced-im">
+          <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white">
+            <Sparkles className="h-4 w-4 mr-2" />
+            体验新版界面
+          </Button>
+        </Link>
+      </div>
+      
+      <div className="flex-1 flex gap-4">
       {/* 连接状态指示器 */}
       {connectionStatus !== 'connected' && (
         <div className="fixed top-4 right-4 z-50">
@@ -724,6 +740,7 @@ export default function IMPage() {
           </>
         )}
       </Card>
+      </div>
     </div>
   );
 }

@@ -76,17 +76,6 @@ export function UserNav() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
-            {t('userNav.profile')}
-          </DropdownMenuItem>
-          <DropdownMenuItem>{t('userNav.billing')}</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push('/dashboard/settings')}>
-            {t('userNav.settings')}
-          </DropdownMenuItem>
-          <DropdownMenuItem>{t('userNav.newTeam')}</DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           {t('userNav.logOut')}
         </DropdownMenuItem>
