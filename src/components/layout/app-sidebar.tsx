@@ -48,8 +48,8 @@ import { OrgSwitcher } from '../org-switcher';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getApiUrl } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
-import { useUnreadMessages } from '@/hooks/use-unread-messages';
-import { NotificationBadge } from '@/components/ui/notification-badge';
+import { useGlobalUnreadStatus } from '@/hooks/use-global-unread-status';
+import { NotificationBadge, NotificationDot } from '@/components/ui/notification-badge';
 
 export const company = {
   name: 'Acme Inc',
@@ -106,7 +106,12 @@ export default function AppSidebar() {
   const { isOpen } = useMediaQuery();
   const router = useRouter();
   const t = useTranslations();
-  const { unreadCount } = useUnreadMessages();
+  const { 
+    systemUnreadCount, 
+    imUnreadCount, 
+    hasSystemUnread, 
+    hasIMUnread 
+  } = useGlobalUnreadStatus();
 
   // Helper function to check if a path is active, ignoring the locale prefix
   const isPathActive = (itemUrl: string, currentPath: string): boolean => {
@@ -267,11 +272,20 @@ export default function AppSidebar() {
                       <Link href={item.url} className="relative">
                         {IconComponent && <IconComponent />}
                         <span>{t(item.title)}</span>
-                        {item.url === '/dashboard/messages' && unreadCount > 0 && (
+                        {/* 系统消息未读提示 */}
+                        {item.url === '/dashboard/messages' && hasSystemUnread && (
                           <NotificationBadge 
-                            count={unreadCount} 
+                            count={systemUnreadCount} 
                             className="absolute -top-1 -right-1" 
                             size="sm"
+                          />
+                        )}
+                        {/* IM即时通讯未读提示 - 使用红点 */}
+                        {item.url === '/dashboard/im' && hasIMUnread && (
+                          <NotificationDot 
+                            show={true}
+                            className="absolute -top-1 -right-1" 
+                            size="md"
                           />
                         )}
                       </Link>
@@ -326,8 +340,8 @@ export default function AppSidebar() {
                     <div className='flex items-center'>
                       <IconBell className='mr-2 h-4 w-4' />
                       {t('sidebar.notifications')}
-                      {unreadCount > 0 && (
-                        <NotificationBadge count={unreadCount} className='ml-auto' />
+                      {(unreadCount + totalUnreadCount) > 0 && (
+                        <NotificationBadge count={unreadCount + totalUnreadCount} className='ml-auto' />
                       )}
                     </div>
                   </DropdownMenuItem>

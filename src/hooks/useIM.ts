@@ -2,6 +2,7 @@ import { useEffect, useCallback, useRef } from 'react';
 import { useWebSocket, WebSocketMessage } from './useWebSocket';
 import { useIMStore } from '@/store/im-store';
 import { imAPI } from '@/lib/api/im-api';
+import { notificationService } from '@/lib/notification-service';
 import { toast } from 'sonner';
 import type { User, Conversation, Message, Project } from '@/store/im-store';
 
@@ -182,6 +183,16 @@ export const useIM = () => {
       setError(null);
       
       console.log('开始初始化IM系统...');
+      
+      // 初始化通知服务
+      if (typeof window !== 'undefined') {
+        try {
+          await notificationService.requestNotificationPermission();
+          console.log('通知服务初始化完成');
+        } catch (notificationError) {
+          console.warn('通知服务初始化失败:', notificationError);
+        }
+      }
       
       // 获取当前用户信息
       const user = await imAPI.user.getCurrentUser();
@@ -614,6 +625,10 @@ export const useIM = () => {
     cleanup: () => {
       stopPolling();
       stopOnlineStatusSync();
+      // 清理通知服务
+      if (typeof window !== 'undefined') {
+        notificationService.cleanup();
+      }
       reset();
     }
   };

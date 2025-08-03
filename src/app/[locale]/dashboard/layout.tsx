@@ -1,6 +1,9 @@
 import KBar from '@/components/kbar';
 import AppSidebar from '@/components/layout/app-sidebar';
 import Header from '@/components/layout/header';
+import { GlobalIMProvider } from '@/components/im/global-im-provider';
+import { GlobalUnreadProvider } from '@/components/layout/global-unread-provider';
+import { GlobalUnreadToast } from '@/components/layout/global-unread-toast';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
@@ -21,13 +24,18 @@ export default async function DashboardLayout({
   return (
     <KBar>
       <SidebarProvider defaultOpen={defaultOpen}>
-        <AppSidebar />
-        <SidebarInset>
-          <Header />
-          {/* page main content */}
-          {children}
-          {/* page main content ends */}
-        </SidebarInset>
+        <GlobalIMProvider>
+          <GlobalUnreadProvider>
+            <AppSidebar />
+            <SidebarInset>
+              <Header />
+              {/* page main content */}
+              {children}
+              {/* page main content ends */}
+            </SidebarInset>
+            <GlobalUnreadToast />
+          </GlobalUnreadProvider>
+        </GlobalIMProvider>
       </SidebarProvider>
     </KBar>
   );

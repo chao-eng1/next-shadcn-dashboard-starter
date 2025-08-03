@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { WebSocketMessage } from '@/hooks/useWebSocket';
+import { notificationService } from '@/lib/notification-service';
 
 // 数据类型定义
 export interface User {
@@ -87,6 +88,10 @@ interface IMState {
   searchTerm: string;
   isTyping: { [conversationId: string]: string[] }; // 正在输入的用户列表
   
+  // 未读消息计数
+  totalUnreadCount: number;
+  conversationUnreadCounts: { [conversationId: string]: number };
+  
   // 加载状态
   loading: {
     projects: boolean;
@@ -129,6 +134,16 @@ interface IMState {
   setSearchTerm: (term: string) => void;
   setTyping: (conversationId: string, userIds: string[]) => void;
   
+  // 未读消息计数
+  updateUnreadCount: (conversationId: string, count: number) => void;
+  incrementUnreadCount: (conversationId: string) => void;
+  clearUnreadCount: (conversationId: string) => void;
+  getTotalUnreadCount: () => number;
+  
+  // 通知相关方法
+  updateTotalUnreadCount: () => void;
+  triggerMessageNotification: (message: Message, conversation?: Conversation) => void;
+  
   // 加载状态
   setLoading: (key: keyof IMState['loading'], loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -153,6 +168,8 @@ const initialState = {
   chatType: 'project' as const,
   searchTerm: '',
   isTyping: {},
+  totalUnreadCount: 0,
+  conversationUnreadCounts: {},
   loading: {
     projects: false,
     conversations: false,
@@ -176,22 +193,109 @@ export const useIMStore = create<IMState>((set, get) => ({
   
   setCurrentProject: (project) => set({ currentProject: project }),
   
-  setConversations: (conversations) => set({ conversations }),
-  
-  setCurrentConversation: (conversation) => set({ 
-    currentConversation: conversation,
-    messages: [] // 清空消息列表，等待加载新的消息
+  setConversations: (conversations) => set(state => {
+    // 从会话列表中提取未读计数
+    const newConversationUnreadCounts: { [conversationId: string]: number } = {};
+    let newTotalUnreadCount = 0;
+    
+    conversations.forEach(conv => {
+      if (conv.unreadCount > 0) {
+        newConversationUnreadCounts[conv.id] = conv.unreadCount;
+        newTotalUnreadCount += conv.unreadCount;
+      }
+    });
+    
+    // 更新浏览器标题栏
+    notificationService.updateTitleWithUnreadCount(newTotalUnreadCount);
+    
+    return {
+      conversations,
+      conversationUnreadCounts: newConversationUnreadCounts,
+      totalUnreadCount: newTotalUnreadCount
+    };
   }),
   
-  addConversation: (conversation) => set(state => ({
-    conversations: [conversation, ...state.conversations]
-  })),
+  setCurrentConversation: (conversation) => set(state => {
+    // 直接在这里清除当前会话的未读计数，避免调用其他setter
+    let updatedConversations = state.conversations;
+    let newConversationUnreadCounts = { ...state.conversationUnreadCounts };
+    let newTotalUnreadCount = state.totalUnreadCount;
+    
+    if (conversation) {
+      // 清除该会话的未读计数
+      updatedConversations = state.conversations.map(conv => 
+        conv.id === conversation.id ? { ...conv, unreadCount: 0 } : conv
+      );
+      
+      // 移除该会话的未读计数
+      if (newConversationUnreadCounts[conversation.id]) {
+        delete newConversationUnreadCounts[conversation.id];
+        // 重新计算总未读计数
+        newTotalUnreadCount = Object.values(newConversationUnreadCounts).reduce((sum, count) => sum + count, 0);
+        
+        // 更新浏览器标题栏
+        notificationService.updateTitleWithUnreadCount(newTotalUnreadCount);
+      }
+    }
+    
+    return { 
+      currentConversation: conversation,
+      messages: [], // 清空消息列表，等待加载新的消息
+      conversations: updatedConversations,
+      conversationUnreadCounts: newConversationUnreadCounts,
+      totalUnreadCount: newTotalUnreadCount
+    };
+  }),
   
-  updateConversation: (conversationId, updates) => set(state => ({
-    conversations: state.conversations.map(conv => 
+  addConversation: (conversation) => set(state => {
+    const updatedConversations = [conversation, ...state.conversations];
+    
+    // 重新计算总未读计数和各会话未读计数
+    const newConversationUnreadCounts: { [conversationId: string]: number } = {};
+    let newTotalUnreadCount = 0;
+    
+    updatedConversations.forEach(conv => {
+      if (conv.unreadCount > 0) {
+        newConversationUnreadCounts[conv.id] = conv.unreadCount;
+        newTotalUnreadCount += conv.unreadCount;
+      }
+    });
+    
+    // 更新浏览器标题栏
+    notificationService.updateTitleWithUnreadCount(newTotalUnreadCount);
+    
+    return {
+      conversations: updatedConversations,
+      conversationUnreadCounts: newConversationUnreadCounts,
+      totalUnreadCount: newTotalUnreadCount
+    };
+  }),
+  
+  updateConversation: (conversationId, updates) => set(state => {
+    const updatedConversations = state.conversations.map(conv => 
       conv.id === conversationId ? { ...conv, ...updates } : conv
-    )
-  })),
+    );
+    
+    // 重新计算总未读计数和各会话未读计数
+    const newConversationUnreadCounts: { [conversationId: string]: number } = {};
+    let newTotalUnreadCount = 0;
+    
+    updatedConversations.forEach(conv => {
+      if (conv.unreadCount > 0) {
+        newConversationUnreadCounts[conv.id] = conv.unreadCount;
+        newTotalUnreadCount += conv.unreadCount;
+      }
+    });
+    
+    // 更新浏览器标题栏
+    notificationService.updateTitleWithUnreadCount(newTotalUnreadCount);
+    
+    return {
+      conversations: updatedConversations,
+      conversationUnreadCounts: newConversationUnreadCounts,
+      totalUnreadCount: newTotalUnreadCount
+    };
+  }),
   
   setMessages: (messages) => set({ messages }),
   
@@ -205,6 +309,10 @@ export const useIMStore = create<IMState>((set, get) => ({
     // 更新对应会话的最后消息
     const updatedConversations = state.conversations.map(conv => {
       if (conv.id === message.conversationId) {
+        // 只有当消息不是来自当前用户并且不在当前会话中时才增加未读计数
+        const shouldIncrement = state.currentUser?.id !== message.senderId && 
+                                state.currentConversation?.id !== message.conversationId;
+        
         return {
           ...conv,
           lastMessage: {
@@ -217,17 +325,32 @@ export const useIMStore = create<IMState>((set, get) => ({
             timestamp: message.createdAt,
             messageType: message.messageType
           },
-          unreadCount: state.currentUser?.id === message.senderId ? 
-            conv.unreadCount : conv.unreadCount + 1,
+          unreadCount: shouldIncrement ? conv.unreadCount + 1 : conv.unreadCount,
           updatedAt: message.createdAt
         };
       }
       return conv;
     });
     
+    // 重新计算总未读计数和各会话未读计数
+    const newConversationUnreadCounts: { [conversationId: string]: number } = {};
+    let newTotalUnreadCount = 0;
+    
+    updatedConversations.forEach(conv => {
+      if (conv.unreadCount > 0) {
+        newConversationUnreadCounts[conv.id] = conv.unreadCount;
+        newTotalUnreadCount += conv.unreadCount;
+      }
+    });
+    
+    // 更新浏览器标题栏
+    notificationService.updateTitleWithUnreadCount(newTotalUnreadCount);
+    
     return {
       messages: newMessages,
-      conversations: updatedConversations
+      conversations: updatedConversations,
+      conversationUnreadCounts: newConversationUnreadCounts,
+      totalUnreadCount: newTotalUnreadCount
     };
   }),
   
@@ -323,6 +446,106 @@ export const useIMStore = create<IMState>((set, get) => ({
   
   setError: (error) => set({ error }),
   
+  // 未读消息计数方法
+  updateUnreadCount: (conversationId, count) => set(state => {
+    const newCounts = { ...state.conversationUnreadCounts, [conversationId]: count };
+    const totalCount = Object.values(newCounts).reduce((sum, count) => sum + count, 0);
+    
+    // 更新浏览器标题栏
+    notificationService.updateTitleWithUnreadCount(totalCount);
+    
+    return {
+      conversationUnreadCounts: newCounts,
+      totalUnreadCount: totalCount
+    };
+  }),
+  
+  incrementUnreadCount: (conversationId) => set(state => {
+    const currentCount = state.conversationUnreadCounts[conversationId] || 0;
+    const newCounts = { ...state.conversationUnreadCounts, [conversationId]: currentCount + 1 };
+    const totalCount = Object.values(newCounts).reduce((sum, count) => sum + count, 0);
+    
+    // 更新浏览器标题栏
+    notificationService.updateTitleWithUnreadCount(totalCount);
+    
+    return {
+      conversationUnreadCounts: newCounts,
+      totalUnreadCount: totalCount
+    };
+  }),
+  
+  clearUnreadCount: (conversationId) => set(state => {
+    const newCounts = { ...state.conversationUnreadCounts };
+    delete newCounts[conversationId];
+    const totalCount = Object.values(newCounts).reduce((sum, count) => sum + count, 0);
+    
+    // 更新浏览器标题栏
+    notificationService.updateTitleWithUnreadCount(totalCount);
+    
+    return {
+      conversationUnreadCounts: newCounts,
+      totalUnreadCount: totalCount
+    };
+  }),
+  
+  getTotalUnreadCount: () => get().totalUnreadCount,
+  
+  updateTotalUnreadCount: () => set(state => {
+    const totalCount = Object.values(state.conversationUnreadCounts).reduce((sum, count) => sum + count, 0);
+    notificationService.updateTitleWithUnreadCount(totalCount);
+    return { totalUnreadCount: totalCount };
+  }),
+  
+  triggerMessageNotification: async (message, conversation) => {
+    const state = get();
+    
+    // 检查是否是自己发送的消息
+    if (message.senderId === state.currentUser?.id) {
+      return;
+    }
+    
+    // 检查是否在当前会话中（如果在当前会话中，不显示通知）
+    if (state.currentConversation?.id === message.conversationId) {
+      return;
+    }
+    
+    // 找到会话信息
+    const targetConversation = conversation || state.conversations.find(conv => conv.id === message.conversationId);
+    if (!targetConversation) {
+      return;
+    }
+    
+    // 根据会话类型触发不同的通知
+    if (targetConversation.type === 'private') {
+      await notificationService.showPrivateMessageNotification({
+        senderName: message.senderName || 'Unknown',
+        senderImage: message.senderImage,
+        message: message.content,
+        conversationId: message.conversationId,
+        onNotificationClick: () => {
+          // 切换到该会话（会自动清除未读计数）
+          get().setCurrentConversation(targetConversation);
+          get().setChatType('private');
+        }
+      });
+    } else if (targetConversation.type === 'project') {
+      // 找到项目信息
+      const project = state.projects.find(p => p.id === targetConversation.projectId);
+      await notificationService.showProjectMessageNotification({
+        senderName: message.senderName || 'Unknown',
+        senderImage: message.senderImage,
+        message: message.content,
+        projectName: project?.name || targetConversation.name,
+        conversationId: message.conversationId,
+        onNotificationClick: () => {
+          // 切换到该会话（会自动清除未读计数）
+          get().setCurrentConversation(targetConversation);
+          get().setChatType('project');
+        }
+      });
+    }
+  },
+  
   handleWebSocketMessage: (message) => {
     const state = get();
     
@@ -350,18 +573,10 @@ export const useIMStore = create<IMState>((set, get) => ({
           if (!isOwnMessage || state.currentConversation?.id === message.data.conversationId) {
             get().addMessage(newMessage);
             
-            // 如果是其他人发送的消息并且不在当前会话中，播放提示音（可选）
-            if (!isOwnMessage && state.currentConversation?.id !== message.data.conversationId) {
-              // 这里可以添加消息提示音或桌面通知
-              console.log('收到新消息:', newMessage);
-              
-              // 可以触发桌面通知
-              if ('Notification' in window && Notification.permission === 'granted') {
-                new Notification(`${newMessage.senderName}发来新消息`, {
-                  body: newMessage.content,
-                  icon: newMessage.senderImage || '/default-avatar.png'
-                });
-              }
+            // 如果是其他人发送的消息，触发通知
+            if (!isOwnMessage) {
+              // 注意：未读计数已经在addMessage中处理了，这里只需要触发通知
+              get().triggerMessageNotification(newMessage);
             }
           }
         }
