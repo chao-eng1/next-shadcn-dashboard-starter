@@ -548,7 +548,7 @@ export function GlobalNotification({
                 </CardContent>
               </Card>
             ))
-          )}
+          }
         </div>
       )}
     </div>

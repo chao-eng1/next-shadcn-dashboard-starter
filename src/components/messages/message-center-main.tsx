@@ -30,6 +30,7 @@ import { useRouter } from 'next/navigation';
 import { ConversationList } from './conversation-list';
 import { ChatContent } from './chat-content';
 import { GlobalNotificationStatus } from './global-notification-status';
+import { NewPrivateChatDialog } from './new-private-chat-dialog';
 
 // 会话类型
 type ConversationType = 'private' | 'group' | 'system' | 'project';
@@ -129,6 +130,7 @@ export function MessageCenterMain() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<ConversationType | 'all'>('all');
   const [isConnected, setIsConnected] = useState(true);
+  const [showNewChatDialog, setShowNewChatDialog] = useState(false);
 
   // 计算未读消息总数
   const totalUnreadCount = conversations.reduce((total, conv) => total + conv.unreadCount, 0);
@@ -152,7 +154,7 @@ export function MessageCenterMain() {
 
   // 快速操作
   const handleNewPrivateChat = () => {
-    router.push('/dashboard/messages/private/new');
+    setShowNewChatDialog(true);
   };
 
   const handleMessageSettings = () => {
@@ -267,6 +269,12 @@ export function MessageCenterMain() {
           <ChatContent conversation={selectedConversation} />
         </ResizablePanel>
       </ResizablePanelGroup>
+      
+      {/* 新建私聊对话框 */}
+      <NewPrivateChatDialog
+        open={showNewChatDialog}
+        onOpenChange={setShowNewChatDialog}
+      />
     </div>
   );
 }

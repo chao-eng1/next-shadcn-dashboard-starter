@@ -5,7 +5,7 @@ import { Breadcrumbs } from '../breadcrumbs';
 import SearchInput from '../search-input';
 import { ThemeSelector } from '../theme-selector';
 import { ModeToggle } from './ThemeToggle/theme-toggle';
-
+import { MessageNotificationIcon } from '../message-notification-icon';
 import { LanguageSwitcher } from '../language-switcher';
 
 export default function Header() {
@@ -22,7 +22,7 @@ export default function Header() {
           <SearchInput />
         </div>
 
-
+        <MessageNotificationIcon />
         <LanguageSwitcher />
         <ModeToggle />
         <ThemeSelector />

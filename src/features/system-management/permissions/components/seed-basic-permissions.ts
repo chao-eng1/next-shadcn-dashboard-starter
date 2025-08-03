@@ -65,6 +65,72 @@ export const basicPermissions = [
   {
     name: 'permission:delete',
     description: 'Can delete permissions'
+  },
+
+  // Project permissions
+  {
+    name: 'project:list',
+    description: 'Can list all projects'
+  },
+  {
+    name: 'project:view',
+    description: 'Can view project details'
+  },
+  {
+    name: 'project:create',
+    description: 'Can create new projects'
+  },
+  {
+    name: 'project:update',
+    description: 'Can update existing projects'
+  },
+  {
+    name: 'project:delete',
+    description: 'Can delete projects'
+  },
+
+  // Project permissions (dot notation for compatibility)
+  {
+    name: 'project.list',
+    description: 'Can list all projects (dot notation)'
+  },
+  {
+    name: 'project.view',
+    description: 'Can view project details (dot notation)'
+  },
+  {
+    name: 'project.create',
+    description: 'Can create new projects (dot notation)'
+  },
+  {
+    name: 'project.update',
+    description: 'Can update existing projects (dot notation)'
+  },
+  {
+    name: 'project.delete',
+    description: 'Can delete projects (dot notation)'
+  },
+
+  // User permissions (dot notation for compatibility)
+  {
+    name: 'user.list',
+    description: 'Can list all users (dot notation)'
+  },
+  {
+    name: 'user.view',
+    description: 'Can view user details (dot notation)'
+  },
+  {
+    name: 'user.create',
+    description: 'Can create new users (dot notation)'
+  },
+  {
+    name: 'user.update',
+    description: 'Can update existing users (dot notation)'
+  },
+  {
+    name: 'user.delete',
+    description: 'Can delete users (dot notation)'
   }
 ];
 

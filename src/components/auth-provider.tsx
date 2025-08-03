@@ -75,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     loadUser();
-  }, [setUser, setLoading, router]);
+  }, []); // 移除依赖数组中的setUser和setLoading，因为它们是稳定的zustand函数
 
   return <>{children}</>;
 }
