@@ -67,7 +67,15 @@ async function main() {
 
     // Kanban permissions
     { name: 'kanban:view', description: 'Permission to view kanban board' },
-    { name: 'kanban:update', description: 'Permission to update kanban items' }
+    { name: 'kanban:update', description: 'Permission to update kanban items' },
+
+    // Project permissions
+    { name: 'project:create', description: 'Permission to create projects' },
+    { name: 'project:read', description: 'Permission to view project details' },
+    { name: 'project:update', description: 'Permission to update projects' },
+    { name: 'project:delete', description: 'Permission to delete projects' },
+    { name: 'project:list', description: 'Permission to list all projects' },
+    { name: 'project:view', description: 'Permission to view projects' }
   ];
 
   console.log('Creating permissions...');

@@ -267,11 +267,35 @@ export async function GET(request: NextRequest) {
           name: otherParticipant.name || otherParticipant.email,
           projectId: conv.projectId,
           project: conv.project,
-          participants: [conv.participant1, conv.participant2],
-          lastMessage: conv.messages[0] || null,
+          participants: [
+            {
+              id: conv.participant1.id,
+              name: conv.participant1.name,
+              email: conv.participant1.email,
+              image: conv.participant1.image,
+              role: '',
+              status: 'offline' as const
+            },
+            {
+              id: conv.participant2.id,
+              name: conv.participant2.name,
+              email: conv.participant2.email,
+              image: conv.participant2.image,
+              role: '',
+              status: 'offline' as const
+            }
+          ],
+          lastMessage: conv.messages[0] ? {
+            id: conv.messages[0].id,
+            content: conv.messages[0].content,
+            senderId: conv.messages[0].sender.id,
+            senderName: conv.messages[0].sender.name,
+            timestamp: conv.messages[0].createdAt.toISOString(),
+            messageType: conv.messages[0].messageType
+          } : null,
           unreadCount: conv._count.messages,
-          createdAt: conv.createdAt,
-          updatedAt: conv.updatedAt
+          createdAt: conv.createdAt.toISOString(),
+          updatedAt: conv.updatedAt.toISOString()
         };
       }));
     }

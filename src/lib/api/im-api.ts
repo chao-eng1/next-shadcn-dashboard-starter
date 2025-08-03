@@ -87,8 +87,8 @@ export const userAPI = {
 export const projectAPI = {
   // 获取用户参与的项目列表
   getUserProjects: async (): Promise<Project[]> => {
-    const result = await apiRequest<Project[]>('/projects');
-    return result.data;
+    const result = await apiRequest<{ projects: Project[]; pagination: any }>('/projects');
+    return result.data.projects || result.data;
   },
   
   // 获取项目详情
@@ -100,8 +100,17 @@ export const projectAPI = {
   // 获取项目成员
   getProjectMembers: async (projectId: string, search?: string): Promise<User[]> => {
     const params = search ? `?search=${encodeURIComponent(search)}` : '';
-    const result = await apiRequest<User[]>(`/projects/${projectId}/members${params}`);
-    return result.data;
+    const result = await apiRequest<any[]>(`/projects/${projectId}/members${params}`);
+    
+    // 转换API响应格式到前端期望的格式
+    return result.data.map((member: any) => ({
+      id: member.user.id,
+      name: member.user.name,
+      email: member.user.email,
+      image: member.user.image,
+      role: member.role,
+      status: member.isOnline ? 'online' : 'offline'
+    }));
   }
 };
 

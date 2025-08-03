@@ -172,8 +172,11 @@ export const useIM = () => {
       setLoading('projects', true);
       setError(null);
       
+      console.log('开始初始化IM系统...');
+      
       // 获取当前用户信息
       const user = await imAPI.user.getCurrentUser();
+      console.log('获取当前用户信息:', user);
       setCurrentUser(user);
       
       // 尝试获取WebSocket token，但不因失败而中断初始化
@@ -193,14 +196,19 @@ export const useIM = () => {
       }
       
       // 加载用户项目
+      console.log('开始加载用户项目...');
       const userProjects = await imAPI.project.getUserProjects();
+      console.log('获取到的用户项目:', userProjects);
       setProjects(userProjects);
       
       // 设置默认项目 - 使用getStoreState获取当前状态
       const currentProj = getStoreState().currentProject;
       if (userProjects.length > 0 && !currentProj) {
+        console.log('设置默认项目:', userProjects[0]);
         setCurrentProject(userProjects[0]);
       }
+      
+      console.log('IM系统初始化完成');
       
     } catch (error) {
       console.error('Failed to initialize IM:', error);
@@ -429,7 +437,9 @@ export const useIM = () => {
   const loadProjectMembers = useCallback(async (projectId: string) => {
     try {
       setLoading('members', true);
+      console.log('开始加载项目成员，项目ID:', projectId);
       const members = await imAPI.project.getProjectMembers(projectId);
+      console.log('获取到的项目成员:', members);
       return members;
     } catch (error) {
       console.error('Failed to load project members:', error);

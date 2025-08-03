@@ -82,6 +82,7 @@ export default function IMPage() {
 
   // 初始化IM系统
   useEffect(() => {
+    console.log('IM页面 - 开始初始化');
     initialize();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // 移除 initialize 依赖，使用空依赖数组
@@ -236,7 +237,9 @@ export default function IMPage() {
   const handleLoadProjectMembers = async (projectId: string) => {
     try {
       setLoadingMembers(true);
+      console.log('页面 - 开始加载项目成员，项目ID:', projectId);
       const members = await loadProjectMembers(projectId);
+      console.log('页面 - 获取到的项目成员:', members);
       setProjectMembers(members);
     } catch (error) {
       console.error('加载项目成员失败:', error);
@@ -261,7 +264,13 @@ export default function IMPage() {
   
   // 格式化时间
   const formatTime = (timestamp: string) => {
+    if (!timestamp) return '';
+    
     const date = new Date(timestamp);
+    
+    // 检查日期是否有效
+    if (isNaN(date.getTime())) return '';
+    
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -270,8 +279,10 @@ export default function IMPage() {
       return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
     } else if (days === 1) {
       return '昨天';
-    } else {
+    } else if (days > 0) {
       return `${days}天前`;
+    } else {
+      return '刚刚';
     }
   };
 
@@ -399,21 +410,37 @@ export default function IMPage() {
                       value={selectedProjectForChat?.id || ''}
                       onChange={(e) => {
                         const project = projects.find(p => p.id === e.target.value);
-                        if (project) setSelectedProjectForChat(project);
+                        if (project) {
+                          setSelectedProjectForChat(project);
+                          console.log('选择的项目:', project);
+                        }
                       }}
                     >
-                      <option value="">请选择项目</option>
+                      <option value="">请选择项目 {projects.length === 0 ? '(暂无项目)' : `(${projects.length}个项目)`}</option>
                       {projects.map(project => (
                         <option key={project.id} value={project.id}>{project.name}</option>
                       ))}
                     </select>
+                    {projects.length === 0 && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        暂无可用项目，请先创建或加入项目
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="text-sm font-medium mb-2 block">项目成员</label>
                     <ScrollArea className="h-64">
-                      {loadingMembers ? (
+                      {!selectedProjectForChat ? (
+                        <div className="flex items-center justify-center h-32 text-muted-foreground">
+                          <p>请先选择项目</p>
+                        </div>
+                      ) : loadingMembers ? (
                         <div className="flex items-center justify-center h-32">
                           <Loader2 className="h-6 w-6 animate-spin" />
+                        </div>
+                      ) : projectMembers.length === 0 ? (
+                        <div className="flex items-center justify-center h-32 text-muted-foreground">
+                          <p>该项目暂无成员</p>
                         </div>
                       ) : (
                         <div className="space-y-2">
@@ -527,11 +554,16 @@ export default function IMPage() {
                               <Users className="h-3 w-3" />
                               {conversation.participants.length}人
                             </span>
-                            <span>{conversation.lastMessage ? formatTime(conversation.lastMessage.timestamp) : ''}</span>
+                            <span>
+                              {conversation.lastMessage && conversation.lastMessage.timestamp ? 
+                                formatTime(conversation.lastMessage.timestamp) : 
+                                ''
+                              }
+                            </span>
                           </div>
                           {conversation.lastMessage && (
                             <div className="mt-2 text-xs text-muted-foreground truncate">
-                              {conversation.lastMessage.senderName}: {conversation.lastMessage.content}
+                              {conversation.lastMessage.senderName || '未知用户'}: {conversation.lastMessage.content || ''}
                             </div>
                           )}
                         </>
@@ -557,12 +589,15 @@ export default function IMPage() {
                             <div className="flex items-center justify-between text-xs text-muted-foreground">
                               <span className="truncate flex-1">
                                 {conversation.lastMessage ? 
-                                  `${conversation.lastMessage.senderName}: ${conversation.lastMessage.content}` : 
+                                  `${conversation.lastMessage.senderName || '未知用户'}: ${conversation.lastMessage.content || ''}` : 
                                   '暂无消息'
                                 }
                               </span>
                               <span className="ml-2">
-                                {conversation.lastMessage ? formatTime(conversation.lastMessage.timestamp) : ''}
+                                {conversation.lastMessage && conversation.lastMessage.timestamp ? 
+                                  formatTime(conversation.lastMessage.timestamp) : 
+                                  ''
+                                }
                               </span>
                             </div>
                           </div>
