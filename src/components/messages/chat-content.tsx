@@ -92,20 +92,24 @@ export function ChatContent({ conversation }: ChatContentProps) {
             id: msg.id,
             content: msg.content,
             sender: {
-              id: msg.senderId,
-              name: msg.senderName,
+              id: msg.senderId || '',
+              name: msg.senderName || '未知用户',
               avatar: msg.senderImage
             },
             timestamp: new Date(msg.createdAt),
             type: msg.messageType,
-            status: msg.status || 'delivered',
+            status: (['sending', 'sent', 'delivered', 'read'].includes(
+              msg.status
+            )
+              ? msg.status
+              : 'delivered') as 'sending' | 'sent' | 'delivered' | 'read',
             replyTo: msg.replyTo
               ? {
                   id: msg.replyTo.id,
                   content: msg.replyTo.content,
                   sender: {
-                    id: msg.replyTo.senderId,
-                    name: msg.replyTo.senderName
+                    id: msg.replyTo.senderId || '',
+                    name: msg.replyTo.senderName || '未知用户'
                   },
                   timestamp: new Date(),
                   type: 'text',
@@ -142,13 +146,13 @@ export function ChatContent({ conversation }: ChatContentProps) {
           id: msg.id,
           content: msg.content,
           sender: {
-            id: msg.senderId,
-            name: msg.senderName,
+            id: msg.senderId || '',
+            name: msg.senderName || '未知用户',
             avatar: msg.senderImage
           },
           timestamp: new Date(msg.createdAt),
           type: msg.messageType,
-          status: 'delivered'
+          status: 'delivered' as const
         }));
 
         setMessages((prev) => [...prev, ...newMessages]);
@@ -187,8 +191,8 @@ export function ChatContent({ conversation }: ChatContentProps) {
       id: `temp_${Date.now()}`,
       content,
       sender: {
-        id: user.id,
-        name: user.name,
+        id: user.id || '',
+        name: user.name || '未知用户',
         avatar: user.image
       },
       timestamp: new Date(),
@@ -250,26 +254,9 @@ export function ChatContent({ conversation }: ChatContentProps) {
       // 标记消息发送失败
       setMessages((prev) =>
         prev.map((msg) =>
-          msg.id === tempMessage.id
-            ? { ...msg, status: 'failed' as const }
-            : msg
+          msg.id === tempMessage.id ? { ...msg, status: 'sent' as const } : msg
         )
       );
-    }
-  };
-
-  // 处理消息操作
-  const handleMessageAction = (action: string, message: Message) => {
-    switch (action) {
-      case 'reply':
-        setReplyTo(message);
-        break;
-      case 'delete':
-        setMessages((prev) => prev.filter((msg) => msg.id !== message.id));
-        break;
-      case 'copy':
-        navigator.clipboard.writeText(message.content);
-        break;
     }
   };
 
@@ -418,23 +405,41 @@ export function ChatContent({ conversation }: ChatContentProps) {
               </div>
             </div>
           ) : (
-            <>
-              {messages.map((message) => (
-                <MessageBubble
-                  key={message.id}
-                  message={message}
-                  onAction={handleMessageAction}
-                />
-              ))}
+            <React.Fragment>
+              {messages.map((message) => {
+                const isOwn = user?.id ? message.sender.id === user.id : false;
+                return (
+                  <MessageBubble
+                    key={message.id}
+                    message={message}
+                    isOwn={isOwn}
+                    onReply={(msg) => setReplyTo(msg)}
+                    onDelete={(messageId) => {
+                      setMessages((prev) =>
+                        prev.filter((msg) => msg.id !== messageId)
+                      );
+                    }}
+                    onCopy={(content) => {
+                      navigator.clipboard.writeText(content);
+                      toast.success('消息已复制到剪贴板');
+                    }}
+                  />
+                );
+              })}
               {isTyping && (
                 <div className='text-muted-foreground flex items-center gap-2 text-sm'>
                   <div className='flex gap-1'>
-                    <div className='bg-muted-foreground h-2 w-2 animate-bounce rounded-full' />
                     <div
+                      key='dot-1'
+                      className='bg-muted-foreground h-2 w-2 animate-bounce rounded-full'
+                    />
+                    <div
+                      key='dot-2'
                       className='bg-muted-foreground h-2 w-2 animate-bounce rounded-full'
                       style={{ animationDelay: '0.1s' }}
                     />
                     <div
+                      key='dot-3'
                       className='bg-muted-foreground h-2 w-2 animate-bounce rounded-full'
                       style={{ animationDelay: '0.2s' }}
                     />
@@ -442,7 +447,7 @@ export function ChatContent({ conversation }: ChatContentProps) {
                   <span>{conversation.name} 正在输入...</span>
                 </div>
               )}
-            </>
+            </React.Fragment>
           )}
           <div ref={messagesEndRef} />
         </div>
@@ -453,7 +458,7 @@ export function ChatContent({ conversation }: ChatContentProps) {
         <div className='bg-card border-t'>
           <MessageInput
             onSendMessage={handleSendMessage}
-            replyTo={replyTo}
+            replyTo={replyTo || undefined}
             onCancelReply={() => setReplyTo(null)}
             placeholder={`发送消息给 ${conversation.name}...`}
           />
