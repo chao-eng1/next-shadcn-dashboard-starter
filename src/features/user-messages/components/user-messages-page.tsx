@@ -153,7 +153,7 @@ export function UserMessagesPage({ currentUser }: UserMessagesPageProps) {
   const unreadCount = messages.filter(msg => !msg.isRead).length;
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="h-screen flex flex-col p-6 space-y-6 overflow-hidden">
       {/* 页面头部 */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -211,7 +211,7 @@ export function UserMessagesPage({ currentUser }: UserMessagesPageProps) {
       </div>
 
       {/* 消息列表 */}
-      <Card>
+      <Card className="flex-1 flex flex-col min-h-0">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageSquare className="h-5 w-5" />
@@ -223,7 +223,7 @@ export function UserMessagesPage({ currentUser }: UserMessagesPageProps) {
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1 flex flex-col min-h-0">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -243,7 +243,7 @@ export function UserMessagesPage({ currentUser }: UserMessagesPageProps) {
               </p>
             </div>
           ) : (
-            <ScrollArea className="h-[600px]">
+            <ScrollArea className="flex-1 min-h-0">
               <div className="space-y-4">
                 {filteredMessages.map((userMessage) => {
                   const message = userMessage.message;
