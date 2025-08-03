@@ -26,24 +26,42 @@ export async function POST(request: NextRequest) {
 
     const { status } = validation.data;
 
-    // 更新用户状态和最后活跃时间
-    const updatedUser = await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        status,
-        lastActiveAt: new Date()
+    // 更新或创建用户在线状态
+    const onlineStatus = await prisma.userOnlineStatus.upsert({
+      where: { userId: user.id },
+      update: {
+        isOnline: status === 'online',
+        lastSeenAt: new Date()
       },
+      create: {
+        userId: user.id,
+        isOnline: status === 'online',
+        lastSeenAt: new Date()
+      }
+    });
+
+    // 获取用户信息和在线状态
+    const updatedUser = await prisma.user.findUnique({
+      where: { id: user.id },
       select: {
         id: true,
         name: true,
         email: true,
-        avatar: true,
-        status: true,
-        lastActiveAt: true
+        image: true,
+        onlineStatus: {
+          select: {
+            isOnline: true,
+            lastSeenAt: true
+          }
+        }
       }
     });
     
-    return apiResponse(updatedUser);
+    return apiResponse({
+      ...updatedUser,
+      status: onlineStatus.isOnline ? 'online' : 'offline',
+      lastActiveAt: onlineStatus.lastSeenAt
+    });
   } catch (error) {
     console.error('Failed to update user status:', error);
     return NextResponse.json(
@@ -66,12 +84,20 @@ export async function GET(request: NextRequest) {
       where: { id: user.id },
       select: {
         id: true,
-        status: true,
-        lastActiveAt: true
+        onlineStatus: {
+          select: {
+            isOnline: true,
+            lastSeenAt: true
+          }
+        }
       }
     });
     
-    return apiResponse(userStatus);
+    return apiResponse({
+      id: userStatus?.id,
+      status: userStatus?.onlineStatus?.isOnline ? 'online' : 'offline',
+      lastActiveAt: userStatus?.onlineStatus?.lastSeenAt || null
+    });
   } catch (error) {
     console.error('Failed to get user status:', error);
     return NextResponse.json(

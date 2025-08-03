@@ -37,6 +37,20 @@ export async function POST(request: Request) {
       );
     }
 
+    // Set user status to online and update last active time
+    await prisma.userOnlineStatus.upsert({
+      where: { userId: user.id },
+      update: {
+        isOnline: true,
+        lastSeenAt: new Date()
+      },
+      create: {
+        userId: user.id,
+        isOnline: true,
+        lastSeenAt: new Date()
+      }
+    });
+
     // Generate JWT
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {

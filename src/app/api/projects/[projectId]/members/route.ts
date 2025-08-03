@@ -73,7 +73,13 @@ export async function GET(
             name: true,
             email: true,
             image: true,
-            createdAt: true
+            createdAt: true,
+            onlineStatus: {
+              select: {
+                isOnline: true,
+                lastSeenAt: true
+              }
+            }
           }
         }
       },
@@ -96,10 +102,11 @@ export async function GET(
         name: member.user.name,
         email: member.user.email,
         image: member.user.image,
-        createdAt: member.user.createdAt
+        createdAt: member.user.createdAt,
+        status: member.user.onlineStatus?.isOnline ? 'online' : 'offline'
       },
-      isOnline: false, // 这里可以后续集成在线状态
-      lastSeen: null // 这里可以后续集成最后在线时间
+      isOnline: member.user.onlineStatus?.isOnline || false,
+      lastSeen: member.user.onlineStatus?.lastSeenAt || null
     }));
 
     return apiResponse(formattedMembers, '获取项目成员列表成功');
@@ -180,7 +187,13 @@ export async function POST(
             name: true,
             email: true,
             image: true,
-            createdAt: true
+            createdAt: true,
+            onlineStatus: {
+              select: {
+                isOnline: true,
+                lastSeenAt: true
+              }
+            }
           }
         }
       }
@@ -196,10 +209,11 @@ export async function POST(
         name: newMember.user.name,
         email: newMember.user.email,
         image: newMember.user.image,
-        createdAt: newMember.user.createdAt
+        createdAt: newMember.user.createdAt,
+        status: newMember.user.onlineStatus?.isOnline ? 'online' : 'offline'
       },
-      isOnline: false,
-      lastSeen: null
+      isOnline: newMember.user.onlineStatus?.isOnline || false,
+      lastSeen: newMember.user.onlineStatus?.lastSeenAt || null
     };
 
     return apiResponse(formattedMember, '成员添加成功');

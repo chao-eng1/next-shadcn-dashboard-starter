@@ -56,11 +56,14 @@ export const useIM = () => {
   const typingTimeoutRef = useRef<{ [conversationId: string]: NodeJS.Timeout }>({});
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastMessageTimestampRef = useRef<string>(new Date().toISOString());
+  const onlineStatusIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
   // 使用refs来存储函数引用，避免useEffect依赖问题
   const startPollingRef = useRef<() => void>(() => {});
   const stopPollingRef = useRef<() => void>(() => {});
   const loadOnlineUsersRef = useRef<() => Promise<void>>(async () => {});
+  const startOnlineStatusSyncRef = useRef<() => void>(() => {});
+  const stopOnlineStatusSyncRef = useRef<() => void>(() => {});
   
   // WebSocket连接 - 只在客户端初始化
   const webSocketResult = typeof window !== 'undefined' ? useWebSocket({
@@ -74,12 +77,16 @@ export const useIM = () => {
       stopPollingRef.current();
       // 连接成功后同步在线用户状态
       loadOnlineUsersRef.current();
+      // WebSocket连接成功时使用较低频率的状态同步（因为WebSocket会实时更新）
+      startOnlineStatusSyncRef.current();
     },
     onDisconnect: () => {
       setIsConnected(false);
       setConnectionStatus('disconnected');
       // 断开连接后启动轮询作为备选方案
       startPollingRef.current();
+      // WebSocket断开时仍然需要定期同步在线状态
+      startOnlineStatusSyncRef.current();
     },
     onError: () => {
       console.warn('WebSocket连接失败，启动轮询模式');
@@ -87,6 +94,8 @@ export const useIM = () => {
       setIsConnected(false);
       // WebSocket失败后启动轮询
       startPollingRef.current();
+      // WebSocket失败时也需要在线状态同步
+      startOnlineStatusSyncRef.current();
     },
     autoReconnect: true, // 启用自动重连
     reconnectInterval: 5000,
@@ -179,6 +188,14 @@ export const useIM = () => {
       console.log('获取当前用户信息:', user);
       setCurrentUser(user);
       
+      // 设置用户状态为在线
+      try {
+        await imAPI.user.updateUserStatus('online');
+        console.log('用户状态已设置为在线');
+      } catch (statusError) {
+        console.warn('设置用户在线状态失败:', statusError);
+      }
+      
       // 尝试获取WebSocket token，但不因失败而中断初始化
       try {
         const wsToken = await imAPI.websocket.getWebSocketToken();
@@ -207,6 +224,9 @@ export const useIM = () => {
         console.log('设置默认项目:', userProjects[0]);
         setCurrentProject(userProjects[0]);
       }
+      
+      // 启动在线状态同步
+      startOnlineStatusSyncRef.current();
       
       console.log('IM系统初始化完成');
       
@@ -401,10 +421,38 @@ export const useIM = () => {
     try {
       const users = await imAPI.user.getOnlineUsers();
       setOnlineUsers(users);
+      
+      // 同步更新会话中参与者的状态
+      const state = getStoreState();
+      if (state.conversations.length > 0) {
+        users.forEach(onlineUser => {
+          updateUserStatus(onlineUser.id, onlineUser.status);
+        });
+      }
     } catch (error) {
       console.error('Failed to load online users:', error);
     }
-  }, [setOnlineUsers]);
+  }, [setOnlineUsers, updateUserStatus, getStoreState]);
+  
+  // 启动在线状态同步
+  const startOnlineStatusSync = useCallback(() => {
+    if (onlineStatusIntervalRef.current) return; // 避免重复启动
+    
+    console.log('启动在线状态同步');
+    // 立即执行一次同步
+    loadOnlineUsers();
+    // 然后每30秒同步一次在线状态
+    onlineStatusIntervalRef.current = setInterval(loadOnlineUsers, 30000);
+  }, [loadOnlineUsers]);
+  
+  // 停止在线状态同步
+  const stopOnlineStatusSync = useCallback(() => {
+    if (onlineStatusIntervalRef.current) {
+      clearInterval(onlineStatusIntervalRef.current);
+      onlineStatusIntervalRef.current = null;
+      console.log('停止在线状态同步');
+    }
+  }, []);
   
   // 创建私聊会话
   const createPrivateConversation = useCallback(async (userId: string, projectId?: string) => {
@@ -515,7 +563,9 @@ export const useIM = () => {
     startPollingRef.current = startPolling;
     stopPollingRef.current = stopPolling;
     loadOnlineUsersRef.current = loadOnlineUsers;
-  }, [startPolling, stopPolling, loadOnlineUsers]);
+    startOnlineStatusSyncRef.current = startOnlineStatusSync;
+    stopOnlineStatusSyncRef.current = stopOnlineStatusSync;
+  }, [startPolling, stopPolling, loadOnlineUsers, startOnlineStatusSync, stopOnlineStatusSync]);
   
   return {
     // 状态
@@ -563,6 +613,7 @@ export const useIM = () => {
     // 清理函数
     cleanup: () => {
       stopPolling();
+      stopOnlineStatusSync();
       reset();
     }
   };

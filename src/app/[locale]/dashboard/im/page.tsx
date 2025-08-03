@@ -223,7 +223,21 @@ export default function IMPage() {
     
     try {
       const conversation = await createPrivateConversation(member.id, selectedProjectForChat.id);
-      setCurrentConversation(conversation);
+      
+      // 确保会话中的用户状态是最新的
+      const updatedConversation = {
+        ...conversation,
+        participants: conversation.participants.map(p => {
+          if (p.id === member.id) {
+            // 使用来自在线用户列表的最新状态，如果没有则使用原状态
+            const onlineUser = onlineUsers.find(u => u.id === member.id);
+            return { ...p, status: onlineUser?.status || member.status };
+          }
+          return p;
+        })
+      };
+      
+      setCurrentConversation(updatedConversation);
       setShowMemberDialog(false);
       setChatType('private');
       toast.success(`已开始与${member.name || '用户'}的私聊`);
@@ -302,6 +316,26 @@ export default function IMPage() {
       case 'offline': return '离线';
       default: return '未知';
     }
+  };
+
+  // 获取用户的最新在线状态
+  const getUserLatestStatus = (userId: string, fallbackStatus: string = 'offline') => {
+    // 优先从在线用户列表中获取状态（WebSocket实时更新）
+    const onlineUser = onlineUsers.find(u => u.id === userId);
+    if (onlineUser) {
+      return onlineUser.status;
+    }
+    
+    // 从当前会话参与者中获取状态
+    if (currentConversation?.participants) {
+      const participant = currentConversation.participants.find(p => p.id === userId);
+      if (participant) {
+        return participant.status;
+      }
+    }
+    
+    // 使用默认状态
+    return fallbackStatus as 'online' | 'away' | 'offline';
   };
 
   // 错误状态显示 - 只在严重错误时显示，WebSocket连接失败不应阻止使用
@@ -457,7 +491,7 @@ export default function IMPage() {
                                 </Avatar>
                                 <div
                                   className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background ${
-                                    getStatusColor(member.status)
+                                    getStatusColor(getUserLatestStatus(member.id, member.status))
                                   }`}
                                 />
                               </div>
@@ -468,11 +502,11 @@ export default function IMPage() {
                               <Badge
                                 variant="outline"
                                 className={`text-xs ${
-                                  member.status === 'online' ? 'text-green-600' :
-                                  member.status === 'away' ? 'text-yellow-600' : 'text-gray-500'
+                                  getUserLatestStatus(member.id, member.status) === 'online' ? 'text-green-600' :
+                                  getUserLatestStatus(member.id, member.status) === 'away' ? 'text-yellow-600' : 'text-gray-500'
                                 }`}
                               >
-                                {getStatusText(member.status)}
+                                {getStatusText(getUserLatestStatus(member.id, member.status))}
                               </Badge>
                             </div>
                           ))}
@@ -676,7 +710,7 @@ export default function IMPage() {
                                   </Avatar>
                                   <div
                                     className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-background ${
-                                      getStatusColor(member.status)
+                                      getStatusColor(getUserLatestStatus(member.id, member.status))
                                     }`}
                                   />
                                 </div>
@@ -687,11 +721,11 @@ export default function IMPage() {
                                 <Badge
                                   variant="outline"
                                   className={`text-xs ${
-                                    member.status === 'online' ? 'text-green-600' :
-                                    member.status === 'away' ? 'text-yellow-600' : 'text-gray-500'
+                                    getUserLatestStatus(member.id, member.status) === 'online' ? 'text-green-600' :
+                                    getUserLatestStatus(member.id, member.status) === 'away' ? 'text-yellow-600' : 'text-gray-500'
                                   }`}
                                 >
-                                  {getStatusText(member.status)}
+                                  {getStatusText(getUserLatestStatus(member.id, member.status))}
                                 </Badge>
                               </div>
                             ))}

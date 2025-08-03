@@ -245,18 +245,63 @@ export const useIMStore = create<IMState>((set, get) => ({
   
   setOnlineUsers: (users) => set({ onlineUsers: users }),
   
-  updateUserStatus: (userId, status) => set(state => ({
-    onlineUsers: state.onlineUsers.map(user => 
+  updateUserStatus: (userId, status) => set(state => {
+    // 更新在线用户列表
+    const updatedOnlineUsers = state.onlineUsers.map(user => 
       user.id === userId ? { ...user, status } : user
-    ),
-    // 同时更新会话中的参与者状态
-    conversations: state.conversations.map(conv => ({
-      ...conv,
-      participants: conv.participants.map(p => 
-        p.id === userId ? { ...p, status } : p
-      )
-    }))
-  })),
+    );
+    
+    // 如果用户不在在线列表中但状态是在线，添加到在线列表
+    const userExists = state.onlineUsers.some(user => user.id === userId);
+    if (!userExists && status === 'online') {
+      // 可以从会话参与者中找到用户信息并添加到在线列表
+      const userFromConversations = state.conversations
+        .flatMap(conv => conv.participants)
+        .find(p => p.id === userId);
+      
+      if (userFromConversations) {
+        updatedOnlineUsers.push({ ...userFromConversations, status });
+      }
+    } else if (userExists && status === 'offline') {
+      // 如果用户离线，从在线列表中移除
+      const filteredOnlineUsers = updatedOnlineUsers.filter(user => user.id !== userId);
+      return {
+        onlineUsers: filteredOnlineUsers,
+        // 同时更新会话中的参与者状态
+        conversations: state.conversations.map(conv => ({
+          ...conv,
+          participants: conv.participants.map(p => 
+            p.id === userId ? { ...p, status } : p
+          )
+        })),
+        // 更新当前会话参与者状态（如果当前会话包含该用户）
+        currentConversation: state.currentConversation ? {
+          ...state.currentConversation,
+          participants: state.currentConversation.participants.map(p => 
+            p.id === userId ? { ...p, status } : p
+          )
+        } : state.currentConversation
+      };
+    }
+    
+    return {
+      onlineUsers: updatedOnlineUsers,
+      // 同时更新会话中的参与者状态
+      conversations: state.conversations.map(conv => ({
+        ...conv,
+        participants: conv.participants.map(p => 
+          p.id === userId ? { ...p, status } : p
+        )
+      })),
+      // 更新当前会话参与者状态（如果当前会话包含该用户）
+      currentConversation: state.currentConversation ? {
+        ...state.currentConversation,
+        participants: state.currentConversation.participants.map(p => 
+          p.id === userId ? { ...p, status } : p
+        )
+      } : state.currentConversation
+    };
+  }),
   
   setChatType: (type) => set({ chatType: type }),
   

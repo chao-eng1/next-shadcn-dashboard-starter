@@ -71,7 +71,7 @@ export const userAPI = {
   // 更新用户状态
   updateUserStatus: async (status: 'online' | 'away' | 'offline'): Promise<void> => {
     await apiRequest('/users/status', {
-      method: 'PUT',
+      method: 'POST',
       body: JSON.stringify({ status })
     });
   },
@@ -109,7 +109,7 @@ export const projectAPI = {
       email: member.user.email,
       image: member.user.image,
       role: member.role,
-      status: member.isOnline ? 'online' : 'offline'
+      status: member.user.status || 'offline'
     }));
   }
 };

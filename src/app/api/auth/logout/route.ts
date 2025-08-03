@@ -1,8 +1,32 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { getCurrentUser } from '@/lib/get-current-user';
+import { prisma } from '@/lib/prisma';
 
 export async function POST() {
   try {
+    // Update user status to offline before clearing cookies
+    try {
+      const user = await getCurrentUser();
+      if (user) {
+        await prisma.userOnlineStatus.upsert({
+          where: { userId: user.id },
+          update: {
+            isOnline: false,
+            lastSeenAt: new Date()
+          },
+          create: {
+            userId: user.id,
+            isOnline: false,
+            lastSeenAt: new Date()
+          }
+        });
+      }
+    } catch (userError) {
+      // Don't fail logout if user status update fails
+      console.warn('Failed to update user status during logout:', userError);
+    }
+
     // Clear auth cookie
     const cookieStore = await cookies();
 
