@@ -87,31 +87,33 @@ export function ChatContent({ conversation }: ChatContentProps) {
       );
       if (response.ok) {
         const data = await response.json();
-        const formattedMessages: Message[] = data.messages.map((msg: any) => ({
-          id: msg.id,
-          content: msg.content,
-          sender: {
-            id: msg.senderId,
-            name: msg.senderName,
-            avatar: msg.senderImage
-          },
-          timestamp: new Date(msg.createdAt),
-          type: msg.messageType,
-          status: msg.status || 'delivered',
-          replyTo: msg.replyTo
-            ? {
-                id: msg.replyTo.id,
-                content: msg.replyTo.content,
-                sender: {
-                  id: msg.replyTo.senderId,
-                  name: msg.replyTo.senderName
-                },
-                timestamp: new Date(),
-                type: 'text',
-                status: 'delivered'
-              }
-            : undefined
-        }));
+        const formattedMessages: Message[] = data.data.messages.map(
+          (msg: any) => ({
+            id: msg.id,
+            content: msg.content,
+            sender: {
+              id: msg.senderId,
+              name: msg.senderName,
+              avatar: msg.senderImage
+            },
+            timestamp: new Date(msg.createdAt),
+            type: msg.messageType,
+            status: msg.status || 'delivered',
+            replyTo: msg.replyTo
+              ? {
+                  id: msg.replyTo.id,
+                  content: msg.replyTo.content,
+                  sender: {
+                    id: msg.replyTo.senderId,
+                    name: msg.replyTo.senderName
+                  },
+                  timestamp: new Date(),
+                  type: 'text',
+                  status: 'delivered'
+                }
+              : undefined
+          })
+        );
         setMessages(formattedMessages);
       } else {
         console.error('Failed to load messages:', response.statusText);

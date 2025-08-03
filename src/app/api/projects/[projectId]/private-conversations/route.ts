@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
-import { apiResponse, apiError, apiUnauthorized, apiNotFound, apiForbidden } from '@/lib/api-response';
+import {
+  apiResponse,
+  apiError,
+  apiUnauthorized,
+  apiNotFound,
+  apiForbidden
+} from '@/lib/api-response';
 import { z } from 'zod';
 
 // 创建私聊会话的请求schema
@@ -20,7 +26,7 @@ export async function GET(
       return apiUnauthorized('用户未登录');
     }
 
-    const { projectId } = params;
+    const { projectId } = await params;
 
     // 检查用户是否是项目成员
     const projectMember = await prisma.projectMember.findFirst({
@@ -38,10 +44,7 @@ export async function GET(
     const conversations = await prisma.privateConversation.findMany({
       where: {
         projectId,
-        OR: [
-          { participant1Id: user.id },
-          { participant2Id: user.id }
-        ]
+        OR: [{ participant1Id: user.id }, { participant2Id: user.id }]
       },
       include: {
         participant1: {
@@ -91,23 +94,26 @@ export async function GET(
     });
 
     // 格式化返回数据
-    const formattedConversations = conversations.map(conversation => {
-      const otherParticipant = conversation.participant1Id === user.id 
-        ? conversation.participant2 
-        : conversation.participant1;
-      
+    const formattedConversations = conversations.map((conversation) => {
+      const otherParticipant =
+        conversation.participant1Id === user.id
+          ? conversation.participant2
+          : conversation.participant1;
+
       const lastMessage = conversation.messages[0] || null;
       const unreadCount = conversation._count.messages;
 
       return {
         id: conversation.id,
         participant: otherParticipant,
-        lastMessage: lastMessage ? {
-          id: lastMessage.id,
-          content: lastMessage.content,
-          sender: lastMessage.sender,
-          createdAt: lastMessage.createdAt
-        } : null,
+        lastMessage: lastMessage
+          ? {
+              id: lastMessage.id,
+              content: lastMessage.content,
+              sender: lastMessage.sender,
+              createdAt: lastMessage.createdAt
+            }
+          : null,
         unreadCount,
         lastMessageAt: conversation.lastMessageAt,
         createdAt: conversation.createdAt
@@ -132,7 +138,7 @@ export async function POST(
       return apiUnauthorized('用户未登录');
     }
 
-    const { projectId } = params;
+    const { projectId } = await params;
     const body = await request.json();
     const { participantId } = createConversationSchema.parse(body);
 
@@ -201,15 +207,19 @@ export async function POST(
     });
 
     if (existingConversation) {
-      const otherParticipant = existingConversation.participant1Id === user.id 
-        ? existingConversation.participant2 
-        : existingConversation.participant1;
+      const otherParticipant =
+        existingConversation.participant1Id === user.id
+          ? existingConversation.participant2
+          : existingConversation.participant1;
 
-      return apiResponse({
-        id: existingConversation.id,
-        participant: otherParticipant,
-        createdAt: existingConversation.createdAt
-      }, '会话已存在');
+      return apiResponse(
+        {
+          id: existingConversation.id,
+          participant: otherParticipant,
+          createdAt: existingConversation.createdAt
+        },
+        '会话已存在'
+      );
     }
 
     // 创建新的私聊会话
@@ -239,15 +249,19 @@ export async function POST(
       }
     });
 
-    const otherParticipant = conversation.participant1Id === user.id 
-      ? conversation.participant2 
-      : conversation.participant1;
+    const otherParticipant =
+      conversation.participant1Id === user.id
+        ? conversation.participant2
+        : conversation.participant1;
 
-    return apiResponse({
-      id: conversation.id,
-      participant: otherParticipant,
-      createdAt: conversation.createdAt
-    }, '创建私聊会话成功');
+    return apiResponse(
+      {
+        id: conversation.id,
+        participant: otherParticipant,
+        createdAt: conversation.createdAt
+      },
+      '创建私聊会话成功'
+    );
   } catch (error) {
     console.error('创建私聊会话失败:', error);
     return apiError('创建私聊会话失败');
