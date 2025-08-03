@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import {
   ResizableHandle,
   ResizablePanel,
-  ResizablePanelGroup,
+  ResizablePanelGroup
 } from '@/components/ui/resizable';
 import {
   MessageSquare,
@@ -32,6 +32,7 @@ import { ChatContent } from './chat-content';
 import { GlobalNotificationStatus } from './global-notification-status';
 import { NewPrivateChatDialog } from './new-private-chat-dialog';
 import { useRecentMessages } from '@/hooks/use-recent-messages';
+import { useMessageCenter } from '@/hooks/use-message-center';
 
 // 会话类型
 type ConversationType = 'private' | 'group' | 'system' | 'project';
@@ -62,14 +63,21 @@ interface Conversation {
 export function MessageCenterMain() {
   const router = useRouter();
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [selectedConversation, setSelectedConversation] =
+    useState<Conversation | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<ConversationType | 'all'>('all');
-  const [isConnected, setIsConnected] = useState(true);
   const [showNewChatDialog, setShowNewChatDialog] = useState(false);
   const [loading, setLoading] = useState(true);
-  
+
   const { unreadCount } = useRecentMessages();
+  const { isConnected, connect, disconnect } = useMessageCenter({});
+
+  // WebSocket连接管理
+  useEffect(() => {
+    connect();
+    return () => disconnect();
+  }, [connect, disconnect]);
 
   // 获取会话列表
   const fetchConversations = async () => {
@@ -80,13 +88,15 @@ export function MessageCenterMain() {
         const data = await response.json();
         const formattedConversations = data.data.map((conv: any) => ({
           ...conv,
-          lastMessage: conv.lastMessage ? {
-            ...conv.lastMessage,
-            timestamp: new Date(conv.lastMessage.timestamp)
-          } : undefined,
+          lastMessage: conv.lastMessage
+            ? {
+                ...conv.lastMessage,
+                timestamp: new Date(conv.lastMessage.timestamp)
+              }
+            : undefined,
           lastActivity: new Date(conv.lastActivity),
           isPinned: false, // TODO: 实现置顶功能
-          isMuted: false   // TODO: 实现免打扰功能
+          isMuted: false // TODO: 实现免打扰功能
         }));
         setConversations(formattedConversations);
       }
@@ -102,16 +112,21 @@ export function MessageCenterMain() {
   }, []);
 
   // 计算未读消息总数
-  const totalUnreadCount = unreadCount?.total || conversations.reduce((total, conv) => total + conv.unreadCount, 0);
+  const totalUnreadCount =
+    unreadCount?.total ||
+    conversations.reduce((total, conv) => total + conv.unreadCount, 0);
 
   // 过滤会话
-  const filteredConversations = conversations.filter(conv => {
-    const matchesSearch = !searchQuery || 
+  const filteredConversations = conversations.filter((conv) => {
+    const matchesSearch =
+      !searchQuery ||
       conv.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conv.lastMessage?.content.toLowerCase().includes(searchQuery.toLowerCase());
-    
+      conv.lastMessage?.content
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+
     const matchesFilter = filterType === 'all' || conv.type === filterType;
-    
+
     return matchesSearch && matchesFilter;
   });
 
@@ -131,89 +146,89 @@ export function MessageCenterMain() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-background overflow-hidden">
+    <div className='bg-background flex h-full flex-col overflow-hidden'>
       {/* 顶部状态栏 */}
-      <div className="flex items-center justify-between p-4 border-b bg-card flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <MessageSquare className="h-6 w-6 text-primary" />
-          <h1 className="text-xl font-semibold">消息中心</h1>
+      <div className='bg-card flex flex-shrink-0 items-center justify-between border-b p-4'>
+        <div className='flex items-center gap-3'>
+          <MessageSquare className='text-primary h-6 w-6' />
+          <h1 className='text-xl font-semibold'>消息中心</h1>
           {totalUnreadCount > 0 && (
-            <Badge variant="destructive" className="ml-2">
+            <Badge variant='destructive' className='ml-2'>
               {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
             </Badge>
           )}
         </div>
-        
-        <div className="flex items-center gap-2">
+
+        <div className='flex items-center gap-2'>
           <GlobalNotificationStatus isConnected={isConnected} />
-          <Button variant="ghost" size="sm" onClick={handleMessageSettings}>
-            <Settings className="h-4 w-4" />
+          <Button variant='ghost' size='sm' onClick={handleMessageSettings}>
+            <Settings className='h-4 w-4' />
           </Button>
         </div>
       </div>
 
-      <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
+      <ResizablePanelGroup direction='horizontal' className='min-h-0 flex-1'>
         {/* 左侧会话列表 */}
         <ResizablePanel defaultSize={35} minSize={25} maxSize={50}>
-          <div className="h-full flex flex-col overflow-hidden">
+          <div className='flex h-full flex-col overflow-hidden'>
             {/* 搜索和筛选 */}
-            <div className="p-4 space-y-3 border-b flex-shrink-0">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <div className='flex-shrink-0 space-y-3 border-b p-4'>
+              <div className='relative'>
+                <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform' />
                 <Input
-                  placeholder="搜索会话或消息..."
+                  placeholder='搜索会话或消息...'
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
+                  className='pl-9'
                 />
               </div>
-              
+
               {/* 筛选按钮 */}
-              <div className="flex gap-2 flex-wrap">
+              <div className='flex flex-wrap gap-2'>
                 <Button
                   variant={filterType === 'all' ? 'default' : 'outline'}
-                  size="sm"
+                  size='sm'
                   onClick={() => setFilterType('all')}
                 >
                   全部
                 </Button>
                 <Button
                   variant={filterType === 'private' ? 'default' : 'outline'}
-                  size="sm"
+                  size='sm'
                   onClick={() => setFilterType('private')}
                 >
-                  <MessageSquare className="h-3 w-3 mr-1" />
+                  <MessageSquare className='mr-1 h-3 w-3' />
                   私聊
                 </Button>
                 <Button
                   variant={filterType === 'group' ? 'default' : 'outline'}
-                  size="sm"
+                  size='sm'
                   onClick={() => setFilterType('group')}
                 >
-                  <Users className="h-3 w-3 mr-1" />
+                  <Users className='mr-1 h-3 w-3' />
                   群聊
                 </Button>
                 <Button
                   variant={filterType === 'system' ? 'default' : 'outline'}
-                  size="sm"
+                  size='sm'
                   onClick={() => setFilterType('system')}
                 >
-                  <Bell className="h-3 w-3 mr-1" />
+                  <Bell className='mr-1 h-3 w-3' />
                   系统
                 </Button>
                 <Button
                   variant={filterType === 'project' ? 'default' : 'outline'}
-                  size="sm"
+                  size='sm'
                   onClick={() => setFilterType('project')}
                 >
-                  <Briefcase className="h-3 w-3 mr-1" />
+                  <Briefcase className='mr-1 h-3 w-3' />
                   项目
                 </Button>
               </div>
             </div>
 
             {/* 会话列表 */}
-            <ScrollArea className="flex-1 min-h-0">
+            <ScrollArea className='min-h-0 flex-1'>
               <ConversationList
                 conversations={filteredConversations}
                 selectedConversation={selectedConversation}
@@ -222,9 +237,9 @@ export function MessageCenterMain() {
             </ScrollArea>
 
             {/* 快速操作 */}
-            <div className="p-4 border-t flex-shrink-0">
-              <Button onClick={handleNewPrivateChat} className="w-full">
-                <Plus className="h-4 w-4 mr-2" />
+            <div className='flex-shrink-0 border-t p-4'>
+              <Button onClick={handleNewPrivateChat} className='w-full'>
+                <Plus className='mr-2 h-4 w-4' />
                 新建私聊
               </Button>
             </div>
@@ -238,7 +253,7 @@ export function MessageCenterMain() {
           <ChatContent conversation={selectedConversation} />
         </ResizablePanel>
       </ResizablePanelGroup>
-      
+
       {/* 新建私聊对话框 */}
       <NewPrivateChatDialog
         open={showNewChatDialog}
