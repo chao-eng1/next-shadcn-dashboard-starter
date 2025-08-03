@@ -42,7 +42,7 @@ export function TaskContainer({
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  
+
   // 初始化时从URL读取projectId
   const getInitialProjectId = () => {
     const projectIdFromUrl = searchParams.get('projectId');
@@ -51,7 +51,7 @@ export function TaskContainer({
     }
     return undefined;
   };
-  
+
   const [selectedProjectId, setSelectedProjectId] = useState<
     string | undefined
   >(getInitialProjectId);
@@ -69,7 +69,7 @@ export function TaskContainer({
   const handleProjectChange = (projectId: string) => {
     const newProjectId = projectId === 'all' ? undefined : projectId;
     setSelectedProjectId(newProjectId);
-    
+
     // 更新URL参数
     const params = new URLSearchParams(searchParams.toString());
     if (newProjectId) {
@@ -77,7 +77,7 @@ export function TaskContainer({
     } else {
       params.delete('projectId');
     }
-    
+
     router.push(`${pathname}?${params.toString()}`);
   };
 

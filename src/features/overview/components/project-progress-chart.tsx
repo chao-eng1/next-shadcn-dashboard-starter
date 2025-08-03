@@ -3,7 +3,13 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, ExternalLink } from 'lucide-react';
@@ -46,13 +52,16 @@ export function ProjectProgressChart() {
         setError(null);
 
         // 获取项目数据
-        const response = await fetch(getApiUrl('/api/projects?limit=10&sortBy=updatedAt&sortOrder=desc'), {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include'
-        });
+        const response = await fetch(
+          getApiUrl('/api/projects?limit=10&sortBy=updatedAt&sortOrder=desc'),
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+          }
+        );
 
         if (!response.ok) {
           throw new Error('Failed to fetch projects');
@@ -61,7 +70,7 @@ export function ProjectProgressChart() {
         const result = await response.json();
         if (result.success) {
           const projectsData = result.data.projects || [];
-          
+
           // 为每个项目获取任务统计
           const projectsWithProgress = await Promise.all(
             projectsData.map(async (project: any) => {
@@ -86,11 +95,16 @@ export function ProjectProgressChart() {
                   if (tasksData.success) {
                     const tasks = tasksData.data.tasks || [];
                     totalTasks = tasks.length;
-                    completedTasks = tasks.filter((task: any) => task.status === 'DONE').length;
+                    completedTasks = tasks.filter(
+                      (task: any) => task.status === 'DONE'
+                    ).length;
                   }
                 }
 
-                const progress = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+                const progress =
+                  totalTasks > 0
+                    ? Math.round((completedTasks / totalTasks) * 100)
+                    : 0;
 
                 return {
                   id: project.id,
@@ -102,7 +116,10 @@ export function ProjectProgressChart() {
                   memberCount: project._count?.members || 0
                 };
               } catch (err) {
-                console.error(`Error fetching tasks for project ${project.id}:`, err);
+                console.error(
+                  `Error fetching tasks for project ${project.id}:`,
+                  err
+                );
                 return {
                   id: project.id,
                   name: project.name,
@@ -140,7 +157,7 @@ export function ProjectProgressChart() {
         </CardHeader>
         <CardContent>
           <div className='flex h-[400px] items-center justify-center'>
-            <Loader2 className='h-8 w-8 animate-spin text-primary' />
+            <Loader2 className='text-primary h-8 w-8 animate-spin' />
           </div>
         </CardContent>
       </Card>
@@ -156,7 +173,7 @@ export function ProjectProgressChart() {
         </CardHeader>
         <CardContent>
           <div className='flex h-[400px] items-center justify-center'>
-            <div className='text-center text-muted-foreground'>
+            <div className='text-muted-foreground text-center'>
               <p>{error}</p>
             </div>
           </div>
@@ -174,7 +191,7 @@ export function ProjectProgressChart() {
         </CardHeader>
         <CardContent>
           <div className='flex h-[400px] items-center justify-center'>
-            <div className='text-center text-muted-foreground'>
+            <div className='text-muted-foreground text-center'>
               <p>暂无项目数据</p>
             </div>
           </div>
@@ -205,12 +222,20 @@ export function ProjectProgressChart() {
                   </Link>
                   <Badge
                     variant='secondary'
-                    className={STATUS_COLORS[project.status as keyof typeof STATUS_COLORS]}
+                    className={
+                      STATUS_COLORS[
+                        project.status as keyof typeof STATUS_COLORS
+                      ]
+                    }
                   >
-                    {STATUS_LABELS[project.status as keyof typeof STATUS_LABELS]}
+                    {
+                      STATUS_LABELS[
+                        project.status as keyof typeof STATUS_LABELS
+                      ]
+                    }
                   </Badge>
                 </div>
-                <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+                <div className='text-muted-foreground flex items-center gap-2 text-sm'>
                   <span>{project.progress}%</span>
                   <Link
                     href={`/dashboard/projects/${project.id}`}
@@ -220,25 +245,23 @@ export function ProjectProgressChart() {
                   </Link>
                 </div>
               </div>
-              
+
               <Progress value={project.progress} className='h-2' />
-              
-              <div className='flex items-center justify-between text-xs text-muted-foreground'>
+
+              <div className='text-muted-foreground flex items-center justify-between text-xs'>
                 <span>
                   {project.completedTasks}/{project.totalTasks} 任务完成
                 </span>
-                <span>
-                  {project.memberCount} 名成员
-                </span>
+                <span>{project.memberCount} 名成员</span>
               </div>
             </div>
           ))}
         </div>
-        
+
         <div className='mt-6 text-center'>
           <Link
             href='/dashboard/projects'
-            className='text-sm text-primary hover:underline'
+            className='text-primary text-sm hover:underline'
           >
             查看所有项目 →
           </Link>

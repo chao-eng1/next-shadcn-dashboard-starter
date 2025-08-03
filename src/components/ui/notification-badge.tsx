@@ -32,7 +32,7 @@ export function NotificationBadge({
   return (
     <span
       className={cn(
-        'absolute -top-1 -right-1 flex items-center justify-center rounded-full bg-red-500 text-white font-medium',
+        'absolute -top-1 -right-1 flex items-center justify-center rounded-full bg-red-500 font-medium text-white',
         sizeClasses[size],
         className
       )}

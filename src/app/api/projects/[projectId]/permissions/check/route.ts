@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/get-current-user';
 import { hasProjectPermission } from '@/lib/permissions';
-import { apiResponse, apiUnauthorized, apiBadRequest } from '@/lib/api-response';
+import {
+  apiResponse,
+  apiUnauthorized,
+  apiBadRequest
+} from '@/lib/api-response';
 
 export async function GET(
   request: NextRequest,

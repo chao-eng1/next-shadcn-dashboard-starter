@@ -7,7 +7,7 @@ import { apiResponse, apiUnauthorized } from '@/lib/api-response';
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user) {
       return apiUnauthorized();
     }
@@ -51,7 +51,8 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    const totalUnreadCount = systemUnreadCount + projectUnreadCount + privateUnreadCount;
+    const totalUnreadCount =
+      systemUnreadCount + projectUnreadCount + privateUnreadCount;
 
     return apiResponse({
       total: totalUnreadCount,

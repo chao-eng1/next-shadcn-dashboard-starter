@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { zhCN } from 'date-fns/locale/zh-CN';
 
 import {
   Card,
@@ -93,12 +93,12 @@ export function RequirementTree({
   useEffect(() => {
     const tree = buildRequirementTree(requirements);
     setTreeData(tree);
-    
+
     // 如果设置了全部展开
     if (expandAll) {
       const allNodeIds = new Set<string>();
       const collectNodeIds = (nodes: RequirementTreeNode[]) => {
-        nodes.forEach(node => {
+        nodes.forEach((node) => {
           allNodeIds.add(node.id);
           if (node.children.length > 0) {
             collectNodeIds(node.children);
@@ -112,7 +112,7 @@ export function RequirementTree({
 
   // 切换节点展开状态
   const toggleNode = (nodeId: string) => {
-    setExpandedNodes(prev => {
+    setExpandedNodes((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(nodeId)) {
         newSet.delete(nodeId);
@@ -151,34 +151,39 @@ export function RequirementTree({
   };
 
   // 渲染需求节点
-  const renderRequirementNode = (node: RequirementTreeNode, level: number = 0) => {
+  const renderRequirementNode = (
+    node: RequirementTreeNode,
+    level: number = 0
+  ) => {
     const requirement = node.requirement;
     const hasChildren = node.children.length > 0;
     const isExpanded = expandedNodes.has(node.id);
     const isSelected = selectedNode === node.id;
-    
+
     const priorityConfig = getRequirementPriorityConfig(requirement.priority);
     const statusConfig = getRequirementStatusConfig(requirement.status);
     const typeConfig = getRequirementTypeConfig(requirement.type);
-    const complexityConfig = getRequirementComplexityConfig(requirement.complexity);
+    const complexityConfig = getRequirementComplexityConfig(
+      requirement.complexity
+    );
 
     return (
       <div key={node.id} className='w-full'>
         <Collapsible open={isExpanded} onOpenChange={() => toggleNode(node.id)}>
-          <div 
-            className={`group flex items-center gap-2 p-2 rounded-md hover:bg-muted/50 cursor-pointer transition-colors ${
-              isSelected ? 'bg-primary/10 border border-primary/20' : ''
+          <div
+            className={`group hover:bg-muted/50 flex cursor-pointer items-center gap-2 rounded-md p-2 transition-colors ${
+              isSelected ? 'bg-primary/10 border-primary/20 border' : ''
             }`}
             style={{ paddingLeft: `${level * 24 + 8}px` }}
             onClick={() => selectNode(requirement)}
           >
             {/* 展开/收起按钮 */}
-            <div className='flex items-center justify-center w-4 h-4'>
+            <div className='flex h-4 w-4 items-center justify-center'>
               {hasChildren ? (
                 <CollapsibleTrigger asChild>
-                  <Button 
-                    variant='ghost' 
-                    size='sm' 
+                  <Button
+                    variant='ghost'
+                    size='sm'
                     className='h-4 w-4 p-0 hover:bg-transparent'
                     onClick={(e) => {
                       e.stopPropagation();
@@ -193,12 +198,12 @@ export function RequirementTree({
                   </Button>
                 </CollapsibleTrigger>
               ) : (
-                <div className='w-3 h-3' />
+                <div className='h-3 w-3' />
               )}
             </div>
 
             {/* 图标 */}
-            <div className='flex items-center justify-center w-4 h-4'>
+            <div className='flex h-4 w-4 items-center justify-center'>
               {hasChildren ? (
                 <FolderIcon className='h-4 w-4 text-blue-500' />
               ) : (
@@ -207,25 +212,23 @@ export function RequirementTree({
             </div>
 
             {/* 需求信息 */}
-            <div className='flex-1 min-w-0 flex items-center gap-2'>
-              <span className='text-xs font-mono text-muted-foreground'>
+            <div className='flex min-w-0 flex-1 items-center gap-2'>
+              <span className='text-muted-foreground font-mono text-xs'>
                 {requirement.requirementId}
               </span>
-              <span className='font-medium truncate'>
-                {requirement.title}
-              </span>
+              <span className='truncate font-medium'>{requirement.title}</span>
             </div>
 
             {/* 状态和优先级徽章 */}
             <div className='flex items-center gap-1'>
-              <Badge 
-                variant='outline' 
+              <Badge
+                variant='outline'
                 className={`text-xs ${statusConfig.bgColor} ${statusConfig.textColor} ${statusConfig.borderColor}`}
               >
                 {statusConfig.label}
               </Badge>
-              <Badge 
-                variant='outline' 
+              <Badge
+                variant='outline'
                 className={`text-xs ${priorityConfig.bgColor} ${priorityConfig.textColor} ${priorityConfig.borderColor}`}
               >
                 {priorityConfig.label}
@@ -233,40 +236,43 @@ export function RequirementTree({
             </div>
 
             {/* 分配人 */}
-            <div className='flex items-center gap-1 min-w-0'>
+            <div className='flex min-w-0 items-center gap-1'>
               {requirement.assignedTo ? (
                 <>
                   <Avatar className='h-5 w-5'>
-                    <AvatarImage 
-                      src={requirement.assignedTo.image || ''} 
-                      alt={requirement.assignedTo.name || ''} 
+                    <AvatarImage
+                      src={requirement.assignedTo.image || ''}
+                      alt={requirement.assignedTo.name || ''}
                     />
                     <AvatarFallback className='text-xs'>
-                      {requirement.assignedTo.name?.charAt(0) || 
-                       requirement.assignedTo.email.charAt(0)}
+                      {requirement.assignedTo.name?.charAt(0) ||
+                        requirement.assignedTo.email.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
-                  <span className='text-xs truncate max-w-[60px]'>
-                    {requirement.assignedTo.name || requirement.assignedTo.email}
+                  <span className='max-w-[60px] truncate text-xs'>
+                    {requirement.assignedTo.name ||
+                      requirement.assignedTo.email}
                   </span>
                 </>
               ) : (
-                <span className='text-xs text-muted-foreground'>未分配</span>
+                <span className='text-muted-foreground text-xs'>未分配</span>
               )}
             </div>
 
             {/* 创建时间 */}
-            <span className='text-xs text-muted-foreground min-w-[60px]'>
-              {format(new Date(requirement.createdAt), 'MM-dd', { locale: zhCN })}
+            <span className='text-muted-foreground min-w-[60px] text-xs'>
+              {format(new Date(requirement.createdAt), 'MM-dd', {
+                locale: zhCN
+              })}
             </span>
 
             {/* 操作菜单 */}
             {showActions && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant='ghost' 
-                    className='h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity'
+                  <Button
+                    variant='ghost'
+                    className='h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100'
                     onClick={(e) => e.stopPropagation()}
                   >
                     <MoreHorizontalIcon className='h-4 w-4' />
@@ -275,14 +281,18 @@ export function RequirementTree({
                 <DropdownMenuContent align='end'>
                   <DropdownMenuLabel>操作</DropdownMenuLabel>
                   <DropdownMenuItem asChild>
-                    <Link href={`/dashboard/projects/${projectId}/requirements/${requirement.id}`}>
+                    <Link
+                      href={`/dashboard/projects/${projectId}/requirements/${requirement.id}`}
+                    >
                       <EyeIcon className='mr-2 h-4 w-4' />
                       查看详情
                     </Link>
                   </DropdownMenuItem>
                   {canEdit && (
                     <DropdownMenuItem asChild>
-                      <Link href={`/dashboard/projects/${projectId}/requirements/${requirement.id}/edit`}>
+                      <Link
+                        href={`/dashboard/projects/${projectId}/requirements/${requirement.id}/edit`}
+                      >
                         <EditIcon className='mr-2 h-4 w-4' />
                         编辑
                       </Link>
@@ -294,7 +304,7 @@ export function RequirementTree({
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   {canDelete && (
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       className='text-destructive'
                       onClick={(e) => {
                         e.stopPropagation();
@@ -313,7 +323,7 @@ export function RequirementTree({
           {/* 子节点 */}
           {hasChildren && (
             <CollapsibleContent className='space-y-0'>
-              {node.children.map(childNode => 
+              {node.children.map((childNode) =>
                 renderRequirementNode(childNode, level + 1)
               )}
             </CollapsibleContent>
@@ -328,9 +338,9 @@ export function RequirementTree({
     if (!selectedNode) {
       return (
         <Card className='h-full'>
-          <CardContent className='flex items-center justify-center h-full'>
-            <div className='text-center text-muted-foreground'>
-              <FileTextIcon className='h-12 w-12 mx-auto mb-4 opacity-50' />
+          <CardContent className='flex h-full items-center justify-center'>
+            <div className='text-muted-foreground text-center'>
+              <FileTextIcon className='mx-auto mb-4 h-12 w-12 opacity-50' />
               <p>选择一个需求查看详情</p>
             </div>
           </CardContent>
@@ -338,7 +348,9 @@ export function RequirementTree({
       );
     }
 
-    const selectedRequirement = requirements.find(req => req.id === selectedNode);
+    const selectedRequirement = requirements.find(
+      (req) => req.id === selectedNode
+    );
     if (!selectedRequirement) {
       return null;
     }
@@ -346,19 +358,21 @@ export function RequirementTree({
     const priorityConfig = getPriorityConfig(selectedRequirement.priority);
     const statusConfig = getStatusConfig(selectedRequirement.status);
     const typeConfig = getTypeConfig(selectedRequirement.type);
-    const complexityConfig = getComplexityConfig(selectedRequirement.complexity);
+    const complexityConfig = getComplexityConfig(
+      selectedRequirement.complexity
+    );
 
     return (
       <Card className='h-full'>
         <CardHeader>
           <div className='flex items-start justify-between'>
-            <div className='flex-1 min-w-0'>
-              <div className='flex items-center gap-2 mb-2'>
-                <span className='text-sm font-mono text-muted-foreground'>
+            <div className='min-w-0 flex-1'>
+              <div className='mb-2 flex items-center gap-2'>
+                <span className='text-muted-foreground font-mono text-sm'>
                   {selectedRequirement.requirementId}
                 </span>
-                <Badge 
-                  variant='outline' 
+                <Badge
+                  variant='outline'
                   className={`text-xs ${statusConfig.bgColor} ${statusConfig.textColor} ${statusConfig.borderColor}`}
                 >
                   {statusConfig.label}
@@ -375,14 +389,18 @@ export function RequirementTree({
             </div>
             <div className='flex gap-2'>
               <Button variant='outline' size='sm' asChild>
-                <Link href={`/dashboard/projects/${projectId}/requirements/${selectedRequirement.id}`}>
+                <Link
+                  href={`/dashboard/projects/${projectId}/requirements/${selectedRequirement.id}`}
+                >
                   <EyeIcon className='mr-2 h-4 w-4' />
                   查看详情
                 </Link>
               </Button>
               {canEdit && (
                 <Button variant='outline' size='sm' asChild>
-                  <Link href={`/dashboard/projects/${projectId}/requirements/${selectedRequirement.id}/edit`}>
+                  <Link
+                    href={`/dashboard/projects/${projectId}/requirements/${selectedRequirement.id}/edit`}
+                  >
                     <EditIcon className='mr-2 h-4 w-4' />
                     编辑
                   </Link>
@@ -395,10 +413,12 @@ export function RequirementTree({
           {/* 基本信息 */}
           <div className='grid grid-cols-2 gap-4'>
             <div>
-              <label className='text-sm font-medium text-muted-foreground'>优先级</label>
+              <label className='text-muted-foreground text-sm font-medium'>
+                优先级
+              </label>
               <div className='mt-1'>
-                <Badge 
-                  variant='outline' 
+                <Badge
+                  variant='outline'
                   className={`${priorityConfig.bgColor} ${priorityConfig.textColor} ${priorityConfig.borderColor}`}
                 >
                   {priorityConfig.label}
@@ -406,10 +426,12 @@ export function RequirementTree({
               </div>
             </div>
             <div>
-              <label className='text-sm font-medium text-muted-foreground'>类型</label>
+              <label className='text-muted-foreground text-sm font-medium'>
+                类型
+              </label>
               <div className='mt-1'>
-                <Badge 
-                  variant='outline' 
+                <Badge
+                  variant='outline'
                   className={`${typeConfig.bgColor} ${typeConfig.textColor} ${typeConfig.borderColor}`}
                 >
                   {typeConfig.label}
@@ -417,10 +439,12 @@ export function RequirementTree({
               </div>
             </div>
             <div>
-              <label className='text-sm font-medium text-muted-foreground'>复杂度</label>
+              <label className='text-muted-foreground text-sm font-medium'>
+                复杂度
+              </label>
               <div className='mt-1'>
-                <Badge 
-                  variant='outline' 
+                <Badge
+                  variant='outline'
                   className={`${complexityConfig.bgColor} ${complexityConfig.textColor} ${complexityConfig.borderColor}`}
                 >
                   {complexityConfig.label}
@@ -428,35 +452,41 @@ export function RequirementTree({
               </div>
             </div>
             <div>
-              <label className='text-sm font-medium text-muted-foreground'>分配人</label>
+              <label className='text-muted-foreground text-sm font-medium'>
+                分配人
+              </label>
               <div className='mt-1'>
                 {selectedRequirement.assignedTo ? (
                   <div className='flex items-center gap-2'>
                     <Avatar className='h-6 w-6'>
-                      <AvatarImage 
-                        src={selectedRequirement.assignedTo.image || ''} 
-                        alt={selectedRequirement.assignedTo.name || ''} 
+                      <AvatarImage
+                        src={selectedRequirement.assignedTo.image || ''}
+                        alt={selectedRequirement.assignedTo.name || ''}
                       />
                       <AvatarFallback className='text-xs'>
-                        {selectedRequirement.assignedTo.name?.charAt(0) || 
-                         selectedRequirement.assignedTo.email.charAt(0)}
+                        {selectedRequirement.assignedTo.name?.charAt(0) ||
+                          selectedRequirement.assignedTo.email.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
                     <span className='text-sm'>
-                      {selectedRequirement.assignedTo.name || selectedRequirement.assignedTo.email}
+                      {selectedRequirement.assignedTo.name ||
+                        selectedRequirement.assignedTo.email}
                     </span>
                   </div>
                 ) : (
-                  <span className='text-sm text-muted-foreground'>未分配</span>
+                  <span className='text-muted-foreground text-sm'>未分配</span>
                 )}
               </div>
             </div>
           </div>
 
           {/* 工作量信息 */}
-          {(selectedRequirement.estimatedHours || selectedRequirement.actualHours) && (
+          {(selectedRequirement.estimatedHours ||
+            selectedRequirement.actualHours) && (
             <div>
-              <label className='text-sm font-medium text-muted-foreground'>工作量</label>
+              <label className='text-muted-foreground text-sm font-medium'>
+                工作量
+              </label>
               <div className='mt-2 space-y-2'>
                 {selectedRequirement.estimatedHours && (
                   <div className='flex justify-between text-sm'>
@@ -470,16 +500,17 @@ export function RequirementTree({
                     <span>{selectedRequirement.actualHours}h</span>
                   </div>
                 )}
-                {selectedRequirement.estimatedHours && selectedRequirement.actualHours && (
-                  <div className='w-full bg-muted rounded-full h-2'>
-                    <div 
-                      className='bg-primary h-2 rounded-full transition-all'
-                      style={{
-                        width: `${Math.min(100, (selectedRequirement.actualHours / selectedRequirement.estimatedHours) * 100)}%`
-                      }}
-                    />
-                  </div>
-                )}
+                {selectedRequirement.estimatedHours &&
+                  selectedRequirement.actualHours && (
+                    <div className='bg-muted h-2 w-full rounded-full'>
+                      <div
+                        className='bg-primary h-2 rounded-full transition-all'
+                        style={{
+                          width: `${Math.min(100, (selectedRequirement.actualHours / selectedRequirement.estimatedHours) * 100)}%`
+                        }}
+                      />
+                    </div>
+                  )}
               </div>
             </div>
           )}
@@ -487,8 +518,10 @@ export function RequirementTree({
           {/* 验收标准 */}
           {selectedRequirement.acceptanceCriteria && (
             <div>
-              <label className='text-sm font-medium text-muted-foreground'>验收标准</label>
-              <div className='mt-1 text-sm bg-muted/50 rounded-md p-3'>
+              <label className='text-muted-foreground text-sm font-medium'>
+                验收标准
+              </label>
+              <div className='bg-muted/50 mt-1 rounded-md p-3 text-sm'>
                 {selectedRequirement.acceptanceCriteria}
               </div>
             </div>
@@ -497,22 +530,36 @@ export function RequirementTree({
           {/* 商业价值 */}
           {selectedRequirement.businessValue && (
             <div>
-              <label className='text-sm font-medium text-muted-foreground'>商业价值</label>
-              <div className='mt-1 text-sm bg-muted/50 rounded-md p-3'>
+              <label className='text-muted-foreground text-sm font-medium'>
+                商业价值
+              </label>
+              <div className='bg-muted/50 mt-1 rounded-md p-3 text-sm'>
                 {selectedRequirement.businessValue}
               </div>
             </div>
           )}
 
           {/* 时间信息 */}
-          <div className='grid grid-cols-2 gap-4 text-sm text-muted-foreground'>
+          <div className='text-muted-foreground grid grid-cols-2 gap-4 text-sm'>
             <div>
               <span className='font-medium'>创建时间</span>
-              <div>{format(new Date(selectedRequirement.createdAt), 'yyyy-MM-dd HH:mm', { locale: zhCN })}</div>
+              <div>
+                {format(
+                  new Date(selectedRequirement.createdAt),
+                  'yyyy-MM-dd HH:mm',
+                  { locale: zhCN }
+                )}
+              </div>
             </div>
             <div>
               <span className='font-medium'>更新时间</span>
-              <div>{format(new Date(selectedRequirement.updatedAt), 'yyyy-MM-dd HH:mm', { locale: zhCN })}</div>
+              <div>
+                {format(
+                  new Date(selectedRequirement.updatedAt),
+                  'yyyy-MM-dd HH:mm',
+                  { locale: zhCN }
+                )}
+              </div>
             </div>
           </div>
         </CardContent>
@@ -522,8 +569,8 @@ export function RequirementTree({
 
   if (loading) {
     return (
-      <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 h-full'>
-        <div className='lg:col-span-2 space-y-2'>
+      <div className='grid h-full grid-cols-1 gap-6 lg:grid-cols-3'>
+        <div className='space-y-2 lg:col-span-2'>
           {Array.from({ length: 8 }).map((_, index) => (
             <div key={index} className='flex items-center gap-2 p-2'>
               <Skeleton className='h-4 w-4' />
@@ -553,7 +600,7 @@ export function RequirementTree({
   }
 
   return (
-    <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 h-full'>
+    <div className='grid h-full grid-cols-1 gap-6 lg:grid-cols-3'>
       {/* 树形视图 */}
       <div className='lg:col-span-2'>
         <Card className='h-full'>
@@ -561,13 +608,13 @@ export function RequirementTree({
             <div className='flex items-center justify-between'>
               <CardTitle>需求层级结构</CardTitle>
               <div className='flex gap-2'>
-                <Button 
-                  variant='outline' 
+                <Button
+                  variant='outline'
                   size='sm'
                   onClick={() => {
                     const allNodeIds = new Set<string>();
                     const collectNodeIds = (nodes: RequirementTreeNode[]) => {
-                      nodes.forEach(node => {
+                      nodes.forEach((node) => {
                         allNodeIds.add(node.id);
                         if (node.children.length > 0) {
                           collectNodeIds(node.children);
@@ -580,8 +627,8 @@ export function RequirementTree({
                 >
                   全部展开
                 </Button>
-                <Button 
-                  variant='outline' 
+                <Button
+                  variant='outline'
                   size='sm'
                   onClick={() => setExpandedNodes(new Set())}
                 >
@@ -593,12 +640,12 @@ export function RequirementTree({
           <CardContent className='p-0'>
             <div className='max-h-[600px] overflow-y-auto'>
               {treeData.length === 0 ? (
-                <div className='flex items-center justify-center h-32 text-muted-foreground'>
+                <div className='text-muted-foreground flex h-32 items-center justify-center'>
                   暂无需求数据
                 </div>
               ) : (
                 <div className='space-y-0'>
-                  {treeData.map(node => renderRequirementNode(node))}
+                  {treeData.map((node) => renderRequirementNode(node))}
                 </div>
               )}
             </div>
@@ -607,9 +654,7 @@ export function RequirementTree({
       </div>
 
       {/* 详情面板 */}
-      <div className='lg:col-span-1'>
-        {renderDetailPanel()}
-      </div>
+      <div className='lg:col-span-1'>{renderDetailPanel()}</div>
     </div>
   );
 }

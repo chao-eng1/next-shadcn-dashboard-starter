@@ -9,7 +9,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import {
   Bell,
@@ -33,7 +33,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { zhCN } from 'date-fns/locale/zh-CN';
 import { toast } from 'sonner';
 
 interface GlobalNotification {
@@ -41,7 +41,14 @@ interface GlobalNotification {
   title: string;
   content: string;
   type: 'private' | 'group' | 'system' | 'project';
-  subType?: 'task' | 'milestone' | 'deadline' | 'assignment' | 'comment' | 'status' | 'meeting';
+  subType?:
+    | 'task'
+    | 'milestone'
+    | 'deadline'
+    | 'assignment'
+    | 'comment'
+    | 'status'
+    | 'meeting';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   timestamp: Date;
   isRead: boolean;
@@ -65,11 +72,11 @@ interface GlobalNotificationProps {
   autoHideDelay?: number;
 }
 
-export function GlobalNotification({ 
-  className, 
-  maxNotifications = 5, 
-  autoHide = true, 
-  autoHideDelay = 5000 
+export function GlobalNotification({
+  className,
+  maxNotifications = 5,
+  autoHide = true,
+  autoHideDelay = 5000
 }: GlobalNotificationProps) {
   const router = useRouter();
   const [notifications, setNotifications] = useState<GlobalNotification[]>([]);
@@ -90,7 +97,8 @@ export function GlobalNotification({
         sender: {
           id: 'user1',
           name: '张三',
-          avatar: 'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20avatar%20person&image_size=square'
+          avatar:
+            'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20avatar%20person&image_size=square'
         },
         relatedUrl: '/dashboard/messages/private/user1',
         actions: [
@@ -117,7 +125,8 @@ export function GlobalNotification({
         sender: {
           id: 'pm1',
           name: '项目经理',
-          avatar: 'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20avatar%20manager&image_size=square'
+          avatar:
+            'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20avatar%20manager&image_size=square'
         },
         relatedUrl: '/projects/proj1/tasks/task1',
         actions: [
@@ -161,7 +170,8 @@ export function GlobalNotification({
         sender: {
           id: 'designer1',
           name: '设计师小李',
-          avatar: 'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20avatar%20designer&image_size=square'
+          avatar:
+            'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20avatar%20designer&image_size=square'
         },
         relatedUrl: '/dashboard/messages/group/frontend-team',
         actions: [
@@ -178,7 +188,7 @@ export function GlobalNotification({
 
   // 计算未读数量
   useEffect(() => {
-    const count = notifications.filter(notif => !notif.isRead).length;
+    const count = notifications.filter((notif) => !notif.isRead).length;
     setUnreadCount(count);
   }, [notifications]);
 
@@ -186,7 +196,7 @@ export function GlobalNotification({
   useEffect(() => {
     if (autoHide && notifications.length > 0) {
       const timer = setTimeout(() => {
-        setNotifications(prev => prev.slice(0, -1));
+        setNotifications((prev) => prev.slice(0, -1));
       }, autoHideDelay);
 
       return () => clearTimeout(timer);
@@ -198,33 +208,33 @@ export function GlobalNotification({
     if (type === 'project') {
       switch (subType) {
         case 'task':
-          return <CheckCircle className="h-4 w-4 text-blue-500" />;
+          return <CheckCircle className='h-4 w-4 text-blue-500' />;
         case 'milestone':
-          return <Target className="h-4 w-4 text-green-500" />;
+          return <Target className='h-4 w-4 text-green-500' />;
         case 'deadline':
-          return <Clock className="h-4 w-4 text-red-500" />;
+          return <Clock className='h-4 w-4 text-red-500' />;
         case 'assignment':
-          return <User className="h-4 w-4 text-purple-500" />;
+          return <User className='h-4 w-4 text-purple-500' />;
         case 'comment':
-          return <MessageSquare className="h-4 w-4 text-orange-500" />;
+          return <MessageSquare className='h-4 w-4 text-orange-500' />;
         case 'status':
-          return <TrendingUp className="h-4 w-4 text-indigo-500" />;
+          return <TrendingUp className='h-4 w-4 text-indigo-500' />;
         case 'meeting':
-          return <Calendar className="h-4 w-4 text-pink-500" />;
+          return <Calendar className='h-4 w-4 text-pink-500' />;
         default:
-          return <Briefcase className="h-4 w-4 text-blue-500" />;
+          return <Briefcase className='h-4 w-4 text-blue-500' />;
       }
     }
 
     switch (type) {
       case 'private':
-        return <MessageSquare className="h-4 w-4 text-blue-500" />;
+        return <MessageSquare className='h-4 w-4 text-blue-500' />;
       case 'group':
-        return <Users className="h-4 w-4 text-green-500" />;
+        return <Users className='h-4 w-4 text-green-500' />;
       case 'system':
-        return <AlertTriangle className="h-4 w-4 text-red-500" />;
+        return <AlertTriangle className='h-4 w-4 text-red-500' />;
       default:
-        return <Bell className="h-4 w-4 text-gray-500" />;
+        return <Bell className='h-4 w-4 text-gray-500' />;
     }
   };
 
@@ -262,8 +272,8 @@ export function GlobalNotification({
 
   // 标记为已读
   const markAsRead = (notificationId: string) => {
-    setNotifications(prev => 
-      prev.map(notif => 
+    setNotifications((prev) =>
+      prev.map((notif) =>
         notif.id === notificationId ? { ...notif, isRead: true } : notif
       )
     );
@@ -271,12 +281,16 @@ export function GlobalNotification({
 
   // 删除通知
   const removeNotification = (notificationId: string) => {
-    setNotifications(prev => prev.filter(notif => notif.id !== notificationId));
+    setNotifications((prev) =>
+      prev.filter((notif) => notif.id !== notificationId)
+    );
   };
 
   // 全部标记为已读
   const markAllAsRead = () => {
-    setNotifications(prev => prev.map(notif => ({ ...notif, isRead: true })));
+    setNotifications((prev) =>
+      prev.map((notif) => ({ ...notif, isRead: true }))
+    );
     toast.success('所有通知已标记为已读');
   };
 
@@ -294,75 +308,71 @@ export function GlobalNotification({
       {/* 通知按钮 */}
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="relative h-9 w-9 p-0"
-          >
-            <Bell className="h-4 w-4" />
+          <Button variant='ghost' size='sm' className='relative h-9 w-9 p-0'>
+            <Bell className='h-4 w-4' />
             {unreadCount > 0 && (
-              <Badge 
-                variant="destructive" 
-                className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs flex items-center justify-center"
+              <Badge
+                variant='destructive'
+                className='absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center p-0 text-xs'
               >
                 {unreadCount > 99 ? '99+' : unreadCount}
               </Badge>
             )}
           </Button>
         </DropdownMenuTrigger>
-        
-        <DropdownMenuContent 
-          align="end" 
-          className="w-96 max-h-[600px] overflow-hidden p-0"
+
+        <DropdownMenuContent
+          align='end'
+          className='max-h-[600px] w-96 overflow-hidden p-0'
         >
           {/* 头部 */}
-          <div className="flex items-center justify-between p-4 border-b">
-            <div className="flex items-center gap-2">
-              <Bell className="h-4 w-4" />
-              <span className="font-medium">通知</span>
+          <div className='flex items-center justify-between border-b p-4'>
+            <div className='flex items-center gap-2'>
+              <Bell className='h-4 w-4' />
+              <span className='font-medium'>通知</span>
               {unreadCount > 0 && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant='secondary' className='text-xs'>
                   {unreadCount} 条未读
                 </Badge>
               )}
             </div>
-            
-            <div className="flex items-center gap-1">
+
+            <div className='flex items-center gap-1'>
               {unreadCount > 0 && (
                 <Button
-                  variant="ghost"
-                  size="sm"
+                  variant='ghost'
+                  size='sm'
                   onClick={markAllAsRead}
-                  className="text-xs h-7 px-2"
+                  className='h-7 px-2 text-xs'
                 >
                   全部已读
                 </Button>
               )}
               <Button
-                variant="ghost"
-                size="sm"
+                variant='ghost'
+                size='sm'
                 onClick={() => router.push('/dashboard/messages/settings')}
-                className="h-7 w-7 p-0"
+                className='h-7 w-7 p-0'
               >
-                <Settings className="h-3 w-3" />
+                <Settings className='h-3 w-3' />
               </Button>
             </div>
           </div>
 
           {/* 通知列表 */}
-          <div className="max-h-96 overflow-y-auto">
+          <div className='max-h-96 overflow-y-auto'>
             {displayNotifications.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground">
-                <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">暂无新通知</p>
+              <div className='text-muted-foreground p-8 text-center'>
+                <Bell className='mx-auto mb-2 h-8 w-8 opacity-50' />
+                <p className='text-sm'>暂无新通知</p>
               </div>
             ) : (
-              <div className="space-y-1 p-2">
+              <div className='space-y-1 p-2'>
                 {displayNotifications.map((notification) => (
                   <Card
                     key={notification.id}
                     className={cn(
-                      'cursor-pointer transition-colors hover:bg-muted/50 border-l-4',
+                      'hover:bg-muted/50 cursor-pointer border-l-4 transition-colors',
                       !notification.isRead && 'bg-primary/5',
                       getPriorityColor(notification.priority)
                     )}
@@ -374,78 +384,90 @@ export function GlobalNotification({
                       }
                     }}
                   >
-                    <CardContent className="p-3">
-                      <div className="flex items-start gap-3">
+                    <CardContent className='p-3'>
+                      <div className='flex items-start gap-3'>
                         {/* 通知图标 */}
-                        <div className="flex-shrink-0 mt-0.5">
+                        <div className='mt-0.5 flex-shrink-0'>
                           {getTypeIcon(notification.type, notification.subType)}
                         </div>
-                        
+
                         {/* 通知内容 */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h4 className={cn(
-                                  'text-sm font-medium truncate',
-                                  !notification.isRead && 'font-semibold'
-                                )}>
+                        <div className='min-w-0 flex-1'>
+                          <div className='flex items-start justify-between gap-2'>
+                            <div className='flex-1'>
+                              <div className='mb-1 flex items-center gap-2'>
+                                <h4
+                                  className={cn(
+                                    'truncate text-sm font-medium',
+                                    !notification.isRead && 'font-semibold'
+                                  )}
+                                >
                                   {notification.title}
                                 </h4>
                                 {!notification.isRead && (
-                                  <div className="h-2 w-2 bg-primary rounded-full flex-shrink-0" />
+                                  <div className='bg-primary h-2 w-2 flex-shrink-0 rounded-full' />
                                 )}
                               </div>
-                              
-                              <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+
+                              <p className='text-muted-foreground mb-2 line-clamp-2 text-xs'>
                                 {notification.content}
                               </p>
-                              
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <Badge variant="outline" className="text-xs px-1 py-0">
+
+                              <div className='text-muted-foreground flex items-center gap-2 text-xs'>
+                                <Badge
+                                  variant='outline'
+                                  className='px-1 py-0 text-xs'
+                                >
                                   {getTypeText(notification.type)}
                                 </Badge>
                                 {notification.sender && (
                                   <span>{notification.sender.name}</span>
                                 )}
                                 <span>•</span>
-                                <span>{format(notification.timestamp, 'HH:mm', { locale: zhCN })}</span>
+                                <span>
+                                  {format(notification.timestamp, 'HH:mm', {
+                                    locale: zhCN
+                                  })}
+                                </span>
                               </div>
                             </div>
-                            
+
                             {/* 操作按钮 */}
                             <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
+                              variant='ghost'
+                              size='sm'
+                              className='h-6 w-6 p-0 opacity-0 group-hover:opacity-100'
                               onClick={(e) => {
                                 e.stopPropagation();
                                 removeNotification(notification.id);
                               }}
                             >
-                              <X className="h-3 w-3" />
+                              <X className='h-3 w-3' />
                             </Button>
                           </div>
-                          
+
                           {/* 快捷操作 */}
-                          {notification.actions && notification.actions.length > 0 && (
-                            <div className="flex gap-1 mt-2">
-                              {notification.actions.slice(0, 2).map((action, index) => (
-                                <Button
-                                  key={index}
-                                  variant={action.variant || 'outline'}
-                                  size="sm"
-                                  className="h-6 text-xs px-2"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    action.action();
-                                  }}
-                                >
-                                  {action.label}
-                                </Button>
-                              ))}
-                            </div>
-                          )}
+                          {notification.actions &&
+                            notification.actions.length > 0 && (
+                              <div className='mt-2 flex gap-1'>
+                                {notification.actions
+                                  .slice(0, 2)
+                                  .map((action, index) => (
+                                    <Button
+                                      key={index}
+                                      variant={action.variant || 'outline'}
+                                      size='sm'
+                                      className='h-6 px-2 text-xs'
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        action.action();
+                                      }}
+                                    >
+                                      {action.label}
+                                    </Button>
+                                  ))}
+                              </div>
+                            )}
                         </div>
                       </div>
                     </CardContent>
@@ -459,12 +481,12 @@ export function GlobalNotification({
           {notifications.length > 0 && (
             <>
               <DropdownMenuSeparator />
-              <div className="p-2">
-                <div className="flex gap-2">
+              <div className='p-2'>
+                <div className='flex gap-2'>
                   <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 text-xs h-8"
+                    variant='outline'
+                    size='sm'
+                    className='h-8 flex-1 text-xs'
                     onClick={() => {
                       router.push('/dashboard/messages');
                       setIsOpen(false);
@@ -473,9 +495,9 @@ export function GlobalNotification({
                     查看全部
                   </Button>
                   <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 text-xs h-8"
+                    variant='outline'
+                    size='sm'
+                    className='h-8 flex-1 text-xs'
                     onClick={clearAllNotifications}
                   >
                     清空通知
@@ -489,66 +511,67 @@ export function GlobalNotification({
 
       {/* 浮动通知（可选） */}
       {notifications.length > 0 && (
-        <div className="fixed top-4 right-4 z-50 space-y-2 pointer-events-none">
+        <div className='pointer-events-none fixed top-4 right-4 z-50 space-y-2'>
           {notifications
-            .filter(notif => !notif.isRead)
+            .filter((notif) => !notif.isRead)
             .slice(0, 3)
             .map((notification) => (
               <Card
                 key={`floating-${notification.id}`}
                 className={cn(
-                  'w-80 shadow-lg border-l-4 pointer-events-auto animate-in slide-in-from-right-full',
+                  'animate-in slide-in-from-right-full pointer-events-auto w-80 border-l-4 shadow-lg',
                   getPriorityColor(notification.priority)
                 )}
               >
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0">
+                <CardContent className='p-4'>
+                  <div className='flex items-start gap-3'>
+                    <div className='flex-shrink-0'>
                       {getTypeIcon(notification.type, notification.subType)}
                     </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1">
-                          <h4 className="text-sm font-medium mb-1">
+
+                    <div className='min-w-0 flex-1'>
+                      <div className='flex items-start justify-between gap-2'>
+                        <div className='flex-1'>
+                          <h4 className='mb-1 text-sm font-medium'>
                             {notification.title}
                           </h4>
-                          <p className="text-xs text-muted-foreground line-clamp-2">
+                          <p className='text-muted-foreground line-clamp-2 text-xs'>
                             {notification.content}
                           </p>
                         </div>
-                        
+
                         <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6 p-0"
+                          variant='ghost'
+                          size='sm'
+                          className='h-6 w-6 p-0'
                           onClick={() => removeNotification(notification.id)}
                         >
-                          <X className="h-3 w-3" />
+                          <X className='h-3 w-3' />
                         </Button>
                       </div>
-                      
+
                       {notification.actions && (
-                        <div className="flex gap-1 mt-2">
-                          {notification.actions.slice(0, 2).map((action, index) => (
-                            <Button
-                              key={index}
-                              variant={action.variant || 'outline'}
-                              size="sm"
-                              className="h-6 text-xs px-2"
-                              onClick={action.action}
-                            >
-                              {action.label}
-                            </Button>
-                          ))}
+                        <div className='mt-2 flex gap-1'>
+                          {notification.actions
+                            .slice(0, 2)
+                            .map((action, index) => (
+                              <Button
+                                key={index}
+                                variant={action.variant || 'outline'}
+                                size='sm'
+                                className='h-6 px-2 text-xs'
+                                onClick={action.action}
+                              >
+                                {action.label}
+                              </Button>
+                            ))}
                         </div>
                       )}
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            ))
-          }
+            ))}
         </div>
       )}
     </div>
@@ -556,11 +579,15 @@ export function GlobalNotification({
 }
 
 // 通知提供者组件
-export function NotificationProvider({ children }: { children: React.ReactNode }) {
+export function NotificationProvider({
+  children
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <div className="relative">
+    <div className='relative'>
       {children}
-      <GlobalNotification className="fixed top-4 right-4 z-50" />
+      <GlobalNotification className='fixed top-4 right-4 z-50' />
     </div>
   );
 }

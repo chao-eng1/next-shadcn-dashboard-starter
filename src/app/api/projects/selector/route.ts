@@ -8,21 +8,22 @@ import { z } from 'zod';
 const getProjectsQuerySchema = z.object({
   search: z.string().optional(),
   status: z.enum(['PLANNING', 'ACTIVE', 'COMPLETED', 'ARCHIVED']).optional(),
-  limit: z.coerce.number().min(1).max(100).default(50),
+  limit: z.coerce.number().min(1).max(100).default(50)
 });
 
 // 获取项目列表 - 用于项目选择器
 export async function GET(request: NextRequest) {
   try {
     const currentUser = await getCurrentUser();
-    
+
     if (!currentUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // 检查项目查看权限
-    const canViewProjects = await hasPermission(currentUser.id, 'project.view') || 
-                            await hasPermission(currentUser.id, 'project:view');
+    const canViewProjects =
+      (await hasPermission(currentUser.id, 'project.view')) ||
+      (await hasPermission(currentUser.id, 'project:view'));
 
     if (!canViewProjects) {
       return NextResponse.json({ error: 'Permission denied' }, { status: 403 });
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
     const query = getProjectsQuerySchema.parse({
       search: searchParams.get('search') || undefined,
       status: searchParams.get('status') || undefined,
-      limit: searchParams.get('limit') || 50,
+      limit: searchParams.get('limit') || 50
     });
 
     // 构建查询条件
@@ -83,17 +84,14 @@ export async function GET(request: NextRequest) {
           }
         }
       },
-      orderBy: [
-        { updatedAt: 'desc' },
-        { name: 'asc' }
-      ]
+      orderBy: [{ updatedAt: 'desc' }, { name: 'asc' }]
     });
 
     // 转换数据格式以匹配ProjectSelector期望的格式
-    const transformedProjects = projects.map(project => {
+    const transformedProjects = projects.map((project) => {
       // 获取用户在项目中的角色
       const userRole = project.members[0]?.role;
-      
+
       // 转换角色名称
       const getRoleDisplayName = (role: string) => {
         switch (role) {
@@ -137,7 +135,6 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json(transformedProjects);
-
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

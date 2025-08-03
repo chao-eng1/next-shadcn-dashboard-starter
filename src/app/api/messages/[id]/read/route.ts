@@ -10,10 +10,7 @@ export async function PUT(
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const messageId = params.id;
@@ -24,10 +21,7 @@ export async function PUT(
     });
 
     if (!message) {
-      return NextResponse.json(
-        { error: 'Message not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Message not found' }, { status: 404 });
     }
 
     // 更新用户消息状态为已读

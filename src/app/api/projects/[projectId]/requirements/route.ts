@@ -16,7 +16,12 @@ import {
   requirementSortSchema,
   requirementPaginationSchema
 } from '@/features/requirement-management/schemas/requirement-schema';
-import { RequirementStatus, RequirementPriority, RequirementType, RequirementComplexity } from '@/features/requirement-management/types/requirement';
+import {
+  RequirementStatus,
+  RequirementPriority,
+  RequirementType,
+  RequirementComplexity
+} from '@/features/requirement-management/types/requirement';
 import {
   canViewRequirements,
   canCreateRequirement
@@ -46,42 +51,46 @@ export async function GET(
     // 检查用户是否有查看需求的权限
     const hasViewPermission = await canViewRequirements(projectId, user.id);
     if (!hasViewPermission) {
-      return apiForbidden("您没有权限查看此项目的需求");
+      return apiForbidden('您没有权限查看此项目的需求');
     }
 
     // 解析查询参数
     const { searchParams } = new URL(request.url);
-    
+
     // 分页参数
     const paginationResult = requirementPaginationSchema.safeParse({
       page: searchParams.get('page') || '1',
       limit: searchParams.get('limit') || '20'
     });
-    
+
     if (!paginationResult.success) {
       return apiValidationError(paginationResult.error.errors);
     }
-    
+
     const { page, limit } = paginationResult.data;
     const skip = (page - 1) * limit;
 
     // 过滤参数
     const filtersResult = requirementFiltersSchema.safeParse({
       status: searchParams.get('status')?.split(',') as RequirementStatus[],
-      priority: searchParams.get('priority')?.split(',') as RequirementPriority[],
+      priority: searchParams
+        .get('priority')
+        ?.split(',') as RequirementPriority[],
       type: searchParams.get('type')?.split(',') as RequirementType[],
-      complexity: searchParams.get('complexity')?.split(',') as RequirementComplexity[],
+      complexity: searchParams
+        .get('complexity')
+        ?.split(',') as RequirementComplexity[],
       assignedToId: searchParams.get('assignedToId') || undefined,
       createdById: searchParams.get('createdById') || undefined,
       parentId: searchParams.get('parentId') || undefined,
       search: searchParams.get('search') || undefined,
       tagIds: searchParams.get('tagIds')?.split(',') || undefined
     });
-    
+
     if (!filtersResult.success) {
       return apiValidationError(filtersResult.error.errors);
     }
-    
+
     const filters = filtersResult.data;
 
     // 排序参数
@@ -89,11 +98,11 @@ export async function GET(
       field: searchParams.get('sortField') || 'createdAt',
       direction: searchParams.get('sortDirection') || 'desc'
     });
-    
+
     if (!sortResult.success) {
       return apiValidationError(sortResult.error.errors);
     }
-    
+
     const { field, direction } = sortResult.data;
 
     // 构建查询条件
@@ -105,41 +114,43 @@ export async function GET(
     if (filters.status && filters.status.length > 0) {
       where.status = { in: filters.status };
     }
-    
+
     if (filters.priority && filters.priority.length > 0) {
       where.priority = { in: filters.priority };
     }
-    
+
     if (filters.type && filters.type.length > 0) {
       where.type = { in: filters.type };
     }
-    
+
     if (filters.complexity && filters.complexity.length > 0) {
       where.complexity = { in: filters.complexity };
     }
-    
+
     if (filters.assignedToId) {
       where.assignedToId = filters.assignedToId;
     }
-    
+
     if (filters.createdById) {
       where.createdById = filters.createdById;
     }
-    
+
     if (filters.parentId !== undefined) {
       where.parentId = filters.parentId || null;
     }
-    
+
     if (filters.search) {
       where.OR = [
         { title: { contains: filters.search, mode: 'insensitive' } },
         { description: { contains: filters.search, mode: 'insensitive' } },
-        { acceptanceCriteria: { contains: filters.search, mode: 'insensitive' } },
+        {
+          acceptanceCriteria: { contains: filters.search, mode: 'insensitive' }
+        },
         { businessValue: { contains: filters.search, mode: 'insensitive' } },
         { userStory: { contains: filters.search, mode: 'insensitive' } }
       ];
     }
-    
+
     if (filters.tagIds && filters.tagIds.length > 0) {
       where.tags = {
         some: {
@@ -282,27 +293,27 @@ export async function POST(
     // 检查用户是否有创建需求的权限
     const hasCreatePermission = await canCreateRequirement(projectId, user.id);
     if (!hasCreatePermission) {
-      return apiForbidden("您没有权限在此项目中创建需求");
+      return apiForbidden('您没有权限在此项目中创建需求');
     }
 
     // 验证项目是否存在
     const project = await prisma.project.findUnique({
       where: { id: projectId }
     });
-    
+
     if (!project) {
       return apiNotFound('项目');
     }
 
     // 解析请求体
     const body = await request.json();
-    
+
     // 验证请求数据
     const validationResult = createRequirementSchema.safeParse(body);
     if (!validationResult.success) {
       return apiValidationError(validationResult.error.errors);
     }
-    
+
     const data = validationResult.data;
 
     // 如果指定了父需求，验证父需求是否存在且属于同一项目
@@ -310,15 +321,20 @@ export async function POST(
       const parentRequirement = await prisma.requirement.findUnique({
         where: { id: data.parentId }
       });
-      
+
       if (!parentRequirement || parentRequirement.projectId !== projectId) {
-        return apiValidationError([{ message: '指定的父需求不存在或不属于当前项目' }]);
+        return apiValidationError([
+          { message: '指定的父需求不存在或不属于当前项目' }
+        ]);
       }
     }
 
     // 如果指定了分配人，验证分配人是否为项目成员
     if (data.assignedToId) {
-      const isAssigneeMember = await isProjectMember(projectId, data.assignedToId);
+      const isAssigneeMember = await isProjectMember(
+        projectId,
+        data.assignedToId
+      );
       if (!isAssigneeMember) {
         return apiValidationError([{ message: '指定的分配人不是项目成员' }]);
       }
@@ -401,7 +417,7 @@ export async function POST(
     // 如果指定了标签，创建标签关联
     if (data.tagIds && data.tagIds.length > 0) {
       await prisma.requirementTag.createMany({
-        data: data.tagIds.map(tagId => ({
+        data: data.tagIds.map((tagId) => ({
           requirementId: requirement.id,
           tagId
         }))

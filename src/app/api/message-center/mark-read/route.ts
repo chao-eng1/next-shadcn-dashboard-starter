@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/get-current-user';
 import { prisma } from '@/lib/prisma';
-import { apiResponse, apiUnauthorized, apiBadRequest } from '@/lib/api-response';
+import {
+  apiResponse,
+  apiUnauthorized,
+  apiBadRequest
+} from '@/lib/api-response';
 import { z } from 'zod';
 
 const markReadSchema = z.object({
@@ -13,14 +17,14 @@ const markReadSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user) {
       return apiUnauthorized();
     }
 
     const body = await request.json();
     const validation = markReadSchema.safeParse(body);
-    
+
     if (!validation.success) {
       return apiBadRequest('请求参数验证失败');
     }
@@ -103,14 +107,14 @@ const batchMarkReadSchema = z.object({
 export async function PUT(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user) {
       return apiUnauthorized();
     }
 
     const body = await request.json();
     const validation = batchMarkReadSchema.safeParse(body);
-    
+
     if (!validation.success) {
       return apiBadRequest('请求参数验证失败');
     }
@@ -134,7 +138,7 @@ export async function PUT(request: NextRequest) {
 
       case 'project':
         // 批量创建已读记录
-        const readRecords = messageIds.map(messageId => ({
+        const readRecords = messageIds.map((messageId) => ({
           messageId,
           userId: user.id,
           readAt: new Date()

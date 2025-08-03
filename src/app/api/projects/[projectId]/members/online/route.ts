@@ -19,8 +19,8 @@ export async function GET(
     const projectMember = await prisma.projectMember.findFirst({
       where: {
         projectId,
-        userId: user.id,
-      },
+        userId: user.id
+      }
     });
 
     if (!projectMember) {
@@ -30,7 +30,7 @@ export async function GET(
     // 获取项目所有成员及其在线状态
     const members = await prisma.projectMember.findMany({
       where: {
-        projectId,
+        projectId
       },
       include: {
         user: {
@@ -43,18 +43,18 @@ export async function GET(
               select: {
                 isOnline: true,
                 lastSeenAt: true,
-                currentPage: true,
-              },
-            },
-          },
-        },
-      },
+                currentPage: true
+              }
+            }
+          }
+        }
+      }
     });
 
     // 获取项目成员在线状态
     const memberOnlineStatus = await prisma.projectMemberOnline.findMany({
       where: {
-        projectId,
+        projectId
       },
       include: {
         user: {
@@ -62,10 +62,10 @@ export async function GET(
             id: true,
             name: true,
             email: true,
-            image: true,
-          },
-        },
-      },
+            image: true
+          }
+        }
+      }
     });
 
     // 合并成员信息和在线状态
@@ -73,7 +73,7 @@ export async function GET(
       const onlineStatus = memberOnlineStatus.find(
         (status) => status.userId === member.user.id
       );
-      
+
       return {
         id: member.id,
         role: member.role,
@@ -81,9 +81,10 @@ export async function GET(
         user: {
           ...member.user,
           isOnline: onlineStatus?.isOnline || false,
-          lastSeen: onlineStatus?.lastSeen || member.user.onlineStatus?.lastSeenAt,
-          currentPage: member.user.onlineStatus?.currentPage,
-        },
+          lastSeen:
+            onlineStatus?.lastSeen || member.user.onlineStatus?.lastSeenAt,
+          currentPage: member.user.onlineStatus?.currentPage
+        }
       };
     });
 
@@ -113,8 +114,8 @@ export async function POST(
     const projectMember = await prisma.projectMember.findFirst({
       where: {
         projectId,
-        userId: user.id,
-      },
+        userId: user.id
+      }
     });
 
     if (!projectMember) {
@@ -124,19 +125,19 @@ export async function POST(
     // 更新全局在线状态
     await prisma.userOnlineStatus.upsert({
       where: {
-        userId: user.id,
+        userId: user.id
       },
       update: {
         isOnline: isOnline ?? true,
         lastSeenAt: new Date(),
-        currentPage: currentPage,
+        currentPage: currentPage
       },
       create: {
         userId: user.id,
         isOnline: isOnline ?? true,
         lastSeenAt: new Date(),
-        currentPage: currentPage,
-      },
+        currentPage: currentPage
+      }
     });
 
     // 更新项目成员在线状态
@@ -144,19 +145,19 @@ export async function POST(
       where: {
         projectId_userId: {
           projectId,
-          userId: user.id,
-        },
+          userId: user.id
+        }
       },
       update: {
         isOnline: isOnline ?? true,
-        lastSeen: new Date(),
+        lastSeen: new Date()
       },
       create: {
         projectId,
         userId: user.id,
         isOnline: isOnline ?? true,
-        lastSeen: new Date(),
-      },
+        lastSeen: new Date()
+      }
     });
 
     return NextResponse.json({ success: true });

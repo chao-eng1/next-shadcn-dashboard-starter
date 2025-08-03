@@ -40,7 +40,9 @@ export function ProjectPermissionGate({
       try {
         setLoading(true);
         const response = await fetch(
-          getApiUrl(`/api/projects/${projectId}/permissions/check?permission=${encodeURIComponent(permission)}`),
+          getApiUrl(
+            `/api/projects/${projectId}/permissions/check?permission=${encodeURIComponent(permission)}`
+          ),
           {
             credentials: 'include',
             headers: {

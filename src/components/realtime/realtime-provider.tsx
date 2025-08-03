@@ -1,6 +1,12 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode
+} from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useUnreadMessages } from '@/hooks/use-unread-messages';
 import { toast } from 'sonner';
@@ -27,7 +33,9 @@ interface RealtimeContextType {
   refreshMessages: () => void;
 }
 
-const RealtimeContext = createContext<RealtimeContextType | undefined>(undefined);
+const RealtimeContext = createContext<RealtimeContextType | undefined>(
+  undefined
+);
 
 interface RealtimeProviderProps {
   children: ReactNode;
@@ -46,23 +54,28 @@ export function RealtimeProvider({ children }: RealtimeProviderProps) {
   // 检查新消息的函数
   const checkForNewMessages = async () => {
     if (!user) return;
-    
+
     try {
       setIsConnected(true);
-      
+
       console.log('Checking for new messages for user:', user.id);
-      
+
       // 使用全局状态管理的未读数量，避免重复API调用
       const currentUnreadCount = unreadCount;
-      
-      console.log('Current unread count:', currentUnreadCount, 'Previous:', previousUnreadCount);
-      
+
+      console.log(
+        'Current unread count:',
+        currentUnreadCount,
+        'Previous:',
+        previousUnreadCount
+      );
+
       // 如果未读数量增加，说明有新消息
       if (currentUnreadCount > previousUnreadCount) {
         const newMessagesCount = currentUnreadCount - previousUnreadCount;
         console.log('New messages detected:', newMessagesCount);
-        setNewMessageCount(prev => prev + newMessagesCount);
-        
+        setNewMessageCount((prev) => prev + newMessagesCount);
+
         // 获取最新消息用于显示
         const messagesResponse = await fetch('/api/user-messages');
         if (messagesResponse.ok) {
@@ -70,12 +83,12 @@ export function RealtimeProvider({ children }: RealtimeProviderProps) {
           const messages = messagesData.messages || [];
           console.log('Fetched messages:', messages.length);
           const latestUnreadMessage = messages.find((msg: any) => !msg.isRead);
-          
+
           if (latestUnreadMessage) {
             console.log('Latest unread message:', latestUnreadMessage);
             setLastMessage(latestUnreadMessage.message);
             setShowNotification(true);
-            
+
             // 显示浮层通知
             toast.success(`收到新消息：${latestUnreadMessage.message.title}`, {
               duration: 5000,
@@ -83,8 +96,8 @@ export function RealtimeProvider({ children }: RealtimeProviderProps) {
                 label: '查看',
                 onClick: () => {
                   window.location.href = '/dashboard/messages';
-                },
-              },
+                }
+              }
             });
           } else {
             console.log('No unread messages found in response');
@@ -95,7 +108,7 @@ export function RealtimeProvider({ children }: RealtimeProviderProps) {
       } else {
         console.log('No new messages detected');
       }
-      
+
       setPreviousUnreadCount(currentUnreadCount);
     } catch (error) {
       console.error('Error checking for new messages:', error);
@@ -106,11 +119,11 @@ export function RealtimeProvider({ children }: RealtimeProviderProps) {
   // 监听未读消息数量变化
   useEffect(() => {
     if (!user) return;
-    
+
     // 当未读数量变化时检查新消息
     checkForNewMessages();
   }, [user?.id, unreadCount]); // 依赖user.id和unreadCount变化
-  
+
   // 初始化连接状态
   useEffect(() => {
     if (user) {
@@ -141,7 +154,7 @@ export function RealtimeProvider({ children }: RealtimeProviderProps) {
   };
 
   return (
-    <RealtimeContext.Provider 
+    <RealtimeContext.Provider
       value={{
         isConnected,
         newMessageCount,
@@ -151,7 +164,7 @@ export function RealtimeProvider({ children }: RealtimeProviderProps) {
       }}
     >
       {children}
-      
+
       {/* 消息通知弹窗 */}
       {showNotification && lastMessage && (
         <MessageNotificationDialog

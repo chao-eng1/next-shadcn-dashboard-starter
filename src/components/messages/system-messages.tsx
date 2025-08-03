@@ -11,13 +11,13 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import {
   Bell,
@@ -43,7 +43,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { zhCN } from 'date-fns/locale/zh-CN';
 
 interface SystemMessage {
   id: string;
@@ -79,7 +79,9 @@ export function SystemMessages() {
   const [filterType, setFilterType] = useState<string>('all');
   const [filterPriority, setFilterPriority] = useState<string>('all');
   const [showArchived, setShowArchived] = useState(false);
-  const [selectedMessage, setSelectedMessage] = useState<SystemMessage | null>(null);
+  const [selectedMessage, setSelectedMessage] = useState<SystemMessage | null>(
+    null
+  );
 
   // 模拟数据
   useEffect(() => {
@@ -87,7 +89,8 @@ export function SystemMessages() {
       {
         id: '1',
         title: '系统维护通知',
-        content: '系统将于今晚23:00-01:00进行例行维护，期间可能会出现短暂的服务中断。请提前保存您的工作内容。',
+        content:
+          '系统将于今晚23:00-01:00进行例行维护，期间可能会出现短暂的服务中断。请提前保存您的工作内容。',
         type: 'warning',
         priority: 'high',
         category: '系统维护',
@@ -108,7 +111,8 @@ export function SystemMessages() {
       {
         id: '2',
         title: '新功能发布',
-        content: '我们很高兴地宣布，消息中心新增了群组聊天功能！现在您可以创建项目群组，与团队成员进行更高效的沟通。',
+        content:
+          '我们很高兴地宣布，消息中心新增了群组聊天功能！现在您可以创建项目群组，与团队成员进行更高效的沟通。',
         type: 'announcement',
         priority: 'medium',
         category: '产品更新',
@@ -143,7 +147,8 @@ export function SystemMessages() {
       {
         id: '3',
         title: '安全提醒',
-        content: '检测到您的账户在异地登录，如果不是您本人操作，请立即修改密码并启用双因素认证。',
+        content:
+          '检测到您的账户在异地登录，如果不是您本人操作，请立即修改密码并启用双因素认证。',
         type: 'error',
         priority: 'urgent',
         category: '安全警告',
@@ -170,7 +175,8 @@ export function SystemMessages() {
       {
         id: '4',
         title: '数据备份完成',
-        content: '您的数据已成功备份到云端，备份时间：2024-01-17 02:00。如需恢复数据，请联系技术支持。',
+        content:
+          '您的数据已成功备份到云端，备份时间：2024-01-17 02:00。如需恢复数据，请联系技术支持。',
         type: 'success',
         priority: 'low',
         category: '数据管理',
@@ -183,7 +189,8 @@ export function SystemMessages() {
       {
         id: '5',
         title: '服务条款更新',
-        content: '我们已更新服务条款和隐私政策，新条款将于2024年2月1日生效。请仔细阅读相关内容。',
+        content:
+          '我们已更新服务条款和隐私政策，新条款将于2024年2月1日生效。请仔细阅读相关内容。',
         type: 'info',
         priority: 'medium',
         category: '法律条款',
@@ -222,26 +229,27 @@ export function SystemMessages() {
 
   // 过滤消息
   useEffect(() => {
-    let filtered = messages.filter(msg => {
+    let filtered = messages.filter((msg) => {
       if (!showArchived && msg.isArchived) return false;
       if (showArchived && !msg.isArchived) return false;
       return true;
     });
 
     if (searchQuery) {
-      filtered = filtered.filter(msg => 
-        msg.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        msg.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        msg.category.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        (msg) =>
+          msg.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          msg.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          msg.category.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
     if (filterType !== 'all') {
-      filtered = filtered.filter(msg => msg.type === filterType);
+      filtered = filtered.filter((msg) => msg.type === filterType);
     }
 
     if (filterPriority !== 'all') {
-      filtered = filtered.filter(msg => msg.priority === filterPriority);
+      filtered = filtered.filter((msg) => msg.priority === filterPriority);
     }
 
     // 按时间倒序排列
@@ -254,17 +262,17 @@ export function SystemMessages() {
   const getTypeIcon = (type: SystemMessage['type']) => {
     switch (type) {
       case 'info':
-        return <Info className="h-5 w-5 text-blue-500" />;
+        return <Info className='h-5 w-5 text-blue-500' />;
       case 'warning':
-        return <AlertTriangle className="h-5 w-5 text-orange-500" />;
+        return <AlertTriangle className='h-5 w-5 text-orange-500' />;
       case 'error':
-        return <XCircle className="h-5 w-5 text-red-500" />;
+        return <XCircle className='h-5 w-5 text-red-500' />;
       case 'success':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
+        return <CheckCircle className='h-5 w-5 text-green-500' />;
       case 'announcement':
-        return <Bell className="h-5 w-5 text-purple-500" />;
+        return <Bell className='h-5 w-5 text-purple-500' />;
       default:
-        return <Info className="h-5 w-5 text-gray-500" />;
+        return <Info className='h-5 w-5 text-gray-500' />;
     }
   };
 
@@ -302,17 +310,15 @@ export function SystemMessages() {
 
   // 标记为已读
   const markAsRead = (messageId: string) => {
-    setMessages(prev => 
-      prev.map(msg => 
-        msg.id === messageId ? { ...msg, isRead: true } : msg
-      )
+    setMessages((prev) =>
+      prev.map((msg) => (msg.id === messageId ? { ...msg, isRead: true } : msg))
     );
   };
 
   // 切换收藏状态
   const toggleStar = (messageId: string) => {
-    setMessages(prev => 
-      prev.map(msg => 
+    setMessages((prev) =>
+      prev.map((msg) =>
         msg.id === messageId ? { ...msg, isStarred: !msg.isStarred } : msg
       )
     );
@@ -320,8 +326,8 @@ export function SystemMessages() {
 
   // 归档消息
   const archiveMessage = (messageId: string) => {
-    setMessages(prev => 
-      prev.map(msg => 
+    setMessages((prev) =>
+      prev.map((msg) =>
         msg.id === messageId ? { ...msg, isArchived: true } : msg
       )
     );
@@ -329,7 +335,7 @@ export function SystemMessages() {
 
   // 删除消息
   const deleteMessage = (messageId: string) => {
-    setMessages(prev => prev.filter(msg => msg.id !== messageId));
+    setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
   };
 
   // 格式化文件大小
@@ -342,94 +348,91 @@ export function SystemMessages() {
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className='flex h-full flex-col'>
       {/* 头部 */}
-      <div className="border-b bg-background p-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.back()}
-            >
-              <ArrowLeft className="h-4 w-4" />
+      <div className='bg-background border-b p-4'>
+        <div className='mb-4 flex items-center justify-between'>
+          <div className='flex items-center gap-3'>
+            <Button variant='ghost' size='sm' onClick={() => router.back()}>
+              <ArrowLeft className='h-4 w-4' />
             </Button>
             <div>
-              <h1 className="text-xl font-semibold">系统消息</h1>
-              <p className="text-sm text-muted-foreground">
-                {filteredMessages.filter(msg => !msg.isRead).length} 条未读消息
+              <h1 className='text-xl font-semibold'>系统消息</h1>
+              <p className='text-muted-foreground text-sm'>
+                {filteredMessages.filter((msg) => !msg.isRead).length}{' '}
+                条未读消息
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className='flex items-center gap-2'>
             <Button
-              variant={showArchived ? "default" : "outline"}
-              size="sm"
+              variant={showArchived ? 'default' : 'outline'}
+              size='sm'
               onClick={() => setShowArchived(!showArchived)}
             >
-              <Archive className="h-4 w-4 mr-2" />
+              <Archive className='mr-2 h-4 w-4' />
               {showArchived ? '查看当前' : '查看归档'}
             </Button>
-            
-            <Button variant="outline" size="sm">
-              <Settings className="h-4 w-4 mr-2" />
+
+            <Button variant='outline' size='sm'>
+              <Settings className='mr-2 h-4 w-4' />
               设置
             </Button>
           </div>
         </div>
 
         {/* 搜索和过滤 */}
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className='flex items-center gap-3'>
+          <div className='relative flex-1'>
+            <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform' />
             <Input
-              placeholder="搜索消息..."
+              placeholder='搜索消息...'
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className='pl-10'
             />
           </div>
-          
+
           <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="类型" />
+            <SelectTrigger className='w-32'>
+              <SelectValue placeholder='类型' />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">全部类型</SelectItem>
-              <SelectItem value="info">信息</SelectItem>
-              <SelectItem value="warning">警告</SelectItem>
-              <SelectItem value="error">错误</SelectItem>
-              <SelectItem value="success">成功</SelectItem>
-              <SelectItem value="announcement">公告</SelectItem>
+              <SelectItem value='all'>全部类型</SelectItem>
+              <SelectItem value='info'>信息</SelectItem>
+              <SelectItem value='warning'>警告</SelectItem>
+              <SelectItem value='error'>错误</SelectItem>
+              <SelectItem value='success'>成功</SelectItem>
+              <SelectItem value='announcement'>公告</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <Select value={filterPriority} onValueChange={setFilterPriority}>
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="优先级" />
+            <SelectTrigger className='w-32'>
+              <SelectValue placeholder='优先级' />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">全部优先级</SelectItem>
-              <SelectItem value="urgent">紧急</SelectItem>
-              <SelectItem value="high">高</SelectItem>
-              <SelectItem value="medium">中</SelectItem>
-              <SelectItem value="low">低</SelectItem>
+              <SelectItem value='all'>全部优先级</SelectItem>
+              <SelectItem value='urgent'>紧急</SelectItem>
+              <SelectItem value='high'>高</SelectItem>
+              <SelectItem value='medium'>中</SelectItem>
+              <SelectItem value='low'>低</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
       {/* 消息列表 */}
-      <div className="flex-1 flex">
+      <div className='flex flex-1'>
         {/* 消息列表 */}
-        <div className="flex-1 border-r">
-          <ScrollArea className="h-full">
-            <div className="p-4 space-y-3">
+        <div className='flex-1 border-r'>
+          <ScrollArea className='h-full'>
+            <div className='space-y-3 p-4'>
               {filteredMessages.length === 0 ? (
-                <div className="text-center py-12">
-                  <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">
+                <div className='py-12 text-center'>
+                  <Bell className='text-muted-foreground mx-auto mb-4 h-12 w-12' />
+                  <p className='text-muted-foreground'>
                     {showArchived ? '没有归档的消息' : '没有找到相关消息'}
                   </p>
                 </div>
@@ -438,9 +441,10 @@ export function SystemMessages() {
                   <Card
                     key={message.id}
                     className={cn(
-                      'cursor-pointer transition-colors hover:bg-muted/50',
+                      'hover:bg-muted/50 cursor-pointer transition-colors',
                       !message.isRead && 'border-primary/50 bg-primary/5',
-                      selectedMessage?.id === message.id && 'ring-2 ring-primary'
+                      selectedMessage?.id === message.id &&
+                        'ring-primary ring-2'
                     )}
                     onClick={() => {
                       setSelectedMessage(message);
@@ -449,67 +453,75 @@ export function SystemMessages() {
                       }
                     }}
                   >
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
+                    <CardContent className='p-4'>
+                      <div className='flex items-start gap-3'>
                         {/* 消息类型图标 */}
-                        <div className="flex-shrink-0 mt-1">
+                        <div className='mt-1 flex-shrink-0'>
                           {getTypeIcon(message.type)}
                         </div>
-                        
+
                         {/* 消息内容 */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h3 className={cn(
-                                  'font-medium truncate',
-                                  !message.isRead && 'font-semibold'
-                                )}>
+                        <div className='min-w-0 flex-1'>
+                          <div className='flex items-start justify-between gap-2'>
+                            <div className='flex-1'>
+                              <div className='mb-1 flex items-center gap-2'>
+                                <h3
+                                  className={cn(
+                                    'truncate font-medium',
+                                    !message.isRead && 'font-semibold'
+                                  )}
+                                >
                                   {message.title}
                                 </h3>
                                 {!message.isRead && (
-                                  <div className="h-2 w-2 bg-primary rounded-full flex-shrink-0" />
+                                  <div className='bg-primary h-2 w-2 flex-shrink-0 rounded-full' />
                                 )}
                               </div>
-                              
-                              <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+
+                              <p className='text-muted-foreground mb-2 line-clamp-2 text-sm'>
                                 {message.content}
                               </p>
-                              
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <Badge variant="outline" className="text-xs">
+
+                              <div className='text-muted-foreground flex items-center gap-2 text-xs'>
+                                <Badge variant='outline' className='text-xs'>
                                   {message.category}
                                 </Badge>
-                                <div className={cn(
-                                  'w-2 h-2 rounded-full',
-                                  getPriorityColor(message.priority)
-                                )} />
+                                <div
+                                  className={cn(
+                                    'h-2 w-2 rounded-full',
+                                    getPriorityColor(message.priority)
+                                  )}
+                                />
                                 <span>{getPriorityText(message.priority)}</span>
                                 <span>•</span>
                                 <span>{message.sender}</span>
                                 <span>•</span>
-                                <span>{format(message.timestamp, 'MM-dd HH:mm', { locale: zhCN })}</span>
+                                <span>
+                                  {format(message.timestamp, 'MM-dd HH:mm', {
+                                    locale: zhCN
+                                  })}
+                                </span>
                               </div>
                             </div>
-                            
+
                             {/* 操作按钮 */}
-                            <div className="flex items-center gap-1">
+                            <div className='flex items-center gap-1'>
                               {message.isStarred && (
-                                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                                <Star className='h-4 w-4 fill-yellow-500 text-yellow-500' />
                               )}
-                              
+
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 w-6 p-0"
+                                    variant='ghost'
+                                    size='sm'
+                                    className='h-6 w-6 p-0'
                                     onClick={(e) => e.stopPropagation()}
                                   >
-                                    <MoreVertical className="h-3 w-3" />
+                                    <MoreVertical className='h-3 w-3' />
                                   </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
+                                <DropdownMenuContent align='end'>
                                   <DropdownMenuItem
                                     onClick={(e) => {
                                       e.stopPropagation();
@@ -517,9 +529,15 @@ export function SystemMessages() {
                                     }}
                                   >
                                     {message.isStarred ? (
-                                      <><StarOff className="h-4 w-4 mr-2" />取消收藏</>
+                                      <>
+                                        <StarOff className='mr-2 h-4 w-4' />
+                                        取消收藏
+                                      </>
                                     ) : (
-                                      <><Star className="h-4 w-4 mr-2" />收藏</>
+                                      <>
+                                        <Star className='mr-2 h-4 w-4' />
+                                        收藏
+                                      </>
                                     )}
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
@@ -529,9 +547,15 @@ export function SystemMessages() {
                                     }}
                                   >
                                     {message.isRead ? (
-                                      <><EyeOff className="h-4 w-4 mr-2" />标为未读</>
+                                      <>
+                                        <EyeOff className='mr-2 h-4 w-4' />
+                                        标为未读
+                                      </>
                                     ) : (
-                                      <><Eye className="h-4 w-4 mr-2" />标为已读</>
+                                      <>
+                                        <Eye className='mr-2 h-4 w-4' />
+                                        标为已读
+                                      </>
                                     )}
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
@@ -540,7 +564,7 @@ export function SystemMessages() {
                                       archiveMessage(message.id);
                                     }}
                                   >
-                                    <Archive className="h-4 w-4 mr-2" />
+                                    <Archive className='mr-2 h-4 w-4' />
                                     归档
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
@@ -548,9 +572,9 @@ export function SystemMessages() {
                                       e.stopPropagation();
                                       deleteMessage(message.id);
                                     }}
-                                    className="text-destructive"
+                                    className='text-destructive'
                                   >
-                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    <Trash2 className='mr-2 h-4 w-4' />
                                     删除
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
@@ -568,90 +592,115 @@ export function SystemMessages() {
         </div>
 
         {/* 消息详情 */}
-        <div className="w-96">
+        <div className='w-96'>
           {selectedMessage ? (
-            <Card className="h-full rounded-none border-0">
+            <Card className='h-full rounded-none border-0'>
               <CardHeader>
-                <div className="flex items-start gap-3">
+                <div className='flex items-start gap-3'>
                   {getTypeIcon(selectedMessage.type)}
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{selectedMessage.title}</CardTitle>
-                    <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                      <Badge variant="outline">{selectedMessage.category}</Badge>
-                      <div className={cn(
-                        'w-2 h-2 rounded-full',
-                        getPriorityColor(selectedMessage.priority)
-                      )} />
+                  <div className='flex-1'>
+                    <CardTitle className='text-lg'>
+                      {selectedMessage.title}
+                    </CardTitle>
+                    <div className='text-muted-foreground mt-2 flex items-center gap-2 text-sm'>
+                      <Badge variant='outline'>
+                        {selectedMessage.category}
+                      </Badge>
+                      <div
+                        className={cn(
+                          'h-2 w-2 rounded-full',
+                          getPriorityColor(selectedMessage.priority)
+                        )}
+                      />
                       <span>{getPriorityText(selectedMessage.priority)}</span>
                     </div>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className='space-y-4'>
                 {/* 消息内容 */}
                 <div>
-                  <p className="text-sm leading-relaxed">{selectedMessage.content}</p>
+                  <p className='text-sm leading-relaxed'>
+                    {selectedMessage.content}
+                  </p>
                 </div>
 
                 {/* 附件 */}
-                {selectedMessage.attachments && selectedMessage.attachments.length > 0 && (
-                  <div>
-                    <h4 className="font-medium mb-2">附件</h4>
-                    <div className="space-y-2">
-                      {selectedMessage.attachments.map((attachment) => (
-                        <div key={attachment.id} className="flex items-center gap-3 p-2 border rounded-lg">
-                          <div className="h-8 w-8 rounded bg-primary/10 flex items-center justify-center">
-                            <Download className="h-4 w-4 text-primary" />
+                {selectedMessage.attachments &&
+                  selectedMessage.attachments.length > 0 && (
+                    <div>
+                      <h4 className='mb-2 font-medium'>附件</h4>
+                      <div className='space-y-2'>
+                        {selectedMessage.attachments.map((attachment) => (
+                          <div
+                            key={attachment.id}
+                            className='flex items-center gap-3 rounded-lg border p-2'
+                          >
+                            <div className='bg-primary/10 flex h-8 w-8 items-center justify-center rounded'>
+                              <Download className='text-primary h-4 w-4' />
+                            </div>
+                            <div className='min-w-0 flex-1'>
+                              <p className='truncate text-sm font-medium'>
+                                {attachment.name}
+                              </p>
+                              <p className='text-muted-foreground text-xs'>
+                                {formatFileSize(attachment.size)}
+                              </p>
+                            </div>
+                            <Button size='sm' variant='ghost'>
+                              <Download className='h-4 w-4' />
+                            </Button>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{attachment.name}</p>
-                            <p className="text-xs text-muted-foreground">{formatFileSize(attachment.size)}</p>
-                          </div>
-                          <Button size="sm" variant="ghost">
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* 操作按钮 */}
-                {selectedMessage.actions && selectedMessage.actions.length > 0 && (
-                  <div>
-                    <h4 className="font-medium mb-2">操作</h4>
-                    <div className="space-y-2">
-                      {selectedMessage.actions.map((action) => (
-                        <Button
-                          key={action.id}
-                          variant={action.type === 'primary' ? 'default' : 'outline'}
-                          className="w-full"
-                          onClick={() => {
-                            if (action.url.startsWith('/')) {
-                              router.push(action.url);
-                            } else {
-                              window.open(action.url, '_blank');
+                {selectedMessage.actions &&
+                  selectedMessage.actions.length > 0 && (
+                    <div>
+                      <h4 className='mb-2 font-medium'>操作</h4>
+                      <div className='space-y-2'>
+                        {selectedMessage.actions.map((action) => (
+                          <Button
+                            key={action.id}
+                            variant={
+                              action.type === 'primary' ? 'default' : 'outline'
                             }
-                          }}
-                        >
-                          {action.label}
-                        </Button>
-                      ))}
+                            className='w-full'
+                            onClick={() => {
+                              if (action.url.startsWith('/')) {
+                                router.push(action.url);
+                              } else {
+                                window.open(action.url, '_blank');
+                              }
+                            }}
+                          >
+                            {action.label}
+                          </Button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* 消息信息 */}
-                <div className="pt-4 border-t text-xs text-muted-foreground space-y-1">
-                  <div className="flex justify-between">
+                <div className='text-muted-foreground space-y-1 border-t pt-4 text-xs'>
+                  <div className='flex justify-between'>
                     <span>发送者:</span>
                     <span>{selectedMessage.sender}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className='flex justify-between'>
                     <span>时间:</span>
-                    <span>{format(selectedMessage.timestamp, 'yyyy-MM-dd HH:mm:ss', { locale: zhCN })}</span>
+                    <span>
+                      {format(
+                        selectedMessage.timestamp,
+                        'yyyy-MM-dd HH:mm:ss',
+                        { locale: zhCN }
+                      )}
+                    </span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className='flex justify-between'>
                     <span>状态:</span>
                     <span>{selectedMessage.isRead ? '已读' : '未读'}</span>
                   </div>
@@ -659,9 +708,9 @@ export function SystemMessages() {
               </CardContent>
             </Card>
           ) : (
-            <div className="h-full flex items-center justify-center text-muted-foreground">
-              <div className="text-center">
-                <Bell className="h-12 w-12 mx-auto mb-4" />
+            <div className='text-muted-foreground flex h-full items-center justify-center'>
+              <div className='text-center'>
+                <Bell className='mx-auto mb-4 h-12 w-12' />
                 <p>选择一条消息查看详情</p>
               </div>
             </div>

@@ -49,7 +49,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getApiUrl } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 
-
 export const company = {
   name: 'Acme Inc',
   logo: IconPhotoUp,
@@ -105,7 +104,6 @@ export default function AppSidebar() {
   const { isOpen } = useMediaQuery();
   const router = useRouter();
   const t = useTranslations();
-
 
   // Helper function to check if a path is active, ignoring the locale prefix
   const isPathActive = (itemUrl: string, currentPath: string): boolean => {
@@ -196,7 +194,9 @@ export default function AppSidebar() {
           <SidebarGroupLabel>{t('sidebar.overview')}</SidebarGroupLabel>
           <SidebarMenu>
             {navItems.map((item) => {
-              const IconComponent = item.icon ? Icons[item.icon as keyof typeof Icons] : null;
+              const IconComponent = item.icon
+                ? Icons[item.icon as keyof typeof Icons]
+                : null;
               return item?.items && item?.items?.length > 0 ? (
                 <PermissionGate
                   key={item.title}
@@ -225,25 +225,30 @@ export default function AppSidebar() {
                       <CollapsibleContent>
                         <SidebarMenuSub>
                           {item.items?.map((subItem) => {
-                            const SubIconComponent = subItem.icon ? Icons[subItem.icon as keyof typeof Icons] : null;
+                            const SubIconComponent = subItem.icon
+                              ? Icons[subItem.icon as keyof typeof Icons]
+                              : null;
                             return (
-                            <PermissionGate
-                              key={subItem.title}
-                              permission={subItem.permission}
-                              role={subItem.role}
-                            >
-                              <SidebarMenuSubItem>
-                                <SidebarMenuSubButton
-                                  asChild
-                                  isActive={isPathActive(subItem.url, pathname)}
-                                >
-                                  <Link href={subItem.url}>
-                                    {SubIconComponent && <SubIconComponent />}
-                                    <span>{t(subItem.title)}</span>
-                                  </Link>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
-                            </PermissionGate>
+                              <PermissionGate
+                                key={subItem.title}
+                                permission={subItem.permission}
+                                role={subItem.role}
+                              >
+                                <SidebarMenuSubItem>
+                                  <SidebarMenuSubButton
+                                    asChild
+                                    isActive={isPathActive(
+                                      subItem.url,
+                                      pathname
+                                    )}
+                                  >
+                                    <Link href={subItem.url}>
+                                      {SubIconComponent && <SubIconComponent />}
+                                      <span>{t(subItem.title)}</span>
+                                    </Link>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              </PermissionGate>
                             );
                           })}
                         </SidebarMenuSub>
@@ -263,10 +268,9 @@ export default function AppSidebar() {
                       tooltip={t(item.title)}
                       isActive={isPathActive(item.url, pathname)}
                     >
-                      <Link href={item.url} className="relative">
+                      <Link href={item.url} className='relative'>
                         {IconComponent && <IconComponent />}
                         <span>{t(item.title)}</span>
-
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

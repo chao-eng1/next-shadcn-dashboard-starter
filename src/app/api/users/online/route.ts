@@ -7,7 +7,7 @@ import { apiResponse, apiUnauthorized } from '@/lib/api-response';
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user) {
       return apiUnauthorized();
     }
@@ -55,9 +55,9 @@ export async function GET(request: NextRequest) {
         }
       ]
     });
-    
+
     // 格式化返回数据，添加 status 字段
-    const formattedUsers = users.map(user => ({
+    const formattedUsers = users.map((user) => ({
       id: user.id,
       name: user.name,
       email: user.email,
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
       status: user.onlineStatus?.isOnline ? 'online' : 'offline',
       lastActiveAt: user.onlineStatus?.lastSeenAt || null
     }));
-    
+
     return apiResponse(formattedUsers);
   } catch (error) {
     console.error('Failed to get users status:', error);

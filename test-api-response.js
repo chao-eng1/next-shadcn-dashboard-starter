@@ -8,26 +8,29 @@ async function testAPIWithCookies() {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Cookie': 'next-auth.session-token=your-session-token' // 这里需要实际的session token
-      }
-    });
-    
-    console.log('Auth check status:', loginResponse.status);
-    
-    // 测试任务API
-    const response = await fetch('http://localhost:3001/api/projects/cmdq080ly0009qqy7swgccib3/tasks?page=1&limit=10&sortBy=updatedAt&sortOrder=desc', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
+        Cookie: 'next-auth.session-token=your-session-token' // 这里需要实际的session token
       }
     });
 
+    console.log('Auth check status:', loginResponse.status);
+
+    // 测试任务API
+    const response = await fetch(
+      'http://localhost:3001/api/projects/cmdq080ly0009qqy7swgccib3/tasks?page=1&limit=10&sortBy=updatedAt&sortOrder=desc',
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
     console.log('Tasks API status:', response.status);
-    
+
     if (response.status === 200) {
       const data = await response.json();
       console.log('Response data:', JSON.stringify(data, null, 2));
-      
+
       if (data.tasks) {
         console.log('Tasks count:', data.tasks.length);
         if (data.tasks.length > 0) {

@@ -1,7 +1,10 @@
 import { prisma } from '@/lib/prisma';
 
 // 检查用户是否可以查看需求
-export async function canViewRequirements(projectId: string, userId: string): Promise<boolean> {
+export async function canViewRequirements(
+  projectId: string,
+  userId: string
+): Promise<boolean> {
   try {
     const project = await prisma.project.findUnique({
       where: { id: projectId },
@@ -25,7 +28,10 @@ export async function canViewRequirements(projectId: string, userId: string): Pr
 }
 
 // 检查用户是否可以创建需求
-export async function canCreateRequirement(projectId: string, userId: string): Promise<boolean> {
+export async function canCreateRequirement(
+  projectId: string,
+  userId: string
+): Promise<boolean> {
   try {
     const project = await prisma.project.findUnique({
       where: { id: projectId },
@@ -49,7 +55,11 @@ export async function canCreateRequirement(projectId: string, userId: string): P
 }
 
 // 检查用户是否可以编辑需求
-export async function canEditRequirement(projectId: string, requirementId: string, userId: string): Promise<boolean> {
+export async function canEditRequirement(
+  projectId: string,
+  requirementId: string,
+  userId: string
+): Promise<boolean> {
   try {
     const requirement = await prisma.requirement.findUnique({
       where: { id: requirementId },
@@ -81,7 +91,11 @@ export async function canEditRequirement(projectId: string, requirementId: strin
 }
 
 // 检查用户是否可以删除需求
-export async function canDeleteRequirement(projectId: string, requirementId: string, userId: string): Promise<boolean> {
+export async function canDeleteRequirement(
+  projectId: string,
+  requirementId: string,
+  userId: string
+): Promise<boolean> {
   try {
     const requirement = await prisma.requirement.findUnique({
       where: { id: requirementId },
@@ -112,7 +126,10 @@ export async function canDeleteRequirement(projectId: string, requirementId: str
 }
 
 // 检查用户是否为项目成员
-export async function isProjectMember(projectId: string, userId: string): Promise<boolean> {
+export async function isProjectMember(
+  projectId: string,
+  userId: string
+): Promise<boolean> {
   try {
     const project = await prisma.project.findUnique({
       where: { id: projectId },

@@ -14,9 +14,7 @@ import PageContainer from '@/components/layout/page-container';
 import { getCurrentUser } from '@/lib/get-current-user';
 import { prisma } from '@/lib/prisma';
 import { ArrowLeftIcon } from 'lucide-react';
-import {
-  canCreateRequirement
-} from '@/features/requirement-management/utils/requirement-permissions';
+import { canCreateRequirement } from '@/features/requirement-management/utils/requirement-permissions';
 import { RequirementFormWrapper } from './requirement-form-wrapper';
 
 interface NewRequirementPageProps {
@@ -162,7 +160,7 @@ export default async function NewRequirementPage({
                 <span className='text-sm font-medium'>
                   {parentRequirement.identifier}
                 </span>
-                <span className='text-sm text-muted-foreground'>
+                <span className='text-muted-foreground text-sm'>
                   {parentRequirement.title}
                 </span>
               </div>
@@ -182,7 +180,7 @@ export default async function NewRequirementPage({
             <RequirementFormWrapper
               projectId={projectId}
               parentId={parentId}
-              projectMembers={projectMembers.map(member => ({
+              projectMembers={projectMembers.map((member) => ({
                 id: member.user.id,
                 name: member.user.name || member.user.email,
                 email: member.user.email,

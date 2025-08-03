@@ -166,7 +166,7 @@ export function TaskList({ projectId, userId, sprints }: TaskListProps) {
       }
 
       const data: ApiResponse = await response.json();
-      debugger
+      debugger;
       if (data.success) {
         setTasks(data.data.tasks);
         setTotal(data.data.pagination.total);
@@ -329,8 +329,6 @@ export function TaskList({ projectId, userId, sprints }: TaskListProps) {
     );
   };
 
-
-
   return (
     <div className='space-y-4'>
       <Tabs
@@ -341,7 +339,9 @@ export function TaskList({ projectId, userId, sprints }: TaskListProps) {
         <TabsList className='mb-4 grid grid-cols-4 md:grid-cols-7 lg:w-[600px]'>
           <TabsTrigger value='all'>{tc('all')}</TabsTrigger>
           <TabsTrigger value='todo'>{t('status.todo')}</TabsTrigger>
-          <TabsTrigger value='in_progress'>{t('status.inProgress')}</TabsTrigger>
+          <TabsTrigger value='in_progress'>
+            {t('status.inProgress')}
+          </TabsTrigger>
           <TabsTrigger value='review'>{t('status.review')}</TabsTrigger>
           <TabsTrigger value='done'>{t('status.done')}</TabsTrigger>
           <TabsTrigger value='blocked'>{t('status.blocked')}</TabsTrigger>
@@ -436,8 +436,6 @@ export function TaskList({ projectId, userId, sprints }: TaskListProps) {
                     </SelectContent>
                   </Select>
                 </div>
-
-
 
                 <div className='flex justify-between pt-2'>
                   <Button variant='outline' size='sm' onClick={clearFilters}>
@@ -710,8 +708,14 @@ export function TaskList({ projectId, userId, sprints }: TaskListProps) {
                 <PaginationContent className='flex-nowrap overflow-hidden'>
                   <PaginationItem>
                     <PaginationPrevious
-                      onClick={page === 1 ? undefined : () => setPage(Math.max(1, page - 1))}
-                      className={page === 1 ? 'pointer-events-none opacity-50' : ''}
+                      onClick={
+                        page === 1
+                          ? undefined
+                          : () => setPage(Math.max(1, page - 1))
+                      }
+                      className={
+                        page === 1 ? 'pointer-events-none opacity-50' : ''
+                      }
                     />
                   </PaginationItem>
 
@@ -719,8 +723,16 @@ export function TaskList({ projectId, userId, sprints }: TaskListProps) {
 
                   <PaginationItem>
                     <PaginationNext
-                      onClick={page === totalPages ? undefined : () => setPage(Math.min(totalPages, page + 1))}
-                      className={page === totalPages ? 'pointer-events-none opacity-50' : ''}
+                      onClick={
+                        page === totalPages
+                          ? undefined
+                          : () => setPage(Math.min(totalPages, page + 1))
+                      }
+                      className={
+                        page === totalPages
+                          ? 'pointer-events-none opacity-50'
+                          : ''
+                      }
                     />
                   </PaginationItem>
                 </PaginationContent>

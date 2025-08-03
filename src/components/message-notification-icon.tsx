@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useRouter } from 'next/navigation';
@@ -18,13 +18,15 @@ import { useUnreadMessages } from '@/hooks/use-unread-messages';
 import { useRecentMessages } from '@/hooks/use-recent-messages';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { zhCN } from 'date-fns/locale/zh-CN';
 
 interface MessageNotificationIconProps {
   className?: string;
 }
 
-export function MessageNotificationIcon({ className }: MessageNotificationIconProps) {
+export function MessageNotificationIcon({
+  className
+}: MessageNotificationIconProps) {
   const router = useRouter();
   const { unreadCount, loading } = useUnreadMessages();
   const { messages, loading: messagesLoading } = useRecentMessages(5);
@@ -45,53 +47,53 @@ export function MessageNotificationIcon({ className }: MessageNotificationIconPr
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant="ghost"
-            size="icon"
-            className="relative h-9 w-9 hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
+            variant='ghost'
+            size='icon'
+            className='hover:bg-accent hover:text-accent-foreground relative h-9 w-9 transition-colors duration-200'
             disabled={loading}
           >
-            <Bell 
+            <Bell
               className={cn(
                 'h-4 w-4 transition-all duration-200',
                 hasUnread && 'text-primary animate-pulse'
-              )} 
+              )}
             />
-            
+
             {/* 未读消息徽章 */}
             {hasUnread && (
-              <Badge 
-                variant="destructive"
-                className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 text-xs font-medium flex items-center justify-center rounded-full border-2 border-background animate-in fade-in-0 zoom-in-50 duration-200"
+              <Badge
+                variant='destructive'
+                className='border-background animate-in fade-in-0 zoom-in-50 absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full border-2 px-1 text-xs font-medium duration-200'
               >
                 {displayCount}
               </Badge>
             )}
-            
+
             {/* 加载状态指示器 */}
             {loading && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="h-2 w-2 bg-muted-foreground rounded-full animate-pulse" />
+              <div className='absolute inset-0 flex items-center justify-center'>
+                <div className='bg-muted-foreground h-2 w-2 animate-pulse rounded-full' />
               </div>
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-80">
-          <DropdownMenuLabel className="flex items-center justify-between">
+        <DropdownMenuContent align='end' className='w-80'>
+          <DropdownMenuLabel className='flex items-center justify-between'>
             <span>消息通知</span>
             {hasUnread && (
-              <span className="text-xs text-muted-foreground">
+              <span className='text-muted-foreground text-xs'>
                 {unreadCount} 条未读
               </span>
             )}
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          
+
           {messagesLoading ? (
-            <div className="p-4 text-center text-sm text-muted-foreground">
+            <div className='text-muted-foreground p-4 text-center text-sm'>
               加载中...
             </div>
           ) : messages.length === 0 ? (
-            <div className="p-4 text-center text-sm text-muted-foreground">
+            <div className='text-muted-foreground p-4 text-center text-sm'>
               暂无未读消息
             </div>
           ) : (
@@ -99,30 +101,30 @@ export function MessageNotificationIcon({ className }: MessageNotificationIconPr
               {messages.map((message) => (
                 <DropdownMenuItem
                   key={message.id}
-                  className="p-3 cursor-pointer hover:bg-accent"
+                  className='hover:bg-accent cursor-pointer p-3'
                   onClick={() => handleMessageClick(message.id)}
                 >
-                  <div className="flex items-start space-x-3 w-full">
-                    <Avatar className="h-8 w-8 flex-shrink-0">
+                  <div className='flex w-full items-start space-x-3'>
+                    <Avatar className='h-8 w-8 flex-shrink-0'>
                       <AvatarImage src={message.sender.image} />
                       <AvatarFallback>
-                        <User className="h-4 w-4" />
+                        <User className='h-4 w-4' />
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium text-foreground truncate">
+                    <div className='min-w-0 flex-1'>
+                      <div className='flex items-center justify-between'>
+                        <p className='text-foreground truncate text-sm font-medium'>
                           {message.sender.name}
                         </p>
-                        <div className="flex items-center text-xs text-muted-foreground ml-2">
-                          <Clock className="h-3 w-3 mr-1" />
+                        <div className='text-muted-foreground ml-2 flex items-center text-xs'>
+                          <Clock className='mr-1 h-3 w-3' />
                           {formatDistanceToNow(new Date(message.createdAt), {
                             addSuffix: true,
                             locale: zhCN
                           })}
                         </div>
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                      <p className='text-muted-foreground mt-1 line-clamp-2 text-sm'>
                         {message.preview}
                       </p>
                     </div>
@@ -131,7 +133,7 @@ export function MessageNotificationIcon({ className }: MessageNotificationIconPr
               ))}
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                className="text-center justify-center text-sm font-medium text-primary cursor-pointer"
+                className='text-primary cursor-pointer justify-center text-center text-sm font-medium'
                 onClick={handleViewAll}
               >
                 查看全部消息

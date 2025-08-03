@@ -6,14 +6,14 @@ import { apiResponse, apiUnauthorized } from '@/lib/api-response';
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user) {
       return apiUnauthorized();
     }
 
     // 返回用户信息，排除敏感字段
     const { passwordHash, ...safeUser } = user;
-    
+
     return apiResponse(safeUser);
   } catch (error) {
     console.error('Failed to get current user:', error);

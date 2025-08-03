@@ -3,13 +3,19 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, Calendar, User, ExternalLink } from 'lucide-react';
 import { getApiUrl } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { zhCN } from 'date-fns/locale/zh-CN';
 
 interface RecentTask {
   id: string;
@@ -109,11 +115,11 @@ export function RecentTasks() {
 
   const formatDueDate = (dueDate: string | null) => {
     if (!dueDate) return null;
-    
+
     const date = new Date(dueDate);
     const now = new Date();
     const isOverdue = date < now;
-    
+
     return {
       text: formatDistanceToNow(date, { addSuffix: true, locale: zhCN }),
       isOverdue
@@ -123,7 +129,7 @@ export function RecentTasks() {
   const getUserInitials = (name: string) => {
     return name
       .split(' ')
-      .map(word => word.charAt(0))
+      .map((word) => word.charAt(0))
       .join('')
       .toUpperCase()
       .slice(0, 2);
@@ -138,7 +144,7 @@ export function RecentTasks() {
         </CardHeader>
         <CardContent>
           <div className='flex h-[400px] items-center justify-center'>
-            <Loader2 className='h-8 w-8 animate-spin text-primary' />
+            <Loader2 className='text-primary h-8 w-8 animate-spin' />
           </div>
         </CardContent>
       </Card>
@@ -154,7 +160,7 @@ export function RecentTasks() {
         </CardHeader>
         <CardContent>
           <div className='flex h-[400px] items-center justify-center'>
-            <div className='text-center text-muted-foreground'>
+            <div className='text-muted-foreground text-center'>
               <p>{error}</p>
             </div>
           </div>
@@ -172,7 +178,7 @@ export function RecentTasks() {
         </CardHeader>
         <CardContent>
           <div className='flex h-[400px] items-center justify-center'>
-            <div className='text-center text-muted-foreground'>
+            <div className='text-muted-foreground text-center'>
               <p>暂无任务数据</p>
             </div>
           </div>
@@ -185,25 +191,23 @@ export function RecentTasks() {
     <Card>
       <CardHeader>
         <CardTitle>最近任务</CardTitle>
-        <CardDescription>
-          显示最近更新的 {tasks.length} 个任务
-        </CardDescription>
+        <CardDescription>显示最近更新的 {tasks.length} 个任务</CardDescription>
       </CardHeader>
       <CardContent>
         <div className='space-y-4'>
           {tasks.map((task) => {
             const dueDateInfo = formatDueDate(task.dueDate);
-            
+
             return (
               <div
                 key={task.id}
-                className='flex items-start justify-between space-x-4 rounded-lg border p-4 hover:bg-muted/50 transition-colors'
+                className='hover:bg-muted/50 flex items-start justify-between space-x-4 rounded-lg border p-4 transition-colors'
               >
                 <div className='flex-1 space-y-2'>
                   <div className='flex items-center gap-2'>
                     <Link
                       href={`/dashboard/projects/${task.project.id}/tasks/${task.id}`}
-                      className='font-medium hover:underline line-clamp-1'
+                      className='line-clamp-1 font-medium hover:underline'
                     >
                       {task.title}
                     </Link>
@@ -214,8 +218,8 @@ export function RecentTasks() {
                       <ExternalLink className='h-3 w-3' />
                     </Link>
                   </div>
-                  
-                  <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+
+                  <div className='text-muted-foreground flex items-center gap-2 text-sm'>
                     <Link
                       href={`/dashboard/projects/${task.project.id}`}
                       className='hover:text-foreground hover:underline'
@@ -223,52 +227,72 @@ export function RecentTasks() {
                       {task.project.name}
                     </Link>
                   </div>
-                  
+
                   <div className='flex items-center gap-2'>
                     <Badge
                       variant='secondary'
-                      className={STATUS_COLORS[task.status as keyof typeof STATUS_COLORS]}
+                      className={
+                        STATUS_COLORS[task.status as keyof typeof STATUS_COLORS]
+                      }
                     >
                       {STATUS_LABELS[task.status as keyof typeof STATUS_LABELS]}
                     </Badge>
-                    
+
                     <Badge
                       variant='outline'
-                      className={PRIORITY_COLORS[task.priority as keyof typeof PRIORITY_COLORS]}
+                      className={
+                        PRIORITY_COLORS[
+                          task.priority as keyof typeof PRIORITY_COLORS
+                        ]
+                      }
                     >
-                      {PRIORITY_LABELS[task.priority as keyof typeof PRIORITY_LABELS]}
+                      {
+                        PRIORITY_LABELS[
+                          task.priority as keyof typeof PRIORITY_LABELS
+                        ]
+                      }
                     </Badge>
-                    
+
                     {dueDateInfo && (
-                      <div className={`flex items-center gap-1 text-xs ${
-                        dueDateInfo.isOverdue ? 'text-red-600' : 'text-muted-foreground'
-                      }`}>
+                      <div
+                        className={`flex items-center gap-1 text-xs ${
+                          dueDateInfo.isOverdue
+                            ? 'text-red-600'
+                            : 'text-muted-foreground'
+                        }`}
+                      >
                         <Calendar className='h-3 w-3' />
                         <span>{dueDateInfo.text}</span>
                       </div>
                     )}
                   </div>
                 </div>
-                
+
                 <div className='flex items-center gap-2'>
                   {task.assignedMembers && task.assignedMembers.length > 0 ? (
                     <div className='flex -space-x-2'>
                       {task.assignedMembers.slice(0, 3).map((member, index) => (
-                        <Avatar key={member.user.id} className='h-6 w-6 border-2 border-background'>
-                          <AvatarImage src={member.user.avatar} alt={member.user.name} />
+                        <Avatar
+                          key={member.user.id}
+                          className='border-background h-6 w-6 border-2'
+                        >
+                          <AvatarImage
+                            src={member.user.avatar}
+                            alt={member.user.name}
+                          />
                           <AvatarFallback className='text-xs'>
                             {getUserInitials(member.user.name)}
                           </AvatarFallback>
                         </Avatar>
                       ))}
                       {task.assignedMembers.length > 3 && (
-                        <div className='flex h-6 w-6 items-center justify-center rounded-full border-2 border-background bg-muted text-xs text-muted-foreground'>
+                        <div className='border-background bg-muted text-muted-foreground flex h-6 w-6 items-center justify-center rounded-full border-2 text-xs'>
                           +{task.assignedMembers.length - 3}
                         </div>
                       )}
                     </div>
                   ) : (
-                    <div className='flex items-center gap-1 text-xs text-muted-foreground'>
+                    <div className='text-muted-foreground flex items-center gap-1 text-xs'>
                       <User className='h-3 w-3' />
                       <span>未分配</span>
                     </div>
@@ -278,11 +302,11 @@ export function RecentTasks() {
             );
           })}
         </div>
-        
+
         <div className='mt-6 text-center'>
           <Link
             href='/dashboard/tasks'
-            className='text-sm text-primary hover:underline'
+            className='text-primary text-sm hover:underline'
           >
             查看所有任务 →
           </Link>

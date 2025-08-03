@@ -34,7 +34,7 @@ import { cn } from '@/lib/utils';
 import { MessageBubble, Message, MessageUser } from './message-bubble';
 import { MessageInput } from './message-input';
 import { format } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { zhCN } from 'date-fns/locale/zh-CN';
 import { useAuth } from '@/hooks/use-auth';
 import { toast } from 'sonner';
 
@@ -405,12 +405,13 @@ export function ChatContent({ conversation }: ChatContentProps) {
               </div>
             </div>
           ) : (
-            <React.Fragment>
-              {messages.map((message) => {
+            [
+              ...messages.map((message) => {
+                console.log(message, 'dddddddddddddd');
                 const isOwn = user?.id ? message.sender.id === user.id : false;
                 return (
                   <MessageBubble
-                    key={message.id}
+                    key={message.sender.id + message.timestamp.getTime()}
                     message={message}
                     isOwn={isOwn}
                     onReply={(msg) => setReplyTo(msg)}
@@ -425,29 +426,29 @@ export function ChatContent({ conversation }: ChatContentProps) {
                     }}
                   />
                 );
-              })}
-              {isTyping && (
-                <div className='text-muted-foreground flex items-center gap-2 text-sm'>
-                  <div className='flex gap-1'>
+              }),
+              ...(isTyping
+                ? [
                     <div
-                      key='dot-1'
-                      className='bg-muted-foreground h-2 w-2 animate-bounce rounded-full'
-                    />
-                    <div
-                      key='dot-2'
-                      className='bg-muted-foreground h-2 w-2 animate-bounce rounded-full'
-                      style={{ animationDelay: '0.1s' }}
-                    />
-                    <div
-                      key='dot-3'
-                      className='bg-muted-foreground h-2 w-2 animate-bounce rounded-full'
-                      style={{ animationDelay: '0.2s' }}
-                    />
-                  </div>
-                  <span>{conversation.name} 正在输入...</span>
-                </div>
-              )}
-            </React.Fragment>
+                      key='typing-indicator'
+                      className='text-muted-foreground flex items-center gap-2 text-sm'
+                    >
+                      <div className='flex gap-1'>
+                        <div className='bg-muted-foreground h-2 w-2 animate-bounce rounded-full' />
+                        <div
+                          className='bg-muted-foreground h-2 w-2 animate-bounce rounded-full'
+                          style={{ animationDelay: '0.1s' }}
+                        />
+                        <div
+                          className='bg-muted-foreground h-2 w-2 animate-bounce rounded-full'
+                          style={{ animationDelay: '0.2s' }}
+                        />
+                      </div>
+                      <span>{conversation.name} 正在输入...</span>
+                    </div>
+                  ]
+                : [])
+            ]
           )}
           <div ref={messagesEndRef} />
         </div>

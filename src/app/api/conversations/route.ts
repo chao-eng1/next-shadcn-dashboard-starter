@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/get-current-user';
 import { prisma } from '@/lib/prisma';
-import { apiResponse, apiUnauthorized, apiBadRequest } from '@/lib/api-response';
+import {
+  apiResponse,
+  apiUnauthorized,
+  apiBadRequest
+} from '@/lib/api-response';
 import { z } from 'zod';
 
 const createConversationSchema = z.object({
@@ -16,7 +20,7 @@ const createConversationSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user) {
       return apiUnauthorized();
     }
@@ -164,7 +168,7 @@ export async function GET(request: NextRequest) {
             description: chat.project.description,
             projectId: chat.projectId,
             project: chat.project,
-            participants: projectMembers.map(member => ({
+            participants: projectMembers.map((member) => ({
               id: member.user.id,
               name: member.user.name,
               email: member.user.email,
@@ -172,14 +176,16 @@ export async function GET(request: NextRequest) {
               role: member.role,
               status: 'offline' as const // 默认状态，实际状态需要从在线用户列表获取
             })),
-            lastMessage: chat.messages[0] ? {
-              id: chat.messages[0].id,
-              content: chat.messages[0].content,
-              senderId: chat.messages[0].sender.id,
-              senderName: chat.messages[0].sender.name,
-              timestamp: chat.messages[0].createdAt.toISOString(),
-              messageType: chat.messages[0].messageType
-            } : null,
+            lastMessage: chat.messages[0]
+              ? {
+                  id: chat.messages[0].id,
+                  content: chat.messages[0].content,
+                  senderId: chat.messages[0].sender.id,
+                  senderName: chat.messages[0].sender.name,
+                  timestamp: chat.messages[0].createdAt.toISOString(),
+                  messageType: chat.messages[0].messageType
+                }
+              : null,
             unreadCount: chat._count.messages,
             createdAt: chat.createdAt.toISOString(),
             updatedAt: chat.updatedAt.toISOString()
@@ -194,10 +200,7 @@ export async function GET(request: NextRequest) {
       // 获取私聊会话
       const privateConversations = await prisma.privateConversation.findMany({
         where: {
-          OR: [
-            { participant1Id: user.id },
-            { participant2Id: user.id }
-          ],
+          OR: [{ participant1Id: user.id }, { participant2Id: user.id }],
           ...(projectId ? { projectId } : {})
         },
         include: {
@@ -259,50 +262,60 @@ export async function GET(request: NextRequest) {
         }
       });
 
-      conversations.push(...privateConversations.map(conv => {
-        const otherParticipant = conv.participant1Id === user.id ? conv.participant2 : conv.participant1;
-        return {
-          id: conv.id,
-          type: 'private',
-          name: otherParticipant.name || otherParticipant.email,
-          projectId: conv.projectId,
-          project: conv.project,
-          participants: [
-            {
-              id: conv.participant1.id,
-              name: conv.participant1.name,
-              email: conv.participant1.email,
-              image: conv.participant1.image,
-              role: '',
-              status: 'offline' as const
-            },
-            {
-              id: conv.participant2.id,
-              name: conv.participant2.name,
-              email: conv.participant2.email,
-              image: conv.participant2.image,
-              role: '',
-              status: 'offline' as const
-            }
-          ],
-          lastMessage: conv.messages[0] ? {
-            id: conv.messages[0].id,
-            content: conv.messages[0].content,
-            senderId: conv.messages[0].sender.id,
-            senderName: conv.messages[0].sender.name,
-            timestamp: conv.messages[0].createdAt.toISOString(),
-            messageType: conv.messages[0].messageType
-          } : null,
-          unreadCount: conv._count.messages,
-          createdAt: conv.createdAt.toISOString(),
-          updatedAt: conv.updatedAt.toISOString()
-        };
-      }));
+      conversations.push(
+        ...privateConversations.map((conv) => {
+          const otherParticipant =
+            conv.participant1Id === user.id
+              ? conv.participant2
+              : conv.participant1;
+          return {
+            id: conv.id,
+            type: 'private',
+            name: otherParticipant.name || otherParticipant.email,
+            projectId: conv.projectId,
+            project: conv.project,
+            participants: [
+              {
+                id: conv.participant1.id,
+                name: conv.participant1.name,
+                email: conv.participant1.email,
+                image: conv.participant1.image,
+                role: '',
+                status: 'offline' as const
+              },
+              {
+                id: conv.participant2.id,
+                name: conv.participant2.name,
+                email: conv.participant2.email,
+                image: conv.participant2.image,
+                role: '',
+                status: 'offline' as const
+              }
+            ],
+            lastMessage: conv.messages[0]
+              ? {
+                  id: conv.messages[0].id,
+                  content: conv.messages[0].content,
+                  senderId: conv.messages[0].sender.id,
+                  senderName: conv.messages[0].sender.name,
+                  timestamp: conv.messages[0].createdAt.toISOString(),
+                  messageType: conv.messages[0].messageType
+                }
+              : null,
+            unreadCount: conv._count.messages,
+            createdAt: conv.createdAt.toISOString(),
+            updatedAt: conv.updatedAt.toISOString()
+          };
+        })
+      );
     }
 
     // 按更新时间排序
-    conversations.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-    
+    conversations.sort(
+      (a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    );
+
     return apiResponse(conversations);
   } catch (error) {
     console.error('Failed to get conversations:', error);
@@ -317,19 +330,20 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user) {
       return apiUnauthorized();
     }
 
     const body = await request.json();
     const validation = createConversationSchema.safeParse(body);
-    
+
     if (!validation.success) {
       return apiBadRequest('请求参数验证失败');
     }
 
-    const { type, projectId, participantId, participantIds, name } = validation.data;
+    const { type, projectId, participantId, participantIds, name } =
+      validation.data;
 
     let conversation: any;
 
@@ -377,8 +391,9 @@ export async function POST(request: NextRequest) {
       };
     } else if (type === 'private') {
       // 创建私聊会话
-      const otherUserId = participantId || (participantIds && participantIds[0]);
-      
+      const otherUserId =
+        participantId || (participantIds && participantIds[0]);
+
       if (!otherUserId) {
         return apiBadRequest('私聊需要指定一个参与者');
       }
@@ -438,7 +453,10 @@ export async function POST(request: NextRequest) {
         }
       });
 
-      const otherParticipant = conversation.participant1Id === user.id ? conversation.participant2 : conversation.participant1;
+      const otherParticipant =
+        conversation.participant1Id === user.id
+          ? conversation.participant2
+          : conversation.participant1;
       conversation = {
         id: conversation.id,
         type: 'private',

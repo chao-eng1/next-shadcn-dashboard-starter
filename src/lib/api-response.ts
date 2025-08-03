@@ -104,6 +104,9 @@ export function apiNotFound(message: string = '资源不存在'): NextResponse {
  * @param message 错误消息
  * @returns NextResponse
  */
-export function apiValidationError(errors: any, message: string = '请求参数验证失败'): NextResponse {
+export function apiValidationError(
+  errors: any,
+  message: string = '请求参数验证失败'
+): NextResponse {
   return apiError('VALIDATION_ERROR', message, errors, 400);
 }

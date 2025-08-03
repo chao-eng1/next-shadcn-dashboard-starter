@@ -7,7 +7,7 @@ import { apiResponse, apiUnauthorized } from '@/lib/api-response';
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user) {
       return apiUnauthorized();
     }
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
         { name: 'asc' }
       ]
     });
-    
+
     return apiResponse(users);
   } catch (error) {
     console.error('Failed to search users:', error);

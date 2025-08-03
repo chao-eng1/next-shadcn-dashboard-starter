@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import {
   Dialog,
@@ -18,14 +18,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -51,10 +51,10 @@ interface RequirementActionsProps {
   projectId?: string;
 }
 
-export function RequirementActions({ 
-  selectedItems = [], 
+export function RequirementActions({
+  selectedItems = [],
   onRefresh,
-  projectId 
+  projectId
 }: RequirementActionsProps) {
   const [showBatchUpdate, setShowBatchUpdate] = useState(false);
   const [showImport, setShowImport] = useState(false);
@@ -66,7 +66,7 @@ export function RequirementActions({
   const { toast } = useToast();
 
   const handleCreateNew = () => {
-    const url = projectId 
+    const url = projectId
       ? `/dashboard/projects/${projectId}/requirements/new`
       : '/dashboard/requirements/new';
     router.push(url);
@@ -211,7 +211,11 @@ export function RequirementActions({
       return;
     }
 
-    if (!confirm(`确定要删除选中的 ${selectedItems.length} 个需求吗？此操作不可撤销。`)) {
+    if (
+      !confirm(
+        `确定要删除选中的 ${selectedItems.length} 个需求吗？此操作不可撤销。`
+      )
+    ) {
       return;
     }
 
@@ -329,14 +333,14 @@ export function RequirementActions({
   };
 
   return (
-    <div className="flex items-center space-x-3">
+    <div className='flex items-center space-x-3'>
       {/* 创建新需求 */}
-      <Button 
+      <Button
         onClick={handleCreateNew}
-        className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-6 h-11"
+        className='flex h-11 items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 px-6 text-white shadow-lg transition-all duration-200 hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl'
       >
-        <Plus className="h-4 w-4" />
-        <span className="font-medium">新建需求</span>
+        <Plus className='h-4 w-4' />
+        <span className='font-medium'>新建需求</span>
       </Button>
 
       {/* 批量操作 */}
@@ -344,7 +348,7 @@ export function RequirementActions({
         <>
           <Dialog open={showBatchUpdate} onOpenChange={setShowBatchUpdate}>
             <DialogTrigger asChild>
-              <Button variant="outline">
+              <Button variant='outline'>
                 批量更新 ({selectedItems.length})
               </Button>
             </DialogTrigger>
@@ -355,98 +359,102 @@ export function RequirementActions({
                   将对选中的 {selectedItems.length} 个需求进行批量更新
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4">
-                <div className="space-y-2">
+              <div className='space-y-4'>
+                <div className='space-y-2'>
                   <Label>状态</Label>
                   <Select value={batchStatus} onValueChange={setBatchStatus}>
                     <SelectTrigger>
-                      <SelectValue placeholder="选择状态（可选）" />
+                      <SelectValue placeholder='选择状态（可选）' />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="DRAFT">草稿</SelectItem>
-                      <SelectItem value="PENDING">待评估</SelectItem>
-                      <SelectItem value="APPROVED">已确认</SelectItem>
-                      <SelectItem value="IN_PROGRESS">开发中</SelectItem>
-                      <SelectItem value="TESTING">测试中</SelectItem>
-                      <SelectItem value="COMPLETED">已完成</SelectItem>
-                      <SelectItem value="REJECTED">已拒绝</SelectItem>
-                      <SelectItem value="CANCELLED">已取消</SelectItem>
+                      <SelectItem value='DRAFT'>草稿</SelectItem>
+                      <SelectItem value='PENDING'>待评估</SelectItem>
+                      <SelectItem value='APPROVED'>已确认</SelectItem>
+                      <SelectItem value='IN_PROGRESS'>开发中</SelectItem>
+                      <SelectItem value='TESTING'>测试中</SelectItem>
+                      <SelectItem value='COMPLETED'>已完成</SelectItem>
+                      <SelectItem value='REJECTED'>已拒绝</SelectItem>
+                      <SelectItem value='CANCELLED'>已取消</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
+                <div className='space-y-2'>
                   <Label>负责人</Label>
-                  <Select value={batchAssignee} onValueChange={setBatchAssignee}>
+                  <Select
+                    value={batchAssignee}
+                    onValueChange={setBatchAssignee}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder="选择负责人（可选）" />
+                      <SelectValue placeholder='选择负责人（可选）' />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="user1">张三</SelectItem>
-                      <SelectItem value="user2">李四</SelectItem>
-                      <SelectItem value="user3">王五</SelectItem>
+                      <SelectItem value='user1'>张三</SelectItem>
+                      <SelectItem value='user2'>李四</SelectItem>
+                      <SelectItem value='user3'>王五</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
+                <div className='space-y-2'>
                   <Label>更新说明</Label>
                   <Textarea
-                    placeholder="请输入更新说明（可选）"
+                    placeholder='请输入更新说明（可选）'
                     value={batchComment}
                     onChange={(e) => setBatchComment(e.target.value)}
                   />
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setShowBatchUpdate(false)}>
+                <Button
+                  variant='outline'
+                  onClick={() => setShowBatchUpdate(false)}
+                >
                   取消
                 </Button>
-                <Button onClick={handleBatchUpdate}>
-                  确认更新
-                </Button>
+                <Button onClick={handleBatchUpdate}>确认更新</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
 
-          <Button variant="outline" onClick={handleDuplicateSelected}>
-            <Copy className="h-4 w-4 mr-2" />
+          <Button variant='outline' onClick={handleDuplicateSelected}>
+            <Copy className='mr-2 h-4 w-4' />
             复制
           </Button>
 
-          <Button variant="outline" onClick={handleBatchArchive}>
-            <Archive className="h-4 w-4 mr-2" />
+          <Button variant='outline' onClick={handleBatchArchive}>
+            <Archive className='mr-2 h-4 w-4' />
             归档
           </Button>
 
-          <Button variant="destructive" onClick={handleBatchDelete}>
+          <Button variant='destructive' onClick={handleBatchDelete}>
             删除 ({selectedItems.length})
           </Button>
         </>
       )}
 
       {/* 快速操作按钮组 */}
-      <div className="hidden md:flex items-center space-x-2">
+      <div className='hidden items-center space-x-2 md:flex'>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button 
-              variant="outline"
-              className="flex items-center gap-2 h-11 px-4 border-border/50 hover:bg-green-50 hover:border-green-200 hover:text-green-700 dark:hover:bg-green-950/20 dark:hover:border-green-800 dark:hover:text-green-300 transition-all duration-200"
+            <Button
+              variant='outline'
+              className='border-border/50 flex h-11 items-center gap-2 px-4 transition-all duration-200 hover:border-green-200 hover:bg-green-50 hover:text-green-700 dark:hover:border-green-800 dark:hover:bg-green-950/20 dark:hover:text-green-300'
             >
-              <ExternalLink className="h-4 w-4" />
-              <span className="hidden lg:inline">导出</span>
+              <ExternalLink className='h-4 w-4' />
+              <span className='hidden lg:inline'>导出</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuLabel>导出格式</DropdownMenuLabel>
             <DropdownMenuItem onClick={() => handleExport('excel')}>
-              <FileSpreadsheet className="mr-2 h-4 w-4" />
+              <FileSpreadsheet className='mr-2 h-4 w-4' />
               Excel 文件
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleExport('pdf')}>
-              <FileText className="mr-2 h-4 w-4" />
+              <FileText className='mr-2 h-4 w-4' />
               PDF 文件
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleExport('csv')}>
-              <FileText className="mr-2 h-4 w-4" />
+              <FileText className='mr-2 h-4 w-4' />
               CSV 文件
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -456,8 +464,8 @@ export function RequirementActions({
       {/* 导入 */}
       <Dialog open={showImport} onOpenChange={setShowImport}>
         <DialogTrigger asChild>
-          <Button variant="outline">
-            <Upload className="h-4 w-4 mr-2" />
+          <Button variant='outline'>
+            <Upload className='mr-2 h-4 w-4' />
             导入
           </Button>
         </DialogTrigger>
@@ -468,33 +476,31 @@ export function RequirementActions({
               支持导入 Excel (.xlsx) 和 CSV (.csv) 格式的文件
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+          <div className='space-y-4'>
+            <div className='rounded-lg border-2 border-dashed border-gray-300 p-6 text-center'>
               <input
-                type="file"
-                accept=".xlsx,.csv"
+                type='file'
+                accept='.xlsx,.csv'
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   if (file) {
                     handleImport(file);
                   }
                 }}
-                className="hidden"
-                id="file-upload"
+                className='hidden'
+                id='file-upload'
               />
-              <label htmlFor="file-upload" className="cursor-pointer">
-                <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                <p className="mt-2 text-sm text-gray-600">
+              <label htmlFor='file-upload' className='cursor-pointer'>
+                <Upload className='mx-auto h-12 w-12 text-gray-400' />
+                <p className='mt-2 text-sm text-gray-600'>
                   点击选择文件或拖拽文件到此处
                 </p>
-                <p className="text-xs text-gray-500">
-                  支持 .xlsx 和 .csv 格式
-                </p>
+                <p className='text-xs text-gray-500'>支持 .xlsx 和 .csv 格式</p>
               </label>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowImport(false)}>
+            <Button variant='outline' onClick={() => setShowImport(false)}>
               取消
             </Button>
           </DialogFooter>
@@ -504,76 +510,91 @@ export function RequirementActions({
       {/* 更多操作 */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-2 h-11 px-4 border-border/50 hover:bg-muted transition-all duration-200"
+          <Button
+            variant='outline'
+            className='border-border/50 hover:bg-muted flex h-11 items-center gap-2 px-4 transition-all duration-200'
           >
-            <MoreHorizontal className="h-4 w-4" />
-            <span className="hidden sm:inline">更多</span>
+            <MoreHorizontal className='h-4 w-4' />
+            <span className='hidden sm:inline'>更多</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuContent align='end' className='w-56'>
           {/* 移动端显示的导入导出选项 */}
-          <div className="md:hidden">
-            <DropdownMenuItem onClick={() => setShowImport(true)} className="flex items-center gap-3 py-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/20">
-                <Import className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+          <div className='md:hidden'>
+            <DropdownMenuItem
+              onClick={() => setShowImport(true)}
+              className='flex items-center gap-3 py-3'
+            >
+              <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/20'>
+                <Import className='h-4 w-4 text-blue-600 dark:text-blue-400' />
               </div>
               <div>
-                <div className="font-medium">导入需求</div>
-                <div className="text-xs text-muted-foreground">从文件导入需求数据</div>
+                <div className='font-medium'>导入需求</div>
+                <div className='text-muted-foreground text-xs'>
+                  从文件导入需求数据
+                </div>
               </div>
             </DropdownMenuItem>
-            <DropdownMenuItem className="flex items-center gap-3 py-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/20">
-                <ExternalLink className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <DropdownMenuItem className='flex items-center gap-3 py-3'>
+              <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/20'>
+                <ExternalLink className='h-4 w-4 text-green-600 dark:text-green-400' />
               </div>
               <div>
-                <div className="font-medium">导出需求</div>
-                <div className="text-xs text-muted-foreground">导出需求数据到文件</div>
+                <div className='font-medium'>导出需求</div>
+                <div className='text-muted-foreground text-xs'>
+                  导出需求数据到文件
+                </div>
               </div>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
           </div>
-          
+
           {/* 其他操作选项 */}
-          <DropdownMenuItem onClick={() => router.push('/dashboard/requirements/templates')} className="flex items-center gap-3 py-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/20">
-              <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+          <DropdownMenuItem
+            onClick={() => router.push('/dashboard/requirements/templates')}
+            className='flex items-center gap-3 py-3'
+          >
+            <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/20'>
+              <FileText className='h-4 w-4 text-purple-600 dark:text-purple-400' />
             </div>
             <div>
-              <div className="font-medium">需求模板</div>
-              <div className="text-xs text-muted-foreground">管理需求模板</div>
+              <div className='font-medium'>需求模板</div>
+              <div className='text-muted-foreground text-xs'>管理需求模板</div>
             </div>
           </DropdownMenuItem>
-          
-          <DropdownMenuItem className="flex items-center gap-3 py-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/20">
-              <Zap className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+
+          <DropdownMenuItem className='flex items-center gap-3 py-3'>
+            <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/20'>
+              <Zap className='h-4 w-4 text-orange-600 dark:text-orange-400' />
             </div>
             <div>
-              <div className="font-medium">智能分析</div>
-              <div className="text-xs text-muted-foreground">AI 驱动的需求分析</div>
+              <div className='font-medium'>智能分析</div>
+              <div className='text-muted-foreground text-xs'>
+                AI 驱动的需求分析
+              </div>
             </div>
           </DropdownMenuItem>
-          
+
           <DropdownMenuSeparator />
-          
-          <DropdownMenuItem onClick={() => router.push('/dashboard/requirements/settings')} className="flex items-center gap-3 py-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-900/20">
-              <Settings className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+
+          <DropdownMenuItem
+            onClick={() => router.push('/dashboard/requirements/settings')}
+            className='flex items-center gap-3 py-3'
+          >
+            <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-900/20'>
+              <Settings className='h-4 w-4 text-gray-600 dark:text-gray-400' />
             </div>
             <div>
-              <div className="font-medium">设置</div>
-              <div className="text-xs text-muted-foreground">配置需求管理选项</div>
+              <div className='font-medium'>设置</div>
+              <div className='text-muted-foreground text-xs'>
+                配置需求管理选项
+              </div>
             </div>
           </DropdownMenuItem>
-          
+
           <DropdownMenuSeparator />
-          
-          <DropdownMenuItem onClick={onRefresh}>
-            刷新列表
-          </DropdownMenuItem>
+
+          <DropdownMenuItem onClick={onRefresh}>刷新列表</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

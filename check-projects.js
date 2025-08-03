@@ -12,7 +12,7 @@ async function checkProjects() {
       },
       take: 5
     });
-    
+
     console.log('Projects found:', projects.length);
     console.log(JSON.stringify(projects, null, 2));
   } catch (error) {

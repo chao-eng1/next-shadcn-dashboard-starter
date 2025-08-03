@@ -265,9 +265,7 @@ export function AddTaskToSprintDialog({
 
                 {filteredTasks.length === 0 && (
                   <div className='text-muted-foreground py-8 text-center'>
-                    {searchQuery
-                      ? t('noMatchingTasks')
-                      : t('noAvailableTasks')}
+                    {searchQuery ? t('noMatchingTasks') : t('noAvailableTasks')}
                   </div>
                 )}
               </div>

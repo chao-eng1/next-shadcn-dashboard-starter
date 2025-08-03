@@ -21,7 +21,9 @@ async function main() {
 
     console.log('Project members:');
     members.forEach((member, index) => {
-      console.log(`${index + 1}. User: ${member.user.email} (${member.user.name}), Role: ${member.role}`);
+      console.log(
+        `${index + 1}. User: ${member.user.email} (${member.user.name}), Role: ${member.role}`
+      );
     });
 
     if (members.length === 0) {
@@ -41,7 +43,6 @@ async function main() {
     });
 
     console.log('\nProject info:', project);
-
   } catch (error) {
     console.error('Error:', error);
   } finally {

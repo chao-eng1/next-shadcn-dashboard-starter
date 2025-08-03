@@ -66,7 +66,9 @@ export function ProjectSprintSummary({
         setError(null);
 
         const response = await fetch(
-          getApiUrl(`/api/projects/${projectId}/sprints?limit=10&sortBy=createdAt&sortOrder=desc`)
+          getApiUrl(
+            `/api/projects/${projectId}/sprints?limit=10&sortBy=createdAt&sortOrder=desc`
+          )
         );
 
         if (!response.ok) {
@@ -95,7 +97,9 @@ export function ProjectSprintSummary({
     if (!sprint.taskStats || sprint.taskStats.total === 0) {
       return 0;
     }
-    return Math.round((sprint.taskStats.completed / sprint.taskStats.total) * 100);
+    return Math.round(
+      (sprint.taskStats.completed / sprint.taskStats.total) * 100
+    );
   };
 
   // 计算剩余天数
@@ -149,7 +153,7 @@ export function ProjectSprintSummary({
             sprints.map((sprint) => {
               const progress = calculateProgress(sprint);
               const daysRemaining = calculateDaysRemaining(sprint.endDate);
-              
+
               return (
                 <TableRow key={sprint.id}>
                   <TableCell className='font-medium'>
@@ -184,7 +188,9 @@ export function ProjectSprintSummary({
                   </TableCell>
                   <TableCell>
                     {sprint.goal ? (
-                      <span className='line-clamp-1 text-sm'>{sprint.goal}</span>
+                      <span className='line-clamp-1 text-sm'>
+                        {sprint.goal}
+                      </span>
                     ) : (
                       <span className='text-muted-foreground text-sm'>
                         {t('table.noGoal')}
@@ -197,7 +203,8 @@ export function ProjectSprintSummary({
                         <div className='flex items-center justify-between text-sm'>
                           <span>{progress}%</span>
                           <span className='text-muted-foreground text-xs'>
-                            {sprint.taskStats?.completed || 0}/{sprint._count.tasks}
+                            {sprint.taskStats?.completed || 0}/
+                            {sprint._count.tasks}
                           </span>
                         </div>
                         <Progress value={progress} className='h-2' />
@@ -227,13 +234,19 @@ export function ProjectSprintSummary({
                         <div className='text-xs'>
                           {daysRemaining > 0 ? (
                             <span className='text-blue-600'>
-                              {t('table.daysRemaining', { days: daysRemaining })}
+                              {t('table.daysRemaining', {
+                                days: daysRemaining
+                              })}
                             </span>
                           ) : daysRemaining === 0 ? (
-                            <span className='text-orange-600'>{t('table.endToday')}</span>
+                            <span className='text-orange-600'>
+                              {t('table.endToday')}
+                            </span>
                           ) : (
                             <span className='text-red-600'>
-                              {t('table.overdue', { days: Math.abs(daysRemaining) })}
+                              {t('table.overdue', {
+                                days: Math.abs(daysRemaining)
+                              })}
                             </span>
                           )}
                         </div>

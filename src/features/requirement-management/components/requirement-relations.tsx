@@ -1,7 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -12,7 +18,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select';
 import {
   Dialog,
@@ -21,7 +27,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from '@/components/ui/dialog';
 import {
   Table,
@@ -29,13 +35,13 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import {
   Plus,
@@ -53,7 +59,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { zhCN } from 'date-fns/locale/zh-CN';
 
 interface Requirement {
   id: string;
@@ -96,7 +102,13 @@ interface Project {
 interface Relation {
   id: string;
   type: 'REQUIREMENT' | 'TASK' | 'PROJECT';
-  relationType: 'DEPENDS_ON' | 'BLOCKS' | 'RELATES_TO' | 'DUPLICATES' | 'PARENT_OF' | 'CHILD_OF';
+  relationType:
+    | 'DEPENDS_ON'
+    | 'BLOCKS'
+    | 'RELATES_TO'
+    | 'DUPLICATES'
+    | 'PARENT_OF'
+    | 'CHILD_OF';
   target: Requirement | Task | Project;
   description?: string;
   createdAt: Date;
@@ -117,24 +129,58 @@ const relationTypeConfig = {
 
 const statusConfig = {
   DRAFT: { label: '草稿', color: 'bg-gray-100 text-gray-800', icon: FileText },
-  PENDING: { label: '待评估', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
-  APPROVED: { label: '已确认', color: 'bg-blue-100 text-blue-800', icon: CheckCircle },
-  IN_PROGRESS: { label: '开发中', color: 'bg-purple-100 text-purple-800', icon: Clock },
-  TESTING: { label: '测试中', color: 'bg-orange-100 text-orange-800', icon: AlertCircle },
-  COMPLETED: { label: '已完成', color: 'bg-green-100 text-green-800', icon: CheckCircle },
+  PENDING: {
+    label: '待评估',
+    color: 'bg-yellow-100 text-yellow-800',
+    icon: Clock
+  },
+  APPROVED: {
+    label: '已确认',
+    color: 'bg-blue-100 text-blue-800',
+    icon: CheckCircle
+  },
+  IN_PROGRESS: {
+    label: '开发中',
+    color: 'bg-purple-100 text-purple-800',
+    icon: Clock
+  },
+  TESTING: {
+    label: '测试中',
+    color: 'bg-orange-100 text-orange-800',
+    icon: AlertCircle
+  },
+  COMPLETED: {
+    label: '已完成',
+    color: 'bg-green-100 text-green-800',
+    icon: CheckCircle
+  },
   ACTIVE: { label: '进行中', color: 'bg-blue-100 text-blue-800', icon: Target },
-  PAUSED: { label: '暂停', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
-  CANCELLED: { label: '已取消', color: 'bg-gray-100 text-gray-800', icon: AlertCircle }
+  PAUSED: {
+    label: '暂停',
+    color: 'bg-yellow-100 text-yellow-800',
+    icon: Clock
+  },
+  CANCELLED: {
+    label: '已取消',
+    color: 'bg-gray-100 text-gray-800',
+    icon: AlertCircle
+  }
 };
 
-export function RequirementRelations({ requirementId }: RequirementRelationsProps) {
+export function RequirementRelations({
+  requirementId
+}: RequirementRelationsProps) {
   const [relations, setRelations] = useState<Relation[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<(Requirement | Task | Project)[]>([]);
+  const [searchResults, setSearchResults] = useState<
+    (Requirement | Task | Project)[]
+  >([]);
   const [searchLoading, setSearchLoading] = useState(false);
-  const [selectedType, setSelectedType] = useState<'REQUIREMENT' | 'TASK' | 'PROJECT'>('REQUIREMENT');
+  const [selectedType, setSelectedType] = useState<
+    'REQUIREMENT' | 'TASK' | 'PROJECT'
+  >('REQUIREMENT');
   const [selectedRelationType, setSelectedRelationType] = useState<string>('');
   const [relationDescription, setRelationDescription] = useState('');
   const [selectedTarget, setSelectedTarget] = useState<string>('');
@@ -148,11 +194,13 @@ export function RequirementRelations({ requirementId }: RequirementRelationsProp
   const fetchRelations = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/requirements/${requirementId}/relations`);
+      const response = await fetch(
+        `/api/requirements/${requirementId}/relations`
+      );
       if (!response.ok) {
         throw new Error('获取关联信息失败');
       }
-      
+
       const data = await response.json();
       setRelations(data.data);
     } catch (error) {
@@ -175,17 +223,24 @@ export function RequirementRelations({ requirementId }: RequirementRelationsProp
 
     try {
       setSearchLoading(true);
-      const endpoint = selectedType === 'REQUIREMENT' ? '/api/requirements/search' :
-                     selectedType === 'TASK' ? '/api/tasks/search' :
-                     '/api/projects/search';
-      
-      const response = await fetch(`${endpoint}?q=${encodeURIComponent(query)}`);
+      const endpoint =
+        selectedType === 'REQUIREMENT'
+          ? '/api/requirements/search'
+          : selectedType === 'TASK'
+            ? '/api/tasks/search'
+            : '/api/projects/search';
+
+      const response = await fetch(
+        `${endpoint}?q=${encodeURIComponent(query)}`
+      );
       if (!response.ok) {
         throw new Error('搜索失败');
       }
-      
+
       const data = await response.json();
-      setSearchResults(data.data.filter((item: any) => item.id !== requirementId));
+      setSearchResults(
+        data.data.filter((item: any) => item.id !== requirementId)
+      );
     } catch (error) {
       console.error('搜索失败:', error);
       toast({
@@ -215,18 +270,21 @@ export function RequirementRelations({ requirementId }: RequirementRelationsProp
 
     try {
       setAdding(true);
-      const response = await fetch(`/api/requirements/${requirementId}/relations`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          targetType: selectedType,
-          targetId: selectedTarget,
-          relationType: selectedRelationType,
-          description: relationDescription
-        })
-      });
+      const response = await fetch(
+        `/api/requirements/${requirementId}/relations`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            targetType: selectedType,
+            targetId: selectedTarget,
+            relationType: selectedRelationType,
+            description: relationDescription
+          })
+        }
+      );
 
       if (!response.ok) {
         throw new Error('添加关联失败');
@@ -258,9 +316,12 @@ export function RequirementRelations({ requirementId }: RequirementRelationsProp
     }
 
     try {
-      const response = await fetch(`/api/requirements/${requirementId}/relations/${relationId}`, {
-        method: 'DELETE'
-      });
+      const response = await fetch(
+        `/api/requirements/${requirementId}/relations/${relationId}`,
+        {
+          method: 'DELETE'
+        }
+      );
 
       if (!response.ok) {
         throw new Error('移除关联失败');
@@ -307,124 +368,144 @@ export function RequirementRelations({ requirementId }: RequirementRelationsProp
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'REQUIREMENT':
-        return <FileText className="h-4 w-4" />;
+        return <FileText className='h-4 w-4' />;
       case 'TASK':
-        return <Target className="h-4 w-4" />;
+        return <Target className='h-4 w-4' />;
       case 'PROJECT':
-        return <Users className="h-4 w-4" />;
+        return <Users className='h-4 w-4' />;
       default:
-        return <FileText className="h-4 w-4" />;
+        return <FileText className='h-4 w-4' />;
     }
   };
 
   if (loading) {
     return (
-      <div className="space-y-4">
+      <div className='space-y-4'>
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="h-16 bg-gray-100 rounded animate-pulse" />
+          <div key={i} className='h-16 animate-pulse rounded bg-gray-100' />
         ))}
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       {/* 头部操作 */}
-      <div className="flex items-center justify-between">
+      <div className='flex items-center justify-between'>
         <div>
-          <h3 className="text-lg font-medium">关联管理</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className='text-lg font-medium'>关联管理</h3>
+          <p className='text-muted-foreground text-sm'>
             管理需求与其他需求、任务和项目的关联关系
           </p>
         </div>
         <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
           <DialogTrigger asChild>
             <Button>
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className='mr-2 h-4 w-4' />
               添加关联
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className='max-w-2xl'>
             <DialogHeader>
               <DialogTitle>添加关联</DialogTitle>
               <DialogDescription>
                 为需求添加与其他对象的关联关系
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className='space-y-4'>
               {/* 关联类型选择 */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+              <div className='grid grid-cols-2 gap-4'>
+                <div className='space-y-2'>
                   <Label>关联对象类型</Label>
-                  <Select value={selectedType} onValueChange={(value: any) => {
-                    setSelectedType(value);
-                    setSearchQuery('');
-                    setSearchResults([]);
-                    setSelectedTarget('');
-                  }}>
+                  <Select
+                    value={selectedType}
+                    onValueChange={(value: any) => {
+                      setSelectedType(value);
+                      setSearchQuery('');
+                      setSearchResults([]);
+                      setSelectedTarget('');
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="REQUIREMENT">需求</SelectItem>
-                      <SelectItem value="TASK">任务</SelectItem>
-                      <SelectItem value="PROJECT">项目</SelectItem>
+                      <SelectItem value='REQUIREMENT'>需求</SelectItem>
+                      <SelectItem value='TASK'>任务</SelectItem>
+                      <SelectItem value='PROJECT'>项目</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
+                <div className='space-y-2'>
                   <Label>关联类型</Label>
-                  <Select value={selectedRelationType} onValueChange={setSelectedRelationType}>
+                  <Select
+                    value={selectedRelationType}
+                    onValueChange={setSelectedRelationType}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder="选择关联类型" />
+                      <SelectValue placeholder='选择关联类型' />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(relationTypeConfig).map(([value, config]) => (
-                        <SelectItem key={value} value={value}>
-                          {config.label}
-                        </SelectItem>
-                      ))}
+                      {Object.entries(relationTypeConfig).map(
+                        ([value, config]) => (
+                          <SelectItem key={value} value={value}>
+                            {config.label}
+                          </SelectItem>
+                        )
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               {/* 搜索关联对象 */}
-              <div className="space-y-2">
+              <div className='space-y-2'>
                 <Label>搜索关联对象</Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <div className='relative'>
+                  <Search className='text-muted-foreground absolute top-3 left-3 h-4 w-4' />
                   <Input
                     placeholder={`搜索${selectedType === 'REQUIREMENT' ? '需求' : selectedType === 'TASK' ? '任务' : '项目'}...`}
                     value={searchQuery}
                     onChange={(e) => handleSearch(e.target.value)}
-                    className="pl-10"
+                    className='pl-10'
                   />
                 </div>
                 {searchLoading && (
-                  <div className="text-sm text-muted-foreground">搜索中...</div>
+                  <div className='text-muted-foreground text-sm'>搜索中...</div>
                 )}
                 {searchResults.length > 0 && (
-                  <div className="max-h-48 overflow-y-auto border rounded-md">
+                  <div className='max-h-48 overflow-y-auto rounded-md border'>
                     {searchResults.map((item) => (
                       <div
                         key={item.id}
-                        className={`p-3 cursor-pointer hover:bg-gray-50 border-b last:border-b-0 ${
-                          selectedTarget === item.id ? 'bg-blue-50 border-blue-200' : ''
+                        className={`cursor-pointer border-b p-3 last:border-b-0 hover:bg-gray-50 ${
+                          selectedTarget === item.id
+                            ? 'border-blue-200 bg-blue-50'
+                            : ''
                         }`}
                         onClick={() => setSelectedTarget(item.id)}
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
+                        <div className='flex items-center justify-between'>
+                          <div className='flex items-center space-x-2'>
                             {getTypeIcon(selectedType)}
-                            <span className="font-medium">{item.title || (item as Project).name}</span>
+                            <span className='font-medium'>
+                              {item.title || (item as Project).name}
+                            </span>
                           </div>
-                          <Badge className={statusConfig[item.status as keyof typeof statusConfig]?.color || 'bg-gray-100 text-gray-800'}>
-                            {statusConfig[item.status as keyof typeof statusConfig]?.label || item.status}
+                          <Badge
+                            className={
+                              statusConfig[
+                                item.status as keyof typeof statusConfig
+                              ]?.color || 'bg-gray-100 text-gray-800'
+                            }
+                          >
+                            {statusConfig[
+                              item.status as keyof typeof statusConfig
+                            ]?.label || item.status}
                           </Badge>
                         </div>
                         {(item as Project).description && (
-                          <div className="text-sm text-muted-foreground mt-1">
+                          <div className='text-muted-foreground mt-1 text-sm'>
                             {(item as Project).description}
                           </div>
                         )}
@@ -435,24 +516,27 @@ export function RequirementRelations({ requirementId }: RequirementRelationsProp
               </div>
 
               {/* 关联描述 */}
-              <div className="space-y-2">
+              <div className='space-y-2'>
                 <Label>关联描述（可选）</Label>
                 <Textarea
-                  placeholder="描述这个关联的具体内容或原因"
+                  placeholder='描述这个关联的具体内容或原因'
                   value={relationDescription}
                   onChange={(e) => setRelationDescription(e.target.value)}
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => {
-                setShowAddDialog(false);
-                resetForm();
-              }}>
+              <Button
+                variant='outline'
+                onClick={() => {
+                  setShowAddDialog(false);
+                  resetForm();
+                }}
+              >
                 取消
               </Button>
-              <Button 
-                onClick={handleAddRelation} 
+              <Button
+                onClick={handleAddRelation}
                 disabled={!selectedTarget || !selectedRelationType || adding}
               >
                 {adding ? '添加中...' : '确认添加'}
@@ -465,14 +549,14 @@ export function RequirementRelations({ requirementId }: RequirementRelationsProp
       {/* 关联列表 */}
       {relations.length === 0 ? (
         <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <Link className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">暂无关联</h3>
-            <p className="text-muted-foreground text-center mb-4">
+          <CardContent className='flex flex-col items-center justify-center py-12'>
+            <Link className='text-muted-foreground mb-4 h-12 w-12' />
+            <h3 className='mb-2 text-lg font-medium'>暂无关联</h3>
+            <p className='text-muted-foreground mb-4 text-center'>
               还没有添加任何关联关系
             </p>
             <Button onClick={() => setShowAddDialog(true)}>
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className='mr-2 h-4 w-4' />
               添加第一个关联
             </Button>
           </CardContent>
@@ -481,9 +565,7 @@ export function RequirementRelations({ requirementId }: RequirementRelationsProp
         <Card>
           <CardHeader>
             <CardTitle>关联列表</CardTitle>
-            <CardDescription>
-              共 {relations.length} 个关联关系
-            </CardDescription>
+            <CardDescription>共 {relations.length} 个关联关系</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -494,26 +576,31 @@ export function RequirementRelations({ requirementId }: RequirementRelationsProp
                   <TableHead>状态</TableHead>
                   <TableHead>描述</TableHead>
                   <TableHead>创建时间</TableHead>
-                  <TableHead className="w-[100px]">操作</TableHead>
+                  <TableHead className='w-[100px]'>操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {relations.map((relation) => (
                   <TableRow key={relation.id}>
                     <TableCell>
-                      <Badge className={relationTypeConfig[relation.relationType].color}>
+                      <Badge
+                        className={
+                          relationTypeConfig[relation.relationType].color
+                        }
+                      >
                         {relationTypeConfig[relation.relationType].label}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center space-x-2">
+                      <div className='flex items-center space-x-2'>
                         {getTypeIcon(relation.type)}
                         <div>
-                          <div className="font-medium">
-                            {relation.target.title || (relation.target as Project).name}
+                          <div className='font-medium'>
+                            {relation.target.title ||
+                              (relation.target as Project).name}
                           </div>
                           {relation.target.project && (
-                            <div className="text-sm text-muted-foreground">
+                            <div className='text-muted-foreground text-sm'>
                               {relation.target.project.name}
                             </div>
                           )}
@@ -521,37 +608,54 @@ export function RequirementRelations({ requirementId }: RequirementRelationsProp
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge className={statusConfig[relation.target.status as keyof typeof statusConfig]?.color || 'bg-gray-100 text-gray-800'}>
-                        {statusConfig[relation.target.status as keyof typeof statusConfig]?.label || relation.target.status}
+                      <Badge
+                        className={
+                          statusConfig[
+                            relation.target.status as keyof typeof statusConfig
+                          ]?.color || 'bg-gray-100 text-gray-800'
+                        }
+                      >
+                        {statusConfig[
+                          relation.target.status as keyof typeof statusConfig
+                        ]?.label || relation.target.status}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="max-w-xs truncate" title={relation.description}>
+                      <div
+                        className='max-w-xs truncate'
+                        title={relation.description}
+                      >
                         {relation.description || '-'}
                       </div>
                     </TableCell>
                     <TableCell>
-                      {format(new Date(relation.createdAt), 'yyyy-MM-dd', { locale: zhCN })}
+                      {format(new Date(relation.createdAt), 'yyyy-MM-dd', {
+                        locale: zhCN
+                      })}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
+                          <Button variant='ghost' size='sm'>
+                            <MoreHorizontal className='h-4 w-4' />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align='end'>
                           <DropdownMenuItem asChild>
-                            <a href={getTargetUrl(relation)} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="mr-2 h-4 w-4" />
+                            <a
+                              href={getTargetUrl(relation)}
+                              target='_blank'
+                              rel='noopener noreferrer'
+                            >
+                              <ExternalLink className='mr-2 h-4 w-4' />
                               查看详情
                             </a>
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             onClick={() => handleRemoveRelation(relation.id)}
-                            className="text-red-600"
+                            className='text-red-600'
                           >
-                            <Unlink className="mr-2 h-4 w-4" />
+                            <Unlink className='mr-2 h-4 w-4' />
                             移除关联
                           </DropdownMenuItem>
                         </DropdownMenuContent>

@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/get-current-user';
 import { prisma } from '@/lib/prisma';
-import { apiResponse, apiUnauthorized, apiBadRequest } from '@/lib/api-response';
+import {
+  apiResponse,
+  apiUnauthorized,
+  apiBadRequest
+} from '@/lib/api-response';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { randomUUID } from 'crypto';
@@ -9,7 +13,7 @@ import { randomUUID } from 'crypto';
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = [
   'image/jpeg',
-  'image/png', 
+  'image/png',
   'image/gif',
   'image/webp',
   'application/pdf',
@@ -24,7 +28,7 @@ const ALLOWED_TYPES = [
 export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user) {
       return apiUnauthorized();
     }
@@ -50,7 +54,7 @@ export async function POST(request: NextRequest) {
     // 生成唯一文件名
     const fileExtension = file.name.split('.').pop() || '';
     const uniqueFileName = `${randomUUID()}.${fileExtension}`;
-    
+
     // 确保上传目录存在
     const uploadsDir = join(process.cwd(), 'public', 'uploads');
     try {
@@ -63,9 +67,9 @@ export async function POST(request: NextRequest) {
     const filePath = join(uploadsDir, uniqueFileName);
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    
+
     await writeFile(filePath, buffer);
-    
+
     // 保存文件信息到数据库（使用现有的Attachment模型）
     const uploadedFile = await prisma.attachment.create({
       data: {
@@ -94,7 +98,6 @@ export async function POST(request: NextRequest) {
       fileSize: uploadedFile.size,
       mimeType: uploadedFile.mimetype
     });
-
   } catch (error) {
     console.error('File upload failed:', error);
     return NextResponse.json(

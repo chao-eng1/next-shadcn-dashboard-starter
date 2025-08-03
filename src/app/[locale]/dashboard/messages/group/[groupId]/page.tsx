@@ -9,7 +9,7 @@ export default function ProjectGroupChatPage() {
   const groupId = params.groupId as string;
 
   return (
-    <div className="h-full">
+    <div className='h-full'>
       <ProjectGroupChat groupId={groupId} />
     </div>
   );

@@ -38,12 +38,15 @@ import {
 import { getProjectMemberRoleLabels } from '@/constants/project';
 
 // 添加成员表单验证
-const createAddMemberFormSchema = (t: (key: string) => string) => z.object({
-  email: z.string().email(t('validation.invalidEmail')),
-  role: z.enum(['ADMIN', 'MEMBER', 'VIEWER']).default('MEMBER')
-});
+const createAddMemberFormSchema = (t: (key: string) => string) =>
+  z.object({
+    email: z.string().email(t('validation.invalidEmail')),
+    role: z.enum(['ADMIN', 'MEMBER', 'VIEWER']).default('MEMBER')
+  });
 
-type AddMemberFormValues = z.infer<ReturnType<typeof createAddMemberFormSchema>>;
+type AddMemberFormValues = z.infer<
+  ReturnType<typeof createAddMemberFormSchema>
+>;
 
 interface AddMemberDialogProps {
   projectId: string;
@@ -70,7 +73,7 @@ export function AddMemberDialog({
 
   // 获取国际化的角色标签
   const roleLabels = getProjectMemberRoleLabels(t);
-  
+
   // 创建带有翻译的表单验证 schema
   const addMemberFormSchema = createAddMemberFormSchema(t);
 
@@ -110,10 +113,16 @@ export function AddMemberDialog({
           onMemberAdded();
         }
       } else {
-        throw new Error(data.error?.message || t('projects.messages.createFailed'));
+        throw new Error(
+          data.error?.message || t('projects.messages.createFailed')
+        );
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : t('projects.messages.createFailed'));
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : t('projects.messages.createFailed')
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -145,7 +154,9 @@ export function AddMemberDialog({
                   <FormControl>
                     <Input placeholder='user@example.com' {...field} />
                   </FormControl>
-                  <FormDescription>{t('projects.team.emailDescription')}</FormDescription>
+                  <FormDescription>
+                    {t('projects.team.emailDescription')}
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -163,7 +174,9 @@ export function AddMemberDialog({
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder={t('forms.placeholder.select')} />
+                        <SelectValue
+                          placeholder={t('forms.placeholder.select')}
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -176,7 +189,9 @@ export function AddMemberDialog({
                         ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription>{t('projects.team.roleDescription')}</FormDescription>
+                  <FormDescription>
+                    {t('projects.team.roleDescription')}
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

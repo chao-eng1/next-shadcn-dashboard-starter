@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
-import { apiResponse, apiError, apiUnauthorized, apiForbidden, apiBadRequest } from '@/lib/api-response';
+import {
+  apiResponse,
+  apiError,
+  apiUnauthorized,
+  apiForbidden,
+  apiBadRequest
+} from '@/lib/api-response';
 
 // 获取项目成员列表
 export async function GET(
@@ -93,7 +99,7 @@ export async function GET(
     });
 
     // 格式化返回数据
-    const formattedMembers = members.map(member => ({
+    const formattedMembers = members.map((member) => ({
       id: member.id,
       role: member.role, // enum值
       joinedAt: member.joinedAt,

@@ -7,13 +7,18 @@ import { apiResponse, apiUnauthorized } from '@/lib/api-response';
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user) {
       return apiUnauthorized();
     }
 
     const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type') as 'private' | 'group' | 'system' | 'project' | null;
+    const type = searchParams.get('type') as
+      | 'private'
+      | 'group'
+      | 'system'
+      | 'project'
+      | null;
 
     let conversations: any[] = [];
 
@@ -75,19 +80,21 @@ export async function GET(request: NextRequest) {
         }
       });
 
-      const groupConversations = projectChats.map(chat => ({
+      const groupConversations = projectChats.map((chat) => ({
         id: chat.id,
         type: 'group' as const,
         name: chat.project.name,
         avatar: `https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20team%20collaboration%20icon%20blue%20gradient&image_size=square`,
-        lastMessage: chat.messages[0] ? {
-          content: chat.messages[0].content,
-          timestamp: chat.messages[0].createdAt,
-          sender: {
-            id: chat.messages[0].sender.id,
-            name: chat.messages[0].sender.name
-          }
-        } : undefined,
+        lastMessage: chat.messages[0]
+          ? {
+              content: chat.messages[0].content,
+              timestamp: chat.messages[0].createdAt,
+              sender: {
+                id: chat.messages[0].sender.id,
+                name: chat.messages[0].sender.name
+              }
+            }
+          : undefined,
         unreadCount: chat._count.messages,
         isOnline: false,
         isPinned: false,
@@ -103,10 +110,7 @@ export async function GET(request: NextRequest) {
     if (!type || type === 'private') {
       const privateConversations = await prisma.privateConversation.findMany({
         where: {
-          OR: [
-            { participant1Id: user.id },
-            { participant2Id: user.id }
-          ]
+          OR: [{ participant1Id: user.id }, { participant2Id: user.id }]
         },
         include: {
           participant1: {
@@ -160,21 +164,28 @@ export async function GET(request: NextRequest) {
         }
       });
 
-      const privateChats = privateConversations.map(conv => {
-        const otherParticipant = conv.participant1Id === user.id ? conv.participant2 : conv.participant1;
+      const privateChats = privateConversations.map((conv) => {
+        const otherParticipant =
+          conv.participant1Id === user.id
+            ? conv.participant2
+            : conv.participant1;
         return {
           id: conv.id,
           type: 'private' as const,
           name: otherParticipant.name || otherParticipant.email,
-          avatar: otherParticipant.image || `https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20business%20portrait%20asian%20person%20suit&image_size=square`,
-          lastMessage: conv.messages[0] ? {
-            content: conv.messages[0].content,
-            timestamp: conv.messages[0].createdAt,
-            sender: {
-              id: conv.messages[0].sender.id,
-              name: conv.messages[0].sender.name
-            }
-          } : undefined,
+          avatar:
+            otherParticipant.image ||
+            `https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20business%20portrait%20asian%20person%20suit&image_size=square`,
+          lastMessage: conv.messages[0]
+            ? {
+                content: conv.messages[0].content,
+                timestamp: conv.messages[0].createdAt,
+                sender: {
+                  id: conv.messages[0].sender.id,
+                  name: conv.messages[0].sender.name
+                }
+              }
+            : undefined,
           unreadCount: conv._count.messages,
           isOnline: false, // TODO: 实现实时在线状态
           isPinned: false,
@@ -216,10 +227,12 @@ export async function GET(request: NextRequest) {
           type: 'system' as const,
           name: '系统通知',
           avatar: undefined,
-          lastMessage: latestSystemMessage ? {
-            content: latestSystemMessage.message.content,
-            timestamp: latestSystemMessage.message.createdAt
-          } : undefined,
+          lastMessage: latestSystemMessage
+            ? {
+                content: latestSystemMessage.message.content,
+                timestamp: latestSystemMessage.message.createdAt
+              }
+            : undefined,
           unreadCount: unreadSystemMessages,
           isPinned: false,
           isMuted: false,
@@ -233,7 +246,7 @@ export async function GET(request: NextRequest) {
     if (!type || type === 'project') {
       // 这里可以添加项目通知的逻辑
       // 基于需求文档中提到的项目进度通知、任务管理通知等
-      
+
       // 获取用户参与的项目中的任务变更通知（模拟）
       const userProjects = await prisma.project.findMany({
         where: {
@@ -258,9 +271,12 @@ export async function GET(request: NextRequest) {
         }
       });
 
-      if (userProjects.length > 0 && userProjects.some(p => p.tasks.length > 0)) {
+      if (
+        userProjects.length > 0 &&
+        userProjects.some((p) => p.tasks.length > 0)
+      ) {
         const latestTask = userProjects
-          .flatMap(p => p.tasks)
+          .flatMap((p) => p.tasks)
           .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())[0];
 
         conversations.push({
@@ -268,10 +284,12 @@ export async function GET(request: NextRequest) {
           type: 'project' as const,
           name: '项目通知',
           avatar: `https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20project%20notification%20icon%20purple%20gradient&image_size=square`,
-          lastMessage: latestTask ? {
-            content: `任务"${latestTask.title}"状态已更新`,
-            timestamp: latestTask.updatedAt
-          } : undefined,
+          lastMessage: latestTask
+            ? {
+                content: `任务"${latestTask.title}"状态已更新`,
+                timestamp: latestTask.updatedAt
+              }
+            : undefined,
           unreadCount: 0, // TODO: 实现项目通知的未读计数
           isPinned: false,
           isMuted: false,
@@ -282,7 +300,10 @@ export async function GET(request: NextRequest) {
     }
 
     // 按最后活动时间排序
-    conversations.sort((a, b) => new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime());
+    conversations.sort(
+      (a, b) =>
+        new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime()
+    );
 
     return apiResponse(conversations);
   } catch (error) {

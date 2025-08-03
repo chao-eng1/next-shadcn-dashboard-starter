@@ -145,8 +145,9 @@ export class WebSocketService {
     try {
       const response = await fetch('/api/ws/token');
       if (response.ok) {
-        const { token } = await response.json();
-        return token;
+        const result = await response.json();
+        // 处理 API 响应格式 {success: true, data: {token: "..."}}
+        return result.data?.token || result.token || '';
       }
     } catch (error) {
       this.log('Failed to get auth token:', error);

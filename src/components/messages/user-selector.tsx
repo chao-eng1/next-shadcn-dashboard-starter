@@ -38,11 +38,11 @@ export function UserSelector({
   users,
   selectedUser,
   onUserSelect,
-  searchPlaceholder = "搜索用户姓名、邮箱或角色...",
+  searchPlaceholder = '搜索用户姓名、邮箱或角色...',
   placeholder,
-  title = "选择用户",
+  title = '选择用户',
   className,
-  maxHeight = "h-96",
+  maxHeight = 'h-96',
   showOnlineStatus = true,
   showRole = true,
   excludeUserIds = [],
@@ -52,21 +52,24 @@ export function UserSelector({
   const [filteredUsers, setFilteredUsers] = useState<User[]>(users);
 
   // 使用 useMemo 来稳定 excludeUserIds 引用，添加字符串化比较避免数组引用问题
-  const memoizedExcludeUserIds = useMemo(() => excludeUserIds, [JSON.stringify(excludeUserIds)]);
+  const memoizedExcludeUserIds = useMemo(
+    () => excludeUserIds,
+    [JSON.stringify(excludeUserIds)]
+  );
 
   // 过滤用户列表
   useEffect(() => {
-    let filtered = users.filter(user => {
+    let filtered = users.filter((user) => {
       // 排除当前用户
       if (currentUserId && user.id === currentUserId) {
         return false;
       }
-      
+
       // 排除指定用户
       if (memoizedExcludeUserIds.includes(user.id)) {
         return false;
       }
-      
+
       // 根据搜索查询过滤
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -76,40 +79,40 @@ export function UserSelector({
           (user.role && user.role.toLowerCase().includes(query))
         );
       }
-      
+
       return true;
     });
-    
+
     setFilteredUsers(filtered);
   }, [searchQuery, users, memoizedExcludeUserIds, currentUserId]);
 
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Users className="h-5 w-5" />
+        <CardTitle className='flex items-center gap-2'>
+          <Users className='h-5 w-5' />
           {title}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className='space-y-4'>
           {/* 搜索框 */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <div className='relative'>
+            <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform' />
             <Input
               placeholder={placeholder || searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
+              className='pl-9'
             />
           </div>
 
           {/* 用户列表 */}
           <ScrollArea className={maxHeight}>
-            <div className="space-y-2">
+            <div className='space-y-2'>
               {filteredUsers.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <User className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <div className='text-muted-foreground py-8 text-center'>
+                  <User className='mx-auto mb-4 h-12 w-12 opacity-50' />
                   <p>未找到匹配的用户</p>
                 </div>
               ) : (
@@ -141,40 +144,44 @@ interface UserItemProps {
   showRole: boolean;
 }
 
-function UserItem({ user, isSelected, onSelect, showOnlineStatus, showRole }: UserItemProps) {
+function UserItem({
+  user,
+  isSelected,
+  onSelect,
+  showOnlineStatus,
+  showRole
+}: UserItemProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
+        'flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors',
         isSelected
-          ? "border-primary bg-primary/5"
-          : "border-border hover:bg-accent"
+          ? 'border-primary bg-primary/5'
+          : 'border-border hover:bg-accent'
       )}
       onClick={onSelect}
     >
-      <Avatar className="h-10 w-10">
+      <Avatar className='h-10 w-10'>
         <AvatarImage src={user.image} alt={user.name} />
         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
       </Avatar>
-      
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="font-medium truncate">{user.name}</p>
+
+      <div className='min-w-0 flex-1'>
+        <div className='flex items-center gap-2'>
+          <p className='truncate font-medium'>{user.name}</p>
           {showOnlineStatus && user.isOnline && (
-            <div className="h-2 w-2 bg-green-500 rounded-full" title="在线" />
+            <div className='h-2 w-2 rounded-full bg-green-500' title='在线' />
           )}
         </div>
-        <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+        <p className='text-muted-foreground truncate text-sm'>{user.email}</p>
         {showRole && user.role && (
-          <Badge variant="secondary" className="mt-1 text-xs">
+          <Badge variant='secondary' className='mt-1 text-xs'>
             {user.role}
           </Badge>
         )}
       </div>
-      
-      {isSelected && (
-        <Check className="h-5 w-5 text-primary" />
-      )}
+
+      {isSelected && <Check className='text-primary h-5 w-5' />}
     </div>
   );
 }

@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 格式化返回数据
-    const formattedNotifications = notifications.map(notification => ({
+    const formattedNotifications = notifications.map((notification) => ({
       id: notification.id,
       message: {
         id: notification.message.id,

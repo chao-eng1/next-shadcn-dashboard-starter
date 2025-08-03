@@ -7,7 +7,7 @@ async function testPermission() {
       'task.view',
       'cmdh5smh7002pfy60npvxlraf'
     );
-    
+
     console.log('Permission check result:', result);
   } catch (error) {
     console.error('Error checking permission:', error);

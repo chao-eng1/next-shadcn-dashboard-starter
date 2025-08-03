@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 格式化消息数据
-    const formattedMessages = recentMessages.map(userMessage => ({
+    const formattedMessages = recentMessages.map((userMessage) => ({
       id: userMessage.message.id,
       content: userMessage.message.content,
       messageType: userMessage.message.messageType,
@@ -55,9 +55,10 @@ export async function GET(request: NextRequest) {
         image: userMessage.message.sender.image
       },
       // 截取内容预览（最多50字符）
-      preview: userMessage.message.content.length > 50 
-        ? userMessage.message.content.substring(0, 50) + '...' 
-        : userMessage.message.content
+      preview:
+        userMessage.message.content.length > 50
+          ? userMessage.message.content.substring(0, 50) + '...'
+          : userMessage.message.content
     }));
 
     return apiResponse({

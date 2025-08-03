@@ -2,7 +2,16 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { toast } from 'sonner';
 
 interface WebSocketMessage {
-  type: 'message' | 'typing' | 'read' | 'join' | 'leave' | 'error' | 'connected' | 'user_status' | 'pong';
+  type:
+    | 'message'
+    | 'typing'
+    | 'read'
+    | 'join'
+    | 'leave'
+    | 'error'
+    | 'connected'
+    | 'user_status'
+    | 'pong';
   data: {
     conversationId?: string;
     content?: string;
@@ -43,9 +52,11 @@ export const useWebSocket = ({
   maxReconnectAttempts = 5
 }: UseWebSocketOptions) => {
   const [isConnected, setIsConnected] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
+  const [connectionStatus, setConnectionStatus] = useState<
+    'connecting' | 'connected' | 'disconnected' | 'error'
+  >('disconnected');
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
-  
+
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -61,7 +72,7 @@ export const useWebSocket = ({
     }
 
     setConnectionStatus('connecting');
-    
+
     try {
       const wsUrl = `${url}?token=${encodeURIComponent(token)}`;
       wsRef.current = new WebSocket(wsUrl);
@@ -71,26 +82,26 @@ export const useWebSocket = ({
         setConnectionStatus('connected');
         setReconnectAttempts(0);
         onConnect?.();
-        
+
         // 启动心跳检测
         heartbeatIntervalRef.current = setInterval(() => {
           if (wsRef.current?.readyState === WebSocket.OPEN) {
             wsRef.current.send(JSON.stringify({ type: 'ping' }));
           }
         }, 30000); // 每30秒发送一次心跳
-        
+
         toast.success('WebSocket连接已建立');
       };
 
       wsRef.current.onmessage = (event) => {
         try {
           const message: WebSocketMessage = JSON.parse(event.data);
-          
+
           // 处理心跳响应
           if (message.type === 'pong') {
             return;
           }
-          
+
           onMessage?.(message);
         } catch (error) {
           console.error('Failed to parse WebSocket message:', error);
@@ -101,19 +112,25 @@ export const useWebSocket = ({
         setIsConnected(false);
         setConnectionStatus('disconnected');
         onDisconnect?.();
-        
+
         // 清除心跳检测
         if (heartbeatIntervalRef.current) {
           clearInterval(heartbeatIntervalRef.current);
           heartbeatIntervalRef.current = null;
         }
-        
-        if (!isManualClose.current && autoReconnect && reconnectAttempts < maxReconnectAttempts) {
-          setReconnectAttempts(prev => {
+
+        if (
+          !isManualClose.current &&
+          autoReconnect &&
+          reconnectAttempts < maxReconnectAttempts
+        ) {
+          setReconnectAttempts((prev) => {
             const newAttempts = prev + 1;
             if (newAttempts < maxReconnectAttempts) {
-              console.log(`连接断开，${reconnectInterval / 1000}秒后尝试重连...`);
-              
+              console.log(
+                `连接断开，${reconnectInterval / 1000}秒后尝试重连...`
+              );
+
               reconnectTimeoutRef.current = setTimeout(() => {
                 connectRef.current?.();
               }, reconnectInterval);
@@ -136,26 +153,36 @@ export const useWebSocket = ({
       console.error('Failed to create WebSocket connection:', error);
       // 不显示错误提示，因为WebSocket服务器可能没有启动
     }
-  }, [url, token, onConnect, onDisconnect, onError, onMessage, autoReconnect, reconnectInterval, maxReconnectAttempts]);
+  }, [
+    url,
+    token,
+    onConnect,
+    onDisconnect,
+    onError,
+    onMessage,
+    autoReconnect,
+    reconnectInterval,
+    maxReconnectAttempts
+  ]);
 
   const disconnect = useCallback(() => {
     isManualClose.current = true;
-    
+
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
     }
-    
+
     if (heartbeatIntervalRef.current) {
       clearInterval(heartbeatIntervalRef.current);
       heartbeatIntervalRef.current = null;
     }
-    
+
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
     }
-    
+
     setIsConnected(false);
     setConnectionStatus('disconnected');
     setReconnectAttempts(0);

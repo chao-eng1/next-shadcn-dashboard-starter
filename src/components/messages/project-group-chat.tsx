@@ -12,7 +12,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import {
   Users,
@@ -37,7 +37,7 @@ import { useRouter } from 'next/navigation';
 import { MessageBubble, Message, MessageUser } from './message-bubble';
 import { MessageInput } from './message-input';
 import { format } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { zhCN } from 'date-fns/locale/zh-CN';
 
 interface ProjectGroupChatProps {
   groupId: string;
@@ -94,7 +94,8 @@ export function ProjectGroupChat({ groupId }: ProjectGroupChatProps) {
       {
         id: '1',
         name: '张三',
-        avatar: 'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20avatar%20male%20developer&image_size=square',
+        avatar:
+          'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20avatar%20male%20developer&image_size=square',
         role: 'owner',
         isOnline: true,
         joinedAt: new Date('2024-01-15')
@@ -102,7 +103,8 @@ export function ProjectGroupChat({ groupId }: ProjectGroupChatProps) {
       {
         id: '2',
         name: '李四',
-        avatar: 'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20avatar%20female%20designer&image_size=square',
+        avatar:
+          'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20avatar%20female%20designer&image_size=square',
         role: 'admin',
         isOnline: true,
         joinedAt: new Date('2024-01-16')
@@ -125,7 +127,8 @@ export function ProjectGroupChat({ groupId }: ProjectGroupChatProps) {
         sender: {
           id: '1',
           name: '张三',
-          avatar: 'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20avatar%20male%20developer&image_size=square',
+          avatar:
+            'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20avatar%20male%20developer&image_size=square',
           role: '项目经理'
         },
         timestamp: new Date('2024-01-20 09:00'),
@@ -138,7 +141,8 @@ export function ProjectGroupChat({ groupId }: ProjectGroupChatProps) {
         sender: {
           id: '2',
           name: '李四',
-          avatar: 'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20avatar%20female%20designer&image_size=square',
+          avatar:
+            'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20avatar%20female%20designer&image_size=square',
           role: '产品经理'
         },
         timestamp: new Date('2024-01-20 10:15'),
@@ -189,7 +193,11 @@ export function ProjectGroupChat({ groupId }: ProjectGroupChatProps) {
   }, [messages]);
 
   // 发送消息
-  const handleSendMessage = (content: string, attachments?: File[], replyToMessage?: Message) => {
+  const handleSendMessage = (
+    content: string,
+    attachments?: File[],
+    replyToMessage?: Message
+  ) => {
     const newMessage: Message = {
       id: Date.now().toString(),
       content,
@@ -204,16 +212,14 @@ export function ProjectGroupChat({ groupId }: ProjectGroupChatProps) {
       replyTo: replyToMessage
     };
 
-    setMessages(prev => [...prev, newMessage]);
+    setMessages((prev) => [...prev, newMessage]);
     setReplyTo(null);
 
     // 模拟发送状态更新
     setTimeout(() => {
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === newMessage.id 
-            ? { ...msg, status: 'sent' as const }
-            : msg
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === newMessage.id ? { ...msg, status: 'sent' as const } : msg
         )
       );
     }, 1000);
@@ -226,7 +232,7 @@ export function ProjectGroupChat({ groupId }: ProjectGroupChatProps) {
 
   // 处理删除消息
   const handleDeleteMessage = (messageId: string) => {
-    setMessages(prev => prev.filter(msg => msg.id !== messageId));
+    setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
   };
 
   // 处理复制消息
@@ -250,11 +256,11 @@ export function ProjectGroupChat({ groupId }: ProjectGroupChatProps) {
   const getRoleIcon = (role: GroupMember['role']) => {
     switch (role) {
       case 'owner':
-        return <Crown className="h-3 w-3 text-yellow-500" />;
+        return <Crown className='h-3 w-3 text-yellow-500' />;
       case 'admin':
-        return <Shield className="h-3 w-3 text-blue-500" />;
+        return <Shield className='h-3 w-3 text-blue-500' />;
       default:
-        return <User className="h-3 w-3 text-gray-500" />;
+        return <User className='h-3 w-3 text-gray-500' />;
     }
   };
 
@@ -271,85 +277,91 @@ export function ProjectGroupChat({ groupId }: ProjectGroupChatProps) {
   };
 
   if (!groupInfo) {
-    return <div className="flex items-center justify-center h-full">加载中...</div>;
+    return (
+      <div className='flex h-full items-center justify-center'>加载中...</div>
+    );
   }
 
   return (
-    <div className="h-full flex">
+    <div className='flex h-full'>
       {/* 主聊天区域 */}
-      <div className="flex-1 flex flex-col">
+      <div className='flex flex-1 flex-col'>
         {/* 头部 */}
-        <div className="border-b bg-background p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => router.back()}
-              >
-                <ArrowLeft className="h-4 w-4" />
+        <div className='bg-background border-b p-4'>
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-3'>
+              <Button variant='ghost' size='sm' onClick={() => router.back()}>
+                <ArrowLeft className='h-4 w-4' />
               </Button>
-              
-              <Avatar className="h-10 w-10">
+
+              <Avatar className='h-10 w-10'>
                 <AvatarImage src={groupInfo.avatar} />
                 <AvatarFallback>
-                  <Users className="h-5 w-5" />
+                  <Users className='h-5 w-5' />
                 </AvatarFallback>
               </Avatar>
-              
+
               <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="font-semibold">{groupInfo.name}</h2>
-                  {groupInfo.isPinned && <Pin className="h-4 w-4 text-primary" />}
-                  {groupInfo.isMuted && <BellOff className="h-4 w-4 text-muted-foreground" />}
+                <div className='flex items-center gap-2'>
+                  <h2 className='font-semibold'>{groupInfo.name}</h2>
+                  {groupInfo.isPinned && (
+                    <Pin className='text-primary h-4 w-4' />
+                  )}
+                  {groupInfo.isMuted && (
+                    <BellOff className='text-muted-foreground h-4 w-4' />
+                  )}
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className='text-muted-foreground text-sm'>
                   {groupInfo.memberCount} 名成员
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className='flex items-center gap-2'>
               <Button
-                variant="outline"
-                size="sm"
+                variant='outline'
+                size='sm'
                 onClick={() => setShowMembers(!showMembers)}
               >
-                <Users className="h-4 w-4 mr-2" />
+                <Users className='mr-2 h-4 w-4' />
                 成员
               </Button>
-              
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <MoreVertical className="h-4 w-4" />
+                  <Button variant='outline' size='sm'>
+                    <MoreVertical className='h-4 w-4' />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align='end'>
                   <DropdownMenuItem>
-                    <Search className="h-4 w-4 mr-2" />
+                    <Search className='mr-2 h-4 w-4' />
                     搜索消息
                   </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <Pin className="h-4 w-4 mr-2" />
+                    <Pin className='mr-2 h-4 w-4' />
                     {groupInfo.isPinned ? '取消置顶' : '置顶群聊'}
                   </DropdownMenuItem>
                   <DropdownMenuItem>
-                    {groupInfo.isMuted ? <Bell className="h-4 w-4 mr-2" /> : <BellOff className="h-4 w-4 mr-2" />}
+                    {groupInfo.isMuted ? (
+                      <Bell className='mr-2 h-4 w-4' />
+                    ) : (
+                      <BellOff className='mr-2 h-4 w-4' />
+                    )}
                     {groupInfo.isMuted ? '开启通知' : '关闭通知'}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
-                    <UserPlus className="h-4 w-4 mr-2" />
+                    <UserPlus className='mr-2 h-4 w-4' />
                     邀请成员
                   </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <Settings className="h-4 w-4 mr-2" />
+                    <Settings className='mr-2 h-4 w-4' />
                     群组设置
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-destructive">
-                    <Archive className="h-4 w-4 mr-2" />
+                  <DropdownMenuItem className='text-destructive'>
+                    <Archive className='mr-2 h-4 w-4' />
                     退出群组
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -359,12 +371,15 @@ export function ProjectGroupChat({ groupId }: ProjectGroupChatProps) {
         </div>
 
         {/* 消息列表 */}
-        <ScrollArea className="flex-1 p-4">
-          <div className="space-y-4">
+        <ScrollArea className='flex-1 p-4'>
+          <div className='space-y-4'>
             {messages.map((message, index) => {
               const isOwn = message.sender.id === 'current-user';
-              const showAvatar = !isOwn && (index === 0 || messages[index - 1].sender.id !== message.sender.id);
-              
+              const showAvatar =
+                !isOwn &&
+                (index === 0 ||
+                  messages[index - 1].sender.id !== message.sender.id);
+
               return (
                 <MessageBubble
                   key={message.id}
@@ -378,21 +393,27 @@ export function ProjectGroupChat({ groupId }: ProjectGroupChatProps) {
                 />
               );
             })}
-            
+
             {/* 打字指示器 */}
             {typingUsers.length > 0 && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce" />
-                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }} />
-                  <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+              <div className='text-muted-foreground flex items-center gap-2 text-sm'>
+                <div className='flex space-x-1'>
+                  <div className='bg-primary h-2 w-2 animate-bounce rounded-full' />
+                  <div
+                    className='bg-primary h-2 w-2 animate-bounce rounded-full'
+                    style={{ animationDelay: '0.1s' }}
+                  />
+                  <div
+                    className='bg-primary h-2 w-2 animate-bounce rounded-full'
+                    style={{ animationDelay: '0.2s' }}
+                  />
                 </div>
                 <span>
-                  {typingUsers.map(user => user.name).join(', ')} 正在输入...
+                  {typingUsers.map((user) => user.name).join(', ')} 正在输入...
                 </span>
               </div>
             )}
-            
+
             <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
@@ -401,7 +422,7 @@ export function ProjectGroupChat({ groupId }: ProjectGroupChatProps) {
         <MessageInput
           onSendMessage={handleSendMessage}
           onTyping={handleTyping}
-          placeholder="输入消息..."
+          placeholder='输入消息...'
           replyTo={replyTo}
           onCancelReply={() => setReplyTo(null)}
         />
@@ -409,46 +430,54 @@ export function ProjectGroupChat({ groupId }: ProjectGroupChatProps) {
 
       {/* 成员列表侧边栏 */}
       {showMembers && (
-        <div className="w-80 border-l bg-muted/30">
-          <Card className="h-full rounded-none border-0">
+        <div className='bg-muted/30 w-80 border-l'>
+          <Card className='h-full rounded-none border-0'>
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
+              <CardTitle className='flex items-center justify-between'>
                 <span>群组成员</span>
                 <Button
-                  variant="ghost"
-                  size="sm"
+                  variant='ghost'
+                  size='sm'
                   onClick={() => setShowMembers(false)}
                 >
                   ×
                 </Button>
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-0">
-              <ScrollArea className="h-[calc(100vh-200px)]">
-                <div className="p-4 space-y-3">
+            <CardContent className='p-0'>
+              <ScrollArea className='h-[calc(100vh-200px)]'>
+                <div className='space-y-3 p-4'>
                   {members.map((member) => (
-                    <div key={member.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50">
-                      <div className="relative">
-                        <Avatar className="h-10 w-10">
+                    <div
+                      key={member.id}
+                      className='hover:bg-muted/50 flex items-center gap-3 rounded-lg p-2'
+                    >
+                      <div className='relative'>
+                        <Avatar className='h-10 w-10'>
                           <AvatarImage src={member.avatar} />
                           <AvatarFallback>
                             {member.name.slice(0, 2)}
                           </AvatarFallback>
                         </Avatar>
                         {member.isOnline && (
-                          <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-background" />
+                          <div className='border-background absolute -right-1 -bottom-1 h-3 w-3 rounded-full border-2 bg-green-500' />
                         )}
                       </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium truncate">{member.name}</p>
+
+                      <div className='min-w-0 flex-1'>
+                        <div className='flex items-center gap-2'>
+                          <p className='truncate font-medium'>{member.name}</p>
                           {getRoleIcon(member.role)}
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <div className='text-muted-foreground flex items-center gap-2 text-xs'>
                           <span>{getRoleName(member.role)}</span>
                           {!member.isOnline && member.lastSeen && (
-                            <span>• {format(member.lastSeen, 'MM-dd HH:mm', { locale: zhCN })}</span>
+                            <span>
+                              •{' '}
+                              {format(member.lastSeen, 'MM-dd HH:mm', {
+                                locale: zhCN
+                              })}
+                            </span>
                           )}
                         </div>
                       </div>
@@ -456,10 +485,10 @@ export function ProjectGroupChat({ groupId }: ProjectGroupChatProps) {
                   ))}
                 </div>
               </ScrollArea>
-              
-              <div className="p-4 border-t">
-                <Button className="w-full" variant="outline">
-                  <UserPlus className="h-4 w-4 mr-2" />
+
+              <div className='border-t p-4'>
+                <Button className='w-full' variant='outline'>
+                  <UserPlus className='mr-2 h-4 w-4' />
                   邀请成员
                 </Button>
               </div>

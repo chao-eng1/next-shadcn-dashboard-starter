@@ -15,12 +15,18 @@ This project implements an automatic language-based font switching system that p
 ```css
 :root {
   /* 英文字体 / English fonts */
-  --font-sans-en: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-mono-en: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-  
+  --font-sans-en: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono-en: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+
   /* 中文字体 / Chinese fonts */
-  --font-sans-zh: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', 'Source Han Sans SC', 'Noto Sans CJK SC', 'WenQuanYi Micro Hei', sans-serif;
-  --font-mono-zh: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', 'Menlo', 'Consolas', '思源黑体', 'Noto Sans Mono CJK SC', monospace;
+  --font-sans-zh: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', 'Source Han Sans SC',
+    'Noto Sans CJK SC', 'WenQuanYi Micro Hei', sans-serif;
+  --font-mono-zh: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono',
+    'Source Code Pro', 'Menlo', 'Consolas', '思源黑体', 'Noto Sans Mono CJK SC',
+    monospace;
 }
 ```
 
@@ -30,13 +36,14 @@ This project implements an automatic language-based font switching system that p
 
 ```css
 /* 中文语言设置 */
-html[lang="zh"], html[lang="zh-CN"] {
+html[lang='zh'],
+html[lang='zh-CN'] {
   --font-sans: var(--font-sans-zh);
   --font-mono: var(--font-mono-zh);
 }
 
 /* 英文语言设置 */
-html[lang="en"] {
+html[lang='en'] {
   --font-sans: var(--font-sans-en);
   --font-mono: var(--font-mono-en);
 }
@@ -78,7 +85,7 @@ import { useLocalizedFontClass } from '@/components/ui/localized-text';
 
 function MyComponent() {
   const { sans, mono, isZh, locale } = useLocalizedFontClass();
-  
+
   return (
     <div className={sans}>
       当前语言: {locale}
@@ -97,7 +104,7 @@ import { useLocalizedFont } from '@/lib/fonts';
 
 function MyComponent() {
   const { fontClass, locale } = useLocalizedFont();
-  
+
   return <div className={fontClass}>文本内容</div>;
 }
 ```

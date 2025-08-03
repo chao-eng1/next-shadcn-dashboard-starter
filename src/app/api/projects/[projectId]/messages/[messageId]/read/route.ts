@@ -19,8 +19,8 @@ export async function POST(
     const projectMember = await prisma.projectMember.findFirst({
       where: {
         projectId,
-        userId: user.id,
-      },
+        userId: user.id
+      }
     });
 
     if (!projectMember) {
@@ -32,10 +32,10 @@ export async function POST(
       where: {
         id: messageId,
         chat: {
-          projectId,
+          projectId
         },
-        isDeleted: false,
-      },
+        isDeleted: false
+      }
     });
 
     if (!message) {
@@ -44,7 +44,10 @@ export async function POST(
 
     // 如果是自己发送的消息，不需要标记为已读
     if (message.senderId === user.id) {
-      return NextResponse.json({ success: true, message: '自己的消息无需标记已读' });
+      return NextResponse.json({
+        success: true,
+        message: '自己的消息无需标记已读'
+      });
     }
 
     // 标记消息为已读
@@ -52,17 +55,17 @@ export async function POST(
       where: {
         messageId_userId: {
           messageId,
-          userId: user.id,
-        },
+          userId: user.id
+        }
       },
       update: {
-        readAt: new Date(),
+        readAt: new Date()
       },
       create: {
         messageId,
         userId: user.id,
-        readAt: new Date(),
-      },
+        readAt: new Date()
+      }
     });
 
     // 标记相关通知为已读
@@ -70,12 +73,12 @@ export async function POST(
       where: {
         messageId,
         userId: user.id,
-        isRead: false,
+        isRead: false
       },
       data: {
         isRead: true,
-        readAt: new Date(),
-      },
+        readAt: new Date()
+      }
     });
 
     return NextResponse.json({ success: true });
@@ -102,8 +105,8 @@ export async function GET(
     const projectMember = await prisma.projectMember.findFirst({
       where: {
         projectId,
-        userId: user.id,
-      },
+        userId: user.id
+      }
     });
 
     if (!projectMember) {
@@ -113,7 +116,7 @@ export async function GET(
     // 获取消息已读状态
     const readStatus = await prisma.messageRead.findMany({
       where: {
-        messageId,
+        messageId
       },
       include: {
         user: {
@@ -121,13 +124,13 @@ export async function GET(
             id: true,
             name: true,
             email: true,
-            image: true,
-          },
-        },
+            image: true
+          }
+        }
       },
       orderBy: {
-        readAt: 'asc',
-      },
+        readAt: 'asc'
+      }
     });
 
     return NextResponse.json({ readStatus });

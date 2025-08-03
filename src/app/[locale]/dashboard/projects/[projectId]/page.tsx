@@ -344,7 +344,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               <TabsTrigger value='requirements'>需求管理</TabsTrigger>
             )}
             {canViewSprints && (
-              <TabsTrigger value='sprints'>{t('overview.iterations')}</TabsTrigger>
+              <TabsTrigger value='sprints'>
+                {t('overview.iterations')}
+              </TabsTrigger>
             )}
             {canViewDocuments && (
               <TabsTrigger value='docs'>{tnav('documents')}</TabsTrigger>
@@ -357,7 +359,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               <Card>
                 <CardHeader className='pb-2'>
                   <CardTitle className='text-base'>
-                    {ttask('title')}{t('overview.statistics')}
+                    {ttask('title')}
+                    {t('overview.statistics')}
                   </CardTitle>
                   <CardDescription>{t('overview.taskStats')}</CardDescription>
                 </CardHeader>
@@ -417,7 +420,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   <div className='text-2xl font-bold'>
                     {project._count.sprints}
                   </div>
-                  <p className='text-muted-foreground text-xs'>{t('overview.totalSprints')}</p>
+                  <p className='text-muted-foreground text-xs'>
+                    {t('overview.totalSprints')}
+                  </p>
 
                   <div className='mt-4'>
                     <Button
@@ -437,13 +442,17 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               <Card>
                 <CardHeader className='pb-2'>
                   <CardTitle className='text-base'>{tdoc('title')}</CardTitle>
-                  <CardDescription>{t('overview.documentKnowledge')}</CardDescription>
+                  <CardDescription>
+                    {t('overview.documentKnowledge')}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className='space-y-2'>
                   <div className='text-2xl font-bold'>
                     {project._count.documents}
                   </div>
-                  <p className='text-muted-foreground text-xs'>{t('overview.totalDocuments')}</p>
+                  <p className='text-muted-foreground text-xs'>
+                    {t('overview.totalDocuments')}
+                  </p>
 
                   <div className='mt-4'>
                     <Button
@@ -531,7 +540,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                     <CardTitle className='text-base'>
                       {t('team.title')}
                     </CardTitle>
-                    <CardDescription>{t('overview.projectTeam')}</CardDescription>
+                    <CardDescription>
+                      {t('overview.projectTeam')}
+                    </CardDescription>
                   </div>
                   {canManageMembers && (
                     <Button variant='outline' size='sm' asChild>
@@ -575,7 +586,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                       <div className='pt-2'>
                         <Separator className='my-2' />
                         <p className='text-muted-foreground text-center text-sm'>
-                          {t('overview.moreMembers', { count: project.members.length - 5 })}
+                          {t('overview.moreMembers', {
+                            count: project.members.length - 5
+                          })}
                         </p>
                       </div>
                     )}
@@ -629,7 +642,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </TabsContent>
 
           <TabsContent value='requirements'>
-            <ProjectPermissionGate permission='requirement.view' projectId={projectId}>
+            <ProjectPermissionGate
+              permission='requirement.view'
+              projectId={projectId}
+            >
               <Card>
                 <CardHeader className='flex flex-row items-center justify-between'>
                   <div>
@@ -654,11 +670,13 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                 <CardContent>
                   <div className='space-y-4'>
                     <div className='flex items-center justify-between'>
-                      <p className='text-sm text-muted-foreground'>
+                      <p className='text-muted-foreground text-sm'>
                         查看和管理项目需求
                       </p>
                       <Button asChild variant='outline'>
-                        <Link href={`/dashboard/projects/${project.id}/requirements`}>
+                        <Link
+                          href={`/dashboard/projects/${project.id}/requirements`}
+                        >
                           查看所有需求
                         </Link>
                       </Button>
@@ -670,12 +688,17 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </TabsContent>
 
           <TabsContent value='sprints'>
-            <ProjectPermissionGate permission='sprint.view' projectId={projectId}>
+            <ProjectPermissionGate
+              permission='sprint.view'
+              projectId={projectId}
+            >
               <Card>
                 <CardHeader className='flex flex-row items-center justify-between'>
                   <div>
                     <CardTitle>{t('overview.sprintManagement')}</CardTitle>
-                    <CardDescription>{t('overview.sprintPlan')}</CardDescription>
+                    <CardDescription>
+                      {t('overview.sprintPlan')}
+                    </CardDescription>
                   </div>
                   <ProjectPermissionGate
                     permission='sprint.create'
@@ -691,19 +714,27 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   </ProjectPermissionGate>
                 </CardHeader>
                 <CardContent>
-                  <ProjectSprintSummary projectId={project.id} userId={user.id} />
+                  <ProjectSprintSummary
+                    projectId={project.id}
+                    userId={user.id}
+                  />
                 </CardContent>
               </Card>
             </ProjectPermissionGate>
           </TabsContent>
 
           <TabsContent value='docs'>
-            <ProjectPermissionGate permission='document.view' projectId={projectId}>
+            <ProjectPermissionGate
+              permission='document.view'
+              projectId={projectId}
+            >
               <Card>
                 <CardHeader className='flex flex-row items-center justify-between'>
                   <div>
                     <CardTitle>{t('overview.documentManagement')}</CardTitle>
-                    <CardDescription>{t('overview.documentKnowledge')}</CardDescription>
+                    <CardDescription>
+                      {t('overview.documentKnowledge')}
+                    </CardDescription>
                   </div>
                   <ProjectPermissionGate
                     permission='document.create'
@@ -719,19 +750,22 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   </ProjectPermissionGate>
                 </CardHeader>
                 <CardContent>
-                   <ProjectDocumentSummary projectId={project.id} userId={user.id} />
-                 </CardContent>
+                  <ProjectDocumentSummary
+                    projectId={project.id}
+                    userId={user.id}
+                  />
+                </CardContent>
               </Card>
             </ProjectPermissionGate>
           </TabsContent>
-
-
 
           <TabsContent value='team'>
             <Card>
               <CardHeader>
                 <CardTitle>{t('team.title')}</CardTitle>
-                <CardDescription>{t('overview.teamManagement')}</CardDescription>
+                <CardDescription>
+                  {t('overview.teamManagement')}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className='py-4'>
@@ -772,7 +806,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                       <div className='pt-2'>
                         <Separator className='my-2' />
                         <p className='text-muted-foreground text-center text-sm'>
-                          {t('overview.moreMembers', { count: project.members.length - 5 })}
+                          {t('overview.moreMembers', {
+                            count: project.members.length - 5
+                          })}
                         </p>
                       </div>
                     )}

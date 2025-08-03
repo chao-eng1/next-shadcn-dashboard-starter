@@ -12,14 +12,17 @@ export const metadata: Metadata = {
 
 export default async function SystemMessagesPage() {
   const currentUser = await getCurrentUser();
-  
+
   if (!currentUser) {
     redirect('/auth/login');
   }
 
   // 检查用户是否有消息管理权限
-  const canManageMessages = await hasPermission(currentUser.id, 'message.manage');
-  
+  const canManageMessages = await hasPermission(
+    currentUser.id,
+    'message.manage'
+  );
+
   if (!canManageMessages) {
     redirect('/dashboard');
   }
@@ -50,7 +53,7 @@ export default async function SystemMessagesPage() {
   });
 
   return (
-    <MessageManagementPage 
+    <MessageManagementPage
       roles={roles}
       users={users}
       currentUser={currentUser}

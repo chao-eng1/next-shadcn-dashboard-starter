@@ -3,14 +3,20 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Plus, 
-  FolderPlus, 
-  ListTodo, 
-  Calendar, 
-  Users, 
+import {
+  Plus,
+  FolderPlus,
+  ListTodo,
+  Calendar,
+  Users,
   BarChart3,
   Settings,
   FileText
@@ -108,48 +114,42 @@ export function QuickActions() {
     <Card>
       <CardHeader>
         <CardTitle>快速操作</CardTitle>
-        <CardDescription>
-          常用功能的快速入口
-        </CardDescription>
+        <CardDescription>常用功能的快速入口</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+        <div className='grid grid-cols-2 gap-4 md:grid-cols-4'>
           {quickActions.map((action) => (
             <Link key={action.id} href={action.href}>
-              <div className={`
-                group relative overflow-hidden rounded-lg border p-4 transition-all duration-200
-                hover:shadow-md hover:scale-105 cursor-pointer
-                ${action.bgColor}
-              `}>
+              <div
+                className={`group relative cursor-pointer overflow-hidden rounded-lg border p-4 transition-all duration-200 hover:scale-105 hover:shadow-md ${action.bgColor} `}
+              >
                 <div className='flex flex-col items-center space-y-3 text-center'>
-                  <div className={`
-                    flex h-12 w-12 items-center justify-center rounded-full
-                    bg-white shadow-sm group-hover:shadow-md transition-shadow
-                    ${action.color}
-                  `}>
+                  <div
+                    className={`flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm transition-shadow group-hover:shadow-md ${action.color} `}
+                  >
                     {action.icon}
                   </div>
-                  
+
                   <div className='space-y-1'>
-                    <h3 className='font-medium text-sm text-gray-900'>
+                    <h3 className='text-sm font-medium text-gray-900'>
                       {action.title}
                     </h3>
-                    <p className='text-xs text-gray-600 line-clamp-2'>
+                    <p className='line-clamp-2 text-xs text-gray-600'>
                       {action.description}
                     </p>
                   </div>
                 </div>
-                
+
                 {/* 悬停效果 */}
-                <div className='absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200' />
+                <div className='absolute inset-0 bg-white/20 opacity-0 transition-opacity duration-200 group-hover:opacity-100' />
               </div>
             </Link>
           ))}
         </div>
-        
+
         {/* 底部提示 */}
         <div className='mt-6 text-center'>
-          <p className='text-xs text-muted-foreground'>
+          <p className='text-muted-foreground text-xs'>
             点击任意卡片快速访问对应功能
           </p>
         </div>

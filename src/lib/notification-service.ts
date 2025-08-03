@@ -24,8 +24,9 @@ export class NotificationService {
     if (typeof window === 'undefined') return;
 
     try {
-      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      
+      this.audioContext = new (window.AudioContext ||
+        (window as any).webkitAudioContext)();
+
       // 创建简单的提示音
       await this.createNotificationSound();
     } catch (error) {
@@ -42,18 +43,19 @@ export class NotificationService {
       const sampleRate = this.audioContext.sampleRate;
       const duration = 0.3; // 300ms
       const length = sampleRate * duration;
-      
+
       const buffer = this.audioContext.createBuffer(1, length, sampleRate);
       const channelData = buffer.getChannelData(0);
-      
+
       // 生成双音调提示音
       for (let i = 0; i < length; i++) {
         const time = i / sampleRate;
         const frequency1 = time < duration / 2 ? 800 : 1000; // 第一个音调800Hz，第二个1000Hz
         const decay = Math.exp(-time * 3); // 衰减效果
-        channelData[i] = Math.sin(2 * Math.PI * frequency1 * time) * 0.3 * decay;
+        channelData[i] =
+          Math.sin(2 * Math.PI * frequency1 * time) * 0.3 * decay;
       }
-      
+
       this.notificationSound = buffer;
     } catch (error) {
       console.warn('无法创建通知音效:', error);
@@ -72,14 +74,14 @@ export class NotificationService {
 
       const source = this.audioContext.createBufferSource();
       const gainNode = this.audioContext.createGain();
-      
+
       source.buffer = this.notificationSound;
       source.connect(gainNode);
       gainNode.connect(this.audioContext.destination);
-      
+
       // 设置音量
       gainNode.gain.setValueAtTime(0.5, this.audioContext.currentTime);
-      
+
       source.start();
     } catch (error) {
       console.warn('无法播放通知音效:', error);
@@ -110,7 +112,7 @@ export class NotificationService {
     onClick?: () => void;
   }) {
     const permission = await this.requestNotificationPermission();
-    
+
     if (permission !== 'granted') {
       console.log('用户未授权桌面通知');
       return null;
@@ -147,7 +149,7 @@ export class NotificationService {
   // 更新浏览器标题栏未读计数
   public updateTitleWithUnreadCount(count: number) {
     this.unreadCount = count;
-    
+
     if (typeof document === 'undefined') return;
 
     if (count > 0) {
@@ -166,7 +168,7 @@ export class NotificationService {
     let isOriginal = true;
     this.titleUpdateInterval = setInterval(() => {
       if (typeof document === 'undefined') return;
-      
+
       if (isOriginal) {
         document.title = `(${this.unreadCount}) ${this.originalTitle}`;
       } else {
@@ -198,7 +200,10 @@ export class NotificationService {
     // 显示桌面通知
     await this.showDesktopNotification({
       title: `${options.senderName} 发来私聊消息`,
-      body: options.message.length > 50 ? options.message.substring(0, 50) + '...' : options.message,
+      body:
+        options.message.length > 50
+          ? options.message.substring(0, 50) + '...'
+          : options.message,
       icon: options.senderImage,
       tag: `private-message-${options.conversationId}`,
       onClick: () => {
@@ -226,7 +231,10 @@ export class NotificationService {
     // 显示桌面通知
     await this.showDesktopNotification({
       title: `${options.projectName} - ${options.senderName}`,
-      body: options.message.length > 50 ? options.message.substring(0, 50) + '...' : options.message,
+      body:
+        options.message.length > 50
+          ? options.message.substring(0, 50) + '...'
+          : options.message,
       icon: options.senderImage,
       tag: `project-message-${options.conversationId}`,
       onClick: () => {
@@ -261,12 +269,14 @@ export class NotificationService {
 
     try {
       const prefs = localStorage.getItem('notification-preferences');
-      return prefs ? JSON.parse(prefs) : {
-        enableSound: true,
-        enableDesktop: true,
-        enableTitleBlink: true,
-        soundVolume: 0.5
-      };
+      return prefs
+        ? JSON.parse(prefs)
+        : {
+            enableSound: true,
+            enableDesktop: true,
+            enableTitleBlink: true,
+            soundVolume: 0.5
+          };
     } catch {
       return {
         enableSound: true,
@@ -285,7 +295,10 @@ export class NotificationService {
     soundVolume: number;
   }) {
     if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('notification-preferences', JSON.stringify(preferences));
+      localStorage.setItem(
+        'notification-preferences',
+        JSON.stringify(preferences)
+      );
     }
   }
 

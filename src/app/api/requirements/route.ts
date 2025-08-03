@@ -26,17 +26,23 @@ export async function GET(request: NextRequest) {
 
     // 解析查询参数
     const { searchParams } = new URL(request.url);
-    
+
     // 分页参数
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const skip = (page - 1) * limit;
 
     // 过滤参数
-    const status = searchParams.get('status')?.split(',') as RequirementStatus[];
-    const priority = searchParams.get('priority')?.split(',') as RequirementPriority[];
+    const status = searchParams
+      .get('status')
+      ?.split(',') as RequirementStatus[];
+    const priority = searchParams
+      .get('priority')
+      ?.split(',') as RequirementPriority[];
     const type = searchParams.get('type')?.split(',') as RequirementType[];
-    const complexity = searchParams.get('complexity')?.split(',') as RequirementComplexity[];
+    const complexity = searchParams
+      .get('complexity')
+      ?.split(',') as RequirementComplexity[];
     const assignedToId = searchParams.get('assignedToId');
     const createdById = searchParams.get('createdById');
     const search = searchParams.get('search');
@@ -73,31 +79,31 @@ export async function GET(request: NextRequest) {
     if (status && status.length > 0) {
       where.status = { in: status };
     }
-    
+
     if (priority && priority.length > 0) {
       where.priority = { in: priority };
     }
-    
+
     if (type && type.length > 0) {
       where.type = { in: type };
     }
-    
+
     if (complexity && complexity.length > 0) {
       where.complexity = { in: complexity };
     }
-    
+
     if (assignedToId) {
       where.assignedToId = assignedToId;
     }
-    
+
     if (createdById) {
       where.createdById = createdById;
     }
-    
+
     if (projectId) {
       where.projectId = projectId;
     }
-    
+
     if (search) {
       where.AND = where.AND || [];
       where.AND.push({
@@ -204,7 +210,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    
+
     // 验证请求数据
     const validationResult = createRequirementSchema.safeParse(body);
     if (!validationResult.success) {
@@ -268,7 +274,7 @@ export async function POST(request: NextRequest) {
     // 处理标签关联
     if (data.tagIds && data.tagIds.length > 0) {
       await prisma.requirementTag.createMany({
-        data: data.tagIds.map(tagId => ({
+        data: data.tagIds.map((tagId) => ({
           requirementId: requirement.id,
           tagId
         })),

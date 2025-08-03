@@ -4,6 +4,9 @@ const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 
+// 加载环境变量
+require('dotenv').config({ path: '.env.local' });
+
 const app = express();
 const httpServer = createServer(app);
 
@@ -125,8 +128,9 @@ const authenticateSocket = (socket, next) => {
   try {
     const decoded = jwt.verify(
       token,
-      process.env.NEXTAUTH_SECRET || 'your-secret-key'
+      process.env.JWT_SECRET || 'your-secret-key'
     );
+
     socket.userId = decoded.sub || decoded.id;
     socket.userEmail = decoded.email;
     socket.isServerClient = false;

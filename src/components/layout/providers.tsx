@@ -16,9 +16,7 @@ export default function Providers({
     <ActiveThemeProvider initialTheme={activeThemeValue}>
       <AuthProvider>
         <RBACProvider>
-          <RealtimeProvider>
-            {children}
-          </RealtimeProvider>
+          <RealtimeProvider>{children}</RealtimeProvider>
         </RBACProvider>
       </AuthProvider>
     </ActiveThemeProvider>

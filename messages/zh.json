@@ -564,7 +564,7 @@
     },
     "table": {
       "title": "标题",
-      "status": "状态", 
+      "status": "状态",
       "folder": "文件夹",
       "createdAt": "创建时间",
       "tags": "标签",

@@ -15,7 +15,8 @@ export const REQUIREMENT_PERMISSIONS = {
   VERSION: 'requirement.version'
 } as const;
 
-export type RequirementPermission = typeof REQUIREMENT_PERMISSIONS[keyof typeof REQUIREMENT_PERMISSIONS];
+export type RequirementPermission =
+  (typeof REQUIREMENT_PERMISSIONS)[keyof typeof REQUIREMENT_PERMISSIONS];
 
 /**
  * 检查用户是否有需求管理权限
@@ -98,13 +99,11 @@ export async function hasRequirementPermission(
       REQUIREMENT_PERMISSIONS.ATTACHMENT,
       REQUIREMENT_PERMISSIONS.VERSION
     ],
-    VIEWER: [
-      REQUIREMENT_PERMISSIONS.VIEW,
-      REQUIREMENT_PERMISSIONS.COMMENT
-    ]
+    VIEWER: [REQUIREMENT_PERMISSIONS.VIEW, REQUIREMENT_PERMISSIONS.COMMENT]
   };
 
-  const userPermissions = rolePermissions[projectMember.role as keyof typeof rolePermissions] || [];
+  const userPermissions =
+    rolePermissions[projectMember.role as keyof typeof rolePermissions] || [];
   return userPermissions.includes(permission);
 }
 
@@ -149,7 +148,9 @@ export async function canEditRequirement(
   }
 
   // 需求创建者和分配人可以编辑
-  return requirement.createdById === userId || requirement.assignedToId === userId;
+  return (
+    requirement.createdById === userId || requirement.assignedToId === userId
+  );
 }
 
 /**

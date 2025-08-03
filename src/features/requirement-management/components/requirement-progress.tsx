@@ -1,7 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -11,7 +17,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -20,7 +26,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from '@/components/ui/table';
 import {
   AlertTriangle,
@@ -39,7 +45,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, differenceInDays, isAfter, isBefore } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { zhCN } from 'date-fns/locale/zh-CN';
 
 interface ProgressData {
   overview: {
@@ -160,7 +166,7 @@ export function RequirementProgress({ projectId }: RequirementProgressProps) {
         params.append('projectId', projectId);
       }
       params.append('timeRange', timeRange);
-      
+
       const response = await fetch(`/api/requirements/progress?${params}`, {
         method: 'GET',
         headers: {
@@ -171,7 +177,7 @@ export function RequirementProgress({ projectId }: RequirementProgressProps) {
       if (!response.ok) {
         throw new Error('获取进度数据失败');
       }
-      
+
       const data = await response.json();
       setProgressData(data.data);
     } catch (error) {
@@ -193,12 +199,14 @@ export function RequirementProgress({ projectId }: RequirementProgressProps) {
         params.append('projectId', projectId);
       }
       params.append('timeRange', timeRange);
-      
-      const response = await fetch(`/api/requirements/progress/export?${params}`);
+
+      const response = await fetch(
+        `/api/requirements/progress/export?${params}`
+      );
       if (!response.ok) {
         throw new Error('导出失败');
       }
-      
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -208,7 +216,7 @@ export function RequirementProgress({ projectId }: RequirementProgressProps) {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      
+
       toast({
         title: '成功',
         description: '进度报告已导出'
@@ -226,13 +234,13 @@ export function RequirementProgress({ projectId }: RequirementProgressProps) {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'COMPLETED':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className='h-4 w-4 text-green-500' />;
       case 'IN_PROGRESS':
-        return <Clock className="h-4 w-4 text-blue-500" />;
+        return <Clock className='h-4 w-4 text-blue-500' />;
       case 'OVERDUE':
-        return <AlertTriangle className="h-4 w-4 text-red-500" />;
+        return <AlertTriangle className='h-4 w-4 text-red-500' />;
       default:
-        return <Clock className="h-4 w-4 text-gray-500" />;
+        return <Clock className='h-4 w-4 text-gray-500' />;
     }
   };
 
@@ -243,9 +251,9 @@ export function RequirementProgress({ projectId }: RequirementProgressProps) {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className='space-y-6'>
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-64 bg-gray-100 rounded animate-pulse" />
+          <div key={i} className='h-64 animate-pulse rounded bg-gray-100' />
         ))}
       </div>
     );
@@ -254,201 +262,255 @@ export function RequirementProgress({ projectId }: RequirementProgressProps) {
   if (!progressData) {
     return (
       <Card>
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <BarChart3 className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium mb-2">暂无进度数据</h3>
-          <p className="text-muted-foreground">还没有足够的数据生成进度跟踪</p>
+        <CardContent className='flex flex-col items-center justify-center py-12'>
+          <BarChart3 className='text-muted-foreground mb-4 h-12 w-12' />
+          <h3 className='mb-2 text-lg font-medium'>暂无进度数据</h3>
+          <p className='text-muted-foreground'>还没有足够的数据生成进度跟踪</p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       {/* 控制面板 */}
-      <div className="flex items-center justify-between">
+      <div className='flex items-center justify-between'>
         <div>
-          <h3 className="text-lg font-medium">进度跟踪</h3>
-          <p className="text-sm text-muted-foreground">
+          <h3 className='text-lg font-medium'>进度跟踪</h3>
+          <p className='text-muted-foreground text-sm'>
             需求开发进度的实时跟踪和分析
           </p>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className='flex items-center space-x-2'>
           <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className='w-32'>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="7">最近7天</SelectItem>
-              <SelectItem value="30">最近30天</SelectItem>
-              <SelectItem value="90">最近90天</SelectItem>
+              <SelectItem value='7'>最近7天</SelectItem>
+              <SelectItem value='30'>最近30天</SelectItem>
+              <SelectItem value='90'>最近90天</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" size="sm" onClick={fetchProgressData}>
-            <RefreshCw className="h-4 w-4 mr-1" />
+          <Button variant='outline' size='sm' onClick={fetchProgressData}>
+            <RefreshCw className='mr-1 h-4 w-4' />
             刷新
           </Button>
-          <Button variant="outline" size="sm" onClick={handleExport}>
-            <Download className="h-4 w-4 mr-1" />
+          <Button variant='outline' size='sm' onClick={handleExport}>
+            <Download className='mr-1 h-4 w-4' />
             导出
           </Button>
         </div>
       </div>
 
       {/* 总体进度概览 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
+          <CardContent className='p-6'>
+            <div className='flex items-center justify-between'>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">总体完成率</p>
-                <p className="text-2xl font-bold">{progressData.overview.completionRate}%</p>
-              </div>
-              <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <Target className="h-4 w-4 text-blue-600" />
-              </div>
-            </div>
-            <Progress value={progressData.overview.completionRate} className="mt-2" />
-            <p className="text-xs text-muted-foreground mt-1">
-              {progressData.overview.completedRequirements} / {progressData.overview.totalRequirements} 个需求
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">工作量完成率</p>
-                <p className="text-2xl font-bold">
-                  {Math.round((progressData.overview.completedEffort / progressData.overview.totalEffort) * 100)}%
+                <p className='text-muted-foreground text-sm font-medium'>
+                  总体完成率
+                </p>
+                <p className='text-2xl font-bold'>
+                  {progressData.overview.completionRate}%
                 </p>
               </div>
-              <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
-                <Zap className="h-4 w-4 text-green-600" />
+              <div className='flex h-8 w-8 items-center justify-center rounded-full bg-blue-100'>
+                <Target className='h-4 w-4 text-blue-600' />
               </div>
             </div>
-            <Progress 
-              value={(progressData.overview.completedEffort / progressData.overview.totalEffort) * 100} 
-              className="mt-2" 
+            <Progress
+              value={progressData.overview.completionRate}
+              className='mt-2'
             />
-            <p className="text-xs text-muted-foreground mt-1">
-              {progressData.overview.completedEffort} / {progressData.overview.totalEffort} 小时
+            <p className='text-muted-foreground mt-1 text-xs'>
+              {progressData.overview.completedRequirements} /{' '}
+              {progressData.overview.totalRequirements} 个需求
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
+          <CardContent className='p-6'>
+            <div className='flex items-center justify-between'>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">业务价值实现</p>
-                <p className="text-2xl font-bold">
-                  {Math.round((progressData.overview.completedBusinessValue / progressData.overview.totalBusinessValue) * 100)}%
+                <p className='text-muted-foreground text-sm font-medium'>
+                  工作量完成率
+                </p>
+                <p className='text-2xl font-bold'>
+                  {Math.round(
+                    (progressData.overview.completedEffort /
+                      progressData.overview.totalEffort) *
+                      100
+                  )}
+                  %
                 </p>
               </div>
-              <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
-                <TrendingUp className="h-4 w-4 text-purple-600" />
+              <div className='flex h-8 w-8 items-center justify-center rounded-full bg-green-100'>
+                <Zap className='h-4 w-4 text-green-600' />
               </div>
             </div>
-            <Progress 
-              value={(progressData.overview.completedBusinessValue / progressData.overview.totalBusinessValue) * 100} 
-              className="mt-2" 
+            <Progress
+              value={
+                (progressData.overview.completedEffort /
+                  progressData.overview.totalEffort) *
+                100
+              }
+              className='mt-2'
             />
-            <p className="text-xs text-muted-foreground mt-1">
-              {progressData.overview.completedBusinessValue} / {progressData.overview.totalBusinessValue} 分
+            <p className='text-muted-foreground mt-1 text-xs'>
+              {progressData.overview.completedEffort} /{' '}
+              {progressData.overview.totalEffort} 小时
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
+          <CardContent className='p-6'>
+            <div className='flex items-center justify-between'>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">逾期需求</p>
-                <p className="text-2xl font-bold text-red-600">{progressData.overview.overdueRequirements}</p>
+                <p className='text-muted-foreground text-sm font-medium'>
+                  业务价值实现
+                </p>
+                <p className='text-2xl font-bold'>
+                  {Math.round(
+                    (progressData.overview.completedBusinessValue /
+                      progressData.overview.totalBusinessValue) *
+                      100
+                  )}
+                  %
+                </p>
               </div>
-              <div className="h-8 w-8 bg-red-100 rounded-full flex items-center justify-center">
-                <AlertTriangle className="h-4 w-4 text-red-600" />
+              <div className='flex h-8 w-8 items-center justify-center rounded-full bg-purple-100'>
+                <TrendingUp className='h-4 w-4 text-purple-600' />
               </div>
             </div>
-            <p className="text-xs text-muted-foreground mt-3">
-              预计完成: {format(new Date(progressData.overview.estimatedCompletionDate), 'yyyy-MM-dd', { locale: zhCN })}
+            <Progress
+              value={
+                (progressData.overview.completedBusinessValue /
+                  progressData.overview.totalBusinessValue) *
+                100
+              }
+              className='mt-2'
+            />
+            <p className='text-muted-foreground mt-1 text-xs'>
+              {progressData.overview.completedBusinessValue} /{' '}
+              {progressData.overview.totalBusinessValue} 分
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className='p-6'>
+            <div className='flex items-center justify-between'>
+              <div>
+                <p className='text-muted-foreground text-sm font-medium'>
+                  逾期需求
+                </p>
+                <p className='text-2xl font-bold text-red-600'>
+                  {progressData.overview.overdueRequirements}
+                </p>
+              </div>
+              <div className='flex h-8 w-8 items-center justify-center rounded-full bg-red-100'>
+                <AlertTriangle className='h-4 w-4 text-red-600' />
+              </div>
+            </div>
+            <p className='text-muted-foreground mt-3 text-xs'>
+              预计完成:{' '}
+              {format(
+                new Date(progressData.overview.estimatedCompletionDate),
+                'yyyy-MM-dd',
+                { locale: zhCN }
+              )}
             </p>
           </CardContent>
         </Card>
       </div>
 
       <Tabs value={viewType} onValueChange={setViewType}>
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">里程碑</TabsTrigger>
-          <TabsTrigger value="teams">团队进度</TabsTrigger>
-          <TabsTrigger value="risks">风险管理</TabsTrigger>
-          <TabsTrigger value="timeline">时间线</TabsTrigger>
+        <TabsList className='grid w-full grid-cols-4'>
+          <TabsTrigger value='overview'>里程碑</TabsTrigger>
+          <TabsTrigger value='teams'>团队进度</TabsTrigger>
+          <TabsTrigger value='risks'>风险管理</TabsTrigger>
+          <TabsTrigger value='timeline'>时间线</TabsTrigger>
         </TabsList>
 
         {/* 里程碑进度 */}
-        <TabsContent value="overview" className="space-y-4">
+        <TabsContent value='overview' className='space-y-4'>
           {progressData.milestones.map((milestone) => (
             <Card key={milestone.id}>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
+                <div className='flex items-center justify-between'>
+                  <div className='flex items-center space-x-3'>
                     {getStatusIcon(milestone.status)}
                     <div>
-                      <CardTitle className="text-lg">{milestone.name}</CardTitle>
+                      <CardTitle className='text-lg'>
+                        {milestone.name}
+                      </CardTitle>
                       <CardDescription>{milestone.description}</CardDescription>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className='text-right'>
                     <Badge className={STATUS_CONFIG[milestone.status].color}>
                       {STATUS_CONFIG[milestone.status].label}
                     </Badge>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      截止: {format(new Date(milestone.dueDate), 'MM-dd', { locale: zhCN })}
+                    <p className='text-muted-foreground mt-1 text-sm'>
+                      截止:{' '}
+                      {format(new Date(milestone.dueDate), 'MM-dd', {
+                        locale: zhCN
+                      })}
                     </p>
                   </div>
                 </div>
-                <div className="mt-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">进度</span>
-                    <span className="text-sm text-muted-foreground">{milestone.progress}%</span>
+                <div className='mt-4'>
+                  <div className='mb-2 flex items-center justify-between'>
+                    <span className='text-sm font-medium'>进度</span>
+                    <span className='text-muted-foreground text-sm'>
+                      {milestone.progress}%
+                    </span>
                   </div>
                   <Progress value={milestone.progress} />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <h4 className="font-medium">关联需求 ({milestone.requirements.length})</h4>
-                  <div className="space-y-2">
+                <div className='space-y-3'>
+                  <h4 className='font-medium'>
+                    关联需求 ({milestone.requirements.length})
+                  </h4>
+                  <div className='space-y-2'>
                     {milestone.requirements.slice(0, 5).map((req) => (
-                      <div key={req.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                        <div className="flex items-center space-x-3">
-                          <div className="flex items-center space-x-2">
-                            <Avatar className="h-6 w-6">
+                      <div
+                        key={req.id}
+                        className='flex items-center justify-between rounded bg-gray-50 p-2'
+                      >
+                        <div className='flex items-center space-x-3'>
+                          <div className='flex items-center space-x-2'>
+                            <Avatar className='h-6 w-6'>
                               <AvatarImage src={req.assignee.avatar} />
-                              <AvatarFallback className="text-xs">
+                              <AvatarFallback className='text-xs'>
                                 {req.assignee.name.slice(0, 1)}
                               </AvatarFallback>
                             </Avatar>
-                            <span className="text-sm font-medium">{req.title}</span>
+                            <span className='text-sm font-medium'>
+                              {req.title}
+                            </span>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <Badge variant="outline" className="text-xs">
+                        <div className='flex items-center space-x-2'>
+                          <Badge variant='outline' className='text-xs'>
                             {req.priority}
                           </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {calculateDaysRemaining(req.dueDate) > 0 
+                          <span className='text-muted-foreground text-xs'>
+                            {calculateDaysRemaining(req.dueDate) > 0
                               ? `${calculateDaysRemaining(req.dueDate)}天后`
-                              : `逾期${Math.abs(calculateDaysRemaining(req.dueDate))}天`
-                            }
+                              : `逾期${Math.abs(calculateDaysRemaining(req.dueDate))}天`}
                           </span>
                         </div>
                       </div>
                     ))}
                     {milestone.requirements.length > 5 && (
-                      <p className="text-sm text-muted-foreground text-center">
+                      <p className='text-muted-foreground text-center text-sm'>
                         还有 {milestone.requirements.length - 5} 个需求...
                       </p>
                     )}
@@ -460,50 +522,62 @@ export function RequirementProgress({ projectId }: RequirementProgressProps) {
         </TabsContent>
 
         {/* 团队进度 */}
-        <TabsContent value="teams" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TabsContent value='teams' className='space-y-4'>
+          <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
             {progressData.teams.map((team) => (
               <Card key={team.id}>
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center">
-                      <Users className="h-5 w-5 mr-2" />
+                  <div className='flex items-center justify-between'>
+                    <CardTitle className='flex items-center'>
+                      <Users className='mr-2 h-5 w-5' />
                       {team.name}
                     </CardTitle>
-                    <Badge variant="outline">
-                      效率: {team.efficiency}%
-                    </Badge>
+                    <Badge variant='outline'>效率: {team.efficiency}%</Badge>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className='space-y-4'>
                   {/* 团队进度 */}
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">完成进度</span>
-                      <span className="text-sm text-muted-foreground">
-                        {Math.round((team.completedRequirements / team.totalRequirements) * 100)}%
+                    <div className='mb-2 flex items-center justify-between'>
+                      <span className='text-sm font-medium'>完成进度</span>
+                      <span className='text-muted-foreground text-sm'>
+                        {Math.round(
+                          (team.completedRequirements /
+                            team.totalRequirements) *
+                            100
+                        )}
+                        %
                       </span>
                     </div>
-                    <Progress value={(team.completedRequirements / team.totalRequirements) * 100} />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {team.completedRequirements} / {team.totalRequirements} 个需求
+                    <Progress
+                      value={
+                        (team.completedRequirements / team.totalRequirements) *
+                        100
+                      }
+                    />
+                    <p className='text-muted-foreground mt-1 text-xs'>
+                      {team.completedRequirements} / {team.totalRequirements}{' '}
+                      个需求
                     </p>
                   </div>
 
                   {/* 团队成员 */}
                   <div>
-                    <h4 className="text-sm font-medium mb-2">团队成员</h4>
-                    <div className="flex flex-wrap gap-2">
+                    <h4 className='mb-2 text-sm font-medium'>团队成员</h4>
+                    <div className='flex flex-wrap gap-2'>
                       {team.members.map((member) => (
-                        <div key={member.id} className="flex items-center space-x-2 bg-gray-50 rounded-full px-3 py-1">
-                          <Avatar className="h-6 w-6">
+                        <div
+                          key={member.id}
+                          className='flex items-center space-x-2 rounded-full bg-gray-50 px-3 py-1'
+                        >
+                          <Avatar className='h-6 w-6'>
                             <AvatarImage src={member.avatar} />
-                            <AvatarFallback className="text-xs">
+                            <AvatarFallback className='text-xs'>
                               {member.name.slice(0, 1)}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="text-sm">{member.name}</span>
-                          <Badge variant="secondary" className="text-xs">
+                          <span className='text-sm'>{member.name}</span>
+                          <Badge variant='secondary' className='text-xs'>
                             {member.role}
                           </Badge>
                         </div>
@@ -512,14 +586,20 @@ export function RequirementProgress({ projectId }: RequirementProgressProps) {
                   </div>
 
                   {/* 团队指标 */}
-                  <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+                  <div className='grid grid-cols-2 gap-4 border-t pt-2'>
                     <div>
-                      <p className="text-sm text-muted-foreground">平均速度</p>
-                      <p className="text-lg font-semibold">{team.averageVelocity}/周</p>
+                      <p className='text-muted-foreground text-sm'>平均速度</p>
+                      <p className='text-lg font-semibold'>
+                        {team.averageVelocity}/周
+                      </p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">当前工作量</p>
-                      <p className="text-lg font-semibold">{team.currentWorkload}h</p>
+                      <p className='text-muted-foreground text-sm'>
+                        当前工作量
+                      </p>
+                      <p className='text-lg font-semibold'>
+                        {team.currentWorkload}h
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -529,51 +609,64 @@ export function RequirementProgress({ projectId }: RequirementProgressProps) {
         </TabsContent>
 
         {/* 风险管理 */}
-        <TabsContent value="risks" className="space-y-4">
-          <div className="space-y-4">
+        <TabsContent value='risks' className='space-y-4'>
+          <div className='space-y-4'>
             {progressData.risks.map((risk) => {
               const RiskIcon = RISK_TYPE_CONFIG[risk.type].icon;
               return (
                 <Card key={risk.id}>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start space-x-3">
-                        <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center">
-                          <RiskIcon className="h-4 w-4" />
+                  <CardContent className='p-6'>
+                    <div className='flex items-start justify-between'>
+                      <div className='flex items-start space-x-3'>
+                        <div className='flex h-8 w-8 items-center justify-center rounded-full bg-gray-100'>
+                          <RiskIcon className='h-4 w-4' />
                         </div>
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <h4 className="font-medium">{RISK_TYPE_CONFIG[risk.type].label}</h4>
-                            <Badge className={RISK_LEVEL_CONFIG[risk.level].color}>
+                        <div className='flex-1'>
+                          <div className='mb-2 flex items-center space-x-2'>
+                            <h4 className='font-medium'>
+                              {RISK_TYPE_CONFIG[risk.type].label}
+                            </h4>
+                            <Badge
+                              className={RISK_LEVEL_CONFIG[risk.level].color}
+                            >
                               {RISK_LEVEL_CONFIG[risk.level].label}
                             </Badge>
-                            <Badge variant="outline">{risk.status}</Badge>
+                            <Badge variant='outline'>{risk.status}</Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground mb-2">{risk.description}</p>
-                          <div className="space-y-2">
+                          <p className='text-muted-foreground mb-2 text-sm'>
+                            {risk.description}
+                          </p>
+                          <div className='space-y-2'>
                             <div>
-                              <span className="text-sm font-medium">影响: </span>
-                              <span className="text-sm">{risk.impact}</span>
+                              <span className='text-sm font-medium'>
+                                影响:{' '}
+                              </span>
+                              <span className='text-sm'>{risk.impact}</span>
                             </div>
                             <div>
-                              <span className="text-sm font-medium">缓解措施: </span>
-                              <span className="text-sm">{risk.mitigation}</span>
+                              <span className='text-sm font-medium'>
+                                缓解措施:{' '}
+                              </span>
+                              <span className='text-sm'>{risk.mitigation}</span>
                             </div>
                           </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <Avatar className="h-6 w-6">
+                      <div className='text-right'>
+                        <div className='mb-2 flex items-center space-x-2'>
+                          <Avatar className='h-6 w-6'>
                             <AvatarImage src={risk.owner.avatar} />
-                            <AvatarFallback className="text-xs">
+                            <AvatarFallback className='text-xs'>
                               {risk.owner.name.slice(0, 1)}
                             </AvatarFallback>
                           </Avatar>
-                          <span className="text-sm">{risk.owner.name}</span>
+                          <span className='text-sm'>{risk.owner.name}</span>
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          截止: {format(new Date(risk.dueDate), 'MM-dd', { locale: zhCN })}
+                        <p className='text-muted-foreground text-xs'>
+                          截止:{' '}
+                          {format(new Date(risk.dueDate), 'MM-dd', {
+                            locale: zhCN
+                          })}
                         </p>
                       </div>
                     </div>
@@ -585,16 +678,14 @@ export function RequirementProgress({ projectId }: RequirementProgressProps) {
         </TabsContent>
 
         {/* 时间线 */}
-        <TabsContent value="timeline">
+        <TabsContent value='timeline'>
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Calendar className="h-5 w-5 mr-2" />
+              <CardTitle className='flex items-center'>
+                <Calendar className='mr-2 h-5 w-5' />
                 进度时间线
               </CardTitle>
-              <CardDescription>
-                计划进度与实际进度的对比分析
-              </CardDescription>
+              <CardDescription>计划进度与实际进度的对比分析</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -613,20 +704,31 @@ export function RequirementProgress({ projectId }: RequirementProgressProps) {
                     return (
                       <TableRow key={index}>
                         <TableCell>
-                          {format(new Date(item.date), 'MM-dd', { locale: zhCN })}
+                          {format(new Date(item.date), 'MM-dd', {
+                            locale: zhCN
+                          })}
                         </TableCell>
                         <TableCell>{item.planned}</TableCell>
                         <TableCell>{item.actual}</TableCell>
                         <TableCell>{item.cumulative}</TableCell>
                         <TableCell>
-                          <div className="flex items-center space-x-1">
+                          <div className='flex items-center space-x-1'>
                             {variance > 0 ? (
-                              <TrendingUp className="h-4 w-4 text-green-500" />
+                              <TrendingUp className='h-4 w-4 text-green-500' />
                             ) : variance < 0 ? (
-                              <TrendingDown className="h-4 w-4 text-red-500" />
+                              <TrendingDown className='h-4 w-4 text-red-500' />
                             ) : null}
-                            <span className={variance > 0 ? 'text-green-600' : variance < 0 ? 'text-red-600' : ''}>
-                              {variance > 0 ? '+' : ''}{variance}
+                            <span
+                              className={
+                                variance > 0
+                                  ? 'text-green-600'
+                                  : variance < 0
+                                    ? 'text-red-600'
+                                    : ''
+                              }
+                            >
+                              {variance > 0 ? '+' : ''}
+                              {variance}
                             </span>
                           </div>
                         </TableCell>

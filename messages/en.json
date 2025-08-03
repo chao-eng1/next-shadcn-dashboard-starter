@@ -557,7 +557,7 @@
     },
     "table": {
       "title": "Title",
-      "status": "Status", 
+      "status": "Status",
       "folder": "Folder",
       "createdAt": "Created Time",
       "tags": "Tags",

@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
-import { apiResponse, apiError, apiUnauthorized, apiNotFound } from '@/lib/api-response';
+import {
+  apiResponse,
+  apiError,
+  apiUnauthorized,
+  apiNotFound
+} from '@/lib/api-response';
 
 export async function POST(
   request: NextRequest,

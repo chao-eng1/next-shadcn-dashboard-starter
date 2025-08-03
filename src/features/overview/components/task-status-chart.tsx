@@ -2,9 +2,22 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Legend,
+  Tooltip
+} from 'recharts';
 import { getApiUrl } from '@/lib/utils';
 import { TASK_STATUS } from '@/constants/project';
 
@@ -60,7 +73,7 @@ export function TaskStatusChart() {
         const result = await response.json();
         if (result.success) {
           const tasks = result.data.tasks || [];
-          
+
           // 统计各状态的任务数量
           const statusCounts: Record<string, number> = {
             TODO: 0,
@@ -89,7 +102,9 @@ export function TaskStatusChart() {
           setData(chartData);
           setTotal(tasks.length);
         } else {
-          throw new Error(result.error?.message || 'Failed to fetch task stats');
+          throw new Error(
+            result.error?.message || 'Failed to fetch task stats'
+          );
         }
       } catch (err) {
         console.error('Error fetching task stats:', err);
@@ -105,11 +120,12 @@ export function TaskStatusChart() {
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0];
-      const percentage = total > 0 ? ((data.value / total) * 100).toFixed(1) : '0';
+      const percentage =
+        total > 0 ? ((data.value / total) * 100).toFixed(1) : '0';
       return (
-        <div className='rounded-lg border bg-background p-2 shadow-md'>
+        <div className='bg-background rounded-lg border p-2 shadow-md'>
           <p className='font-medium'>{data.name}</p>
-          <p className='text-sm text-muted-foreground'>
+          <p className='text-muted-foreground text-sm'>
             {data.value} 个任务 ({percentage}%)
           </p>
         </div>
@@ -129,7 +145,7 @@ export function TaskStatusChart() {
             />
             <span>{entry.value}</span>
             <span className='text-muted-foreground'>
-              ({data.find(d => d.name === entry.value)?.value || 0})
+              ({data.find((d) => d.name === entry.value)?.value || 0})
             </span>
           </div>
         ))}
@@ -146,7 +162,7 @@ export function TaskStatusChart() {
         </CardHeader>
         <CardContent>
           <div className='flex h-[300px] items-center justify-center'>
-            <Loader2 className='h-8 w-8 animate-spin text-primary' />
+            <Loader2 className='text-primary h-8 w-8 animate-spin' />
           </div>
         </CardContent>
       </Card>
@@ -162,7 +178,7 @@ export function TaskStatusChart() {
         </CardHeader>
         <CardContent>
           <div className='flex h-[300px] items-center justify-center'>
-            <div className='text-center text-muted-foreground'>
+            <div className='text-muted-foreground text-center'>
               <p>{error}</p>
             </div>
           </div>
@@ -180,7 +196,7 @@ export function TaskStatusChart() {
         </CardHeader>
         <CardContent>
           <div className='flex h-[300px] items-center justify-center'>
-            <div className='text-center text-muted-foreground'>
+            <div className='text-muted-foreground text-center'>
               <p>暂无任务数据</p>
             </div>
           </div>
@@ -193,9 +209,7 @@ export function TaskStatusChart() {
     <Card>
       <CardHeader>
         <CardTitle>任务状态分布</CardTitle>
-        <CardDescription>
-          总计 {total} 个任务的状态分布情况
-        </CardDescription>
+        <CardDescription>总计 {total} 个任务的状态分布情况</CardDescription>
       </CardHeader>
       <CardContent>
         <div className='h-[300px]'>

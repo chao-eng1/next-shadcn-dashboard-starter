@@ -8,10 +8,7 @@ export async function GET(request: NextRequest) {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -22,7 +19,10 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // 检查用户是否有消息管理权限
-    const canManageMessages = await hasPermission(currentUser.id, 'message.manage');
+    const canManageMessages = await hasPermission(
+      currentUser.id,
+      'message.manage'
+    );
 
     if (canManageMessages) {
       // 管理员可以查看所有消息
@@ -135,10 +135,7 @@ export async function POST(request: NextRequest) {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // 检查用户是否有发送消息权限
@@ -151,7 +148,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, content, isGlobal, roleIds, recipientIds, includeSender = false } = body;
+    const {
+      title,
+      content,
+      isGlobal,
+      roleIds,
+      recipientIds,
+      includeSender = false
+    } = body;
 
     if (!title || !content) {
       return NextResponse.json(
@@ -160,7 +164,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('Creating message with data:', { title, content, isGlobal, roleIds, recipientIds, includeSender, senderId: currentUser.id });
+    console.log('Creating message with data:', {
+      title,
+      content,
+      isGlobal,
+      roleIds,
+      recipientIds,
+      includeSender,
+      senderId: currentUser.id
+    });
 
     // 创建消息
     const message = await prisma.message.create({
@@ -179,11 +191,13 @@ export async function POST(request: NextRequest) {
       const allUsers = await prisma.user.findMany({
         select: { id: true }
       });
-      recipientUserIds = allUsers.map(user => user.id);
-      
+      recipientUserIds = allUsers.map((user) => user.id);
+
       // 如果不包含发送者，则从列表中移除
       if (!includeSender) {
-        recipientUserIds = recipientUserIds.filter(id => id !== currentUser.id);
+        recipientUserIds = recipientUserIds.filter(
+          (id) => id !== currentUser.id
+        );
       }
     } else if (roleIds && roleIds.length > 0) {
       // 按角色发送：获取指定角色的所有用户
@@ -197,36 +211,40 @@ export async function POST(request: NextRequest) {
           userId: true
         }
       });
-      recipientUserIds = [...new Set(usersInRoles.map(ur => ur.userId))];
-      
+      recipientUserIds = [...new Set(usersInRoles.map((ur) => ur.userId))];
+
       // 如果不包含发送者，则从列表中移除
       if (!includeSender) {
-        recipientUserIds = recipientUserIds.filter(id => id !== currentUser.id);
+        recipientUserIds = recipientUserIds.filter(
+          (id) => id !== currentUser.id
+        );
       }
     } else if (recipientIds && recipientIds.length > 0) {
       // 指定用户：直接使用提供的用户ID
       recipientUserIds = recipientIds;
-      
+
       // 如果不包含发送者，则从列表中移除
       if (!includeSender) {
-        recipientUserIds = recipientUserIds.filter(id => id !== currentUser.id);
+        recipientUserIds = recipientUserIds.filter(
+          (id) => id !== currentUser.id
+        );
       }
     }
 
     // 创建用户消息关联记录
     if (recipientUserIds.length > 0) {
-      const userMessageData = recipientUserIds.map(userId => ({
+      const userMessageData = recipientUserIds.map((userId) => ({
         userId,
         messageId: message.id,
         isRead: false
       }));
-      
+
       console.log('Creating UserMessage records:', userMessageData);
-      
+
       await prisma.userMessage.createMany({
         data: userMessageData
       });
-      
+
       console.log(`Created ${userMessageData.length} UserMessage records`);
     } else {
       console.log('No recipients found for message:', message.id);
@@ -236,7 +254,10 @@ export async function POST(request: NextRequest) {
     // 在实际项目中，这里会通过WebSocket、SSE或推送服务发送实时通知
     console.log('Message sent to recipients:', recipientUserIds);
     console.log('Sender ID:', currentUser.id);
-    console.log('Message type:', isGlobal ? 'global' : (roleIds?.length ? 'role-based' : 'specific'));
+    console.log(
+      'Message type:',
+      isGlobal ? 'global' : roleIds?.length ? 'role-based' : 'specific'
+    );
 
     // 返回创建的消息和接收者数量
     return NextResponse.json({

@@ -5,7 +5,13 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,7 +21,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select';
 import {
   Form,
@@ -24,12 +30,12 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from '@/components/ui/form';
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger,
+  PopoverTrigger
 } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
@@ -45,18 +51,33 @@ import {
   Tag
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { zhCN } from 'date-fns/locale/zh-CN';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
 const requirementSchema = z.object({
-  title: z.string().min(1, '需求标题不能为空').max(200, '需求标题不能超过200个字符'),
+  title: z
+    .string()
+    .min(1, '需求标题不能为空')
+    .max(200, '需求标题不能超过200个字符'),
   description: z.string().min(1, '需求描述不能为空'),
-  status: z.enum(['DRAFT', 'PENDING', 'APPROVED', 'IN_PROGRESS', 'TESTING', 'COMPLETED', 'REJECTED', 'CANCELLED']),
+  status: z.enum([
+    'DRAFT',
+    'PENDING',
+    'APPROVED',
+    'IN_PROGRESS',
+    'TESTING',
+    'COMPLETED',
+    'REJECTED',
+    'CANCELLED'
+  ]),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']),
   type: z.enum(['FUNCTIONAL', 'NON_FUNCTIONAL', 'TECHNICAL', 'BUSINESS']),
   complexity: z.enum(['SIMPLE', 'MEDIUM', 'COMPLEX', 'VERY_COMPLEX']),
-  businessValue: z.number().min(0, '业务价值不能为负数').max(100, '业务价值不能超过100'),
+  businessValue: z
+    .number()
+    .min(0, '业务价值不能为负数')
+    .max(100, '业务价值不能超过100'),
   estimatedEffort: z.number().min(0, '预估工作量不能为负数'),
   dueDate: z.date().optional(),
   projectId: z.string().optional(),
@@ -110,19 +131,29 @@ const complexityOptions = [
   { value: 'VERY_COMPLEX', label: '非常复杂（2周以上）' }
 ];
 
-export function RequirementForm({ 
-  initialData, 
-  requirementId, 
+export function RequirementForm({
+  initialData,
+  requirementId,
   projectId,
-  onSuccess 
+  onSuccess
 }: RequirementFormProps) {
   const [loading, setLoading] = useState(false);
-  const [projects, setProjects] = useState<Array<{ id: string; name: string }>>([]);
-  const [users, setUsers] = useState<Array<{ id: string; name: string; email: string }>>([]);
-  const [tags, setTags] = useState<Array<{ id: string; name: string; color: string }>>([]);
-  const [requirements, setRequirements] = useState<Array<{ id: string; title: string }>>([]);
+  const [projects, setProjects] = useState<Array<{ id: string; name: string }>>(
+    []
+  );
+  const [users, setUsers] = useState<
+    Array<{ id: string; name: string; email: string }>
+  >([]);
+  const [tags, setTags] = useState<
+    Array<{ id: string; name: string; color: string }>
+  >([]);
+  const [requirements, setRequirements] = useState<
+    Array<{ id: string; title: string }>
+  >([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [selectedDependencies, setSelectedDependencies] = useState<string[]>([]);
+  const [selectedDependencies, setSelectedDependencies] = useState<string[]>(
+    []
+  );
   const router = useRouter();
   const { toast } = useToast();
 
@@ -160,8 +191,11 @@ export function RequirementForm({
       const projectsResponse = await fetch('/api/projects');
       if (projectsResponse.ok) {
         const projectsData = await projectsResponse.json();
-        const projectsList = Array.isArray(projectsData.data) ? projectsData.data : 
-                            Array.isArray(projectsData) ? projectsData : [];
+        const projectsList = Array.isArray(projectsData.data)
+          ? projectsData.data
+          : Array.isArray(projectsData)
+            ? projectsData
+            : [];
         setProjects(projectsList);
       }
 
@@ -169,8 +203,11 @@ export function RequirementForm({
       const usersResponse = await fetch('/api/users');
       if (usersResponse.ok) {
         const usersData = await usersResponse.json();
-        const usersList = Array.isArray(usersData.data) ? usersData.data : 
-                         Array.isArray(usersData) ? usersData : [];
+        const usersList = Array.isArray(usersData.data)
+          ? usersData.data
+          : Array.isArray(usersData)
+            ? usersData
+            : [];
         setUsers(usersList);
       }
 
@@ -178,8 +215,11 @@ export function RequirementForm({
       const tagsResponse = await fetch('/api/tags');
       if (tagsResponse.ok) {
         const tagsData = await tagsResponse.json();
-        const tagsList = Array.isArray(tagsData.data) ? tagsData.data : 
-                        Array.isArray(tagsData) ? tagsData : [];
+        const tagsList = Array.isArray(tagsData.data)
+          ? tagsData.data
+          : Array.isArray(tagsData)
+            ? tagsData
+            : [];
         setTags(tagsList);
       }
 
@@ -187,8 +227,11 @@ export function RequirementForm({
       const requirementsResponse = await fetch('/api/requirements');
       if (requirementsResponse.ok) {
         const requirementsData = await requirementsResponse.json();
-        const requirementsList = Array.isArray(requirementsData.data) ? requirementsData.data : 
-                                Array.isArray(requirementsData) ? requirementsData : [];
+        const requirementsList = Array.isArray(requirementsData.data)
+          ? requirementsData.data
+          : Array.isArray(requirementsData)
+            ? requirementsData
+            : [];
         setRequirements(requirementsList);
       }
     } catch (error) {
@@ -204,7 +247,7 @@ export function RequirementForm({
   const onSubmit = async (data: RequirementFormData) => {
     try {
       setLoading(true);
-      
+
       const submitData = {
         ...data,
         tags: selectedTags,
@@ -213,7 +256,7 @@ export function RequirementForm({
 
       let url: string;
       let method: string;
-      
+
       if (requirementId) {
         // 更新需求
         if (projectId) {
@@ -245,7 +288,7 @@ export function RequirementForm({
       }
 
       const result = await response.json();
-      
+
       toast({
         title: '成功',
         description: requirementId ? '需求已更新' : '需求已创建'
@@ -260,7 +303,9 @@ export function RequirementForm({
       console.error('提交失败:', error);
       toast({
         title: '错误',
-        description: requirementId ? '更新需求失败，请稍后重试' : '创建需求失败，请稍后重试',
+        description: requirementId
+          ? '更新需求失败，请稍后重试'
+          : '创建需求失败，请稍后重试',
         variant: 'destructive'
       });
     } finally {
@@ -269,44 +314,42 @@ export function RequirementForm({
   };
 
   const handleTagToggle = (tagId: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tagId) 
-        ? prev.filter(id => id !== tagId)
+    setSelectedTags((prev) =>
+      prev.includes(tagId)
+        ? prev.filter((id) => id !== tagId)
         : [...prev, tagId]
     );
   };
 
   const handleDependencyToggle = (reqId: string) => {
-    setSelectedDependencies(prev => 
-      prev.includes(reqId) 
-        ? prev.filter(id => id !== reqId)
+    setSelectedDependencies((prev) =>
+      prev.includes(reqId)
+        ? prev.filter((id) => id !== reqId)
         : [...prev, reqId]
     );
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
         {/* 基本信息 */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <FileText className="h-5 w-5 mr-2" />
+            <CardTitle className='flex items-center'>
+              <FileText className='mr-2 h-5 w-5' />
               基本信息
             </CardTitle>
-            <CardDescription>
-              填写需求的基本信息和描述
-            </CardDescription>
+            <CardDescription>填写需求的基本信息和描述</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className='space-y-4'>
             <FormField
               control={form.control}
-              name="title"
+              name='title'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>需求标题 *</FormLabel>
                   <FormControl>
-                    <Input placeholder="请输入需求标题" {...field} />
+                    <Input placeholder='请输入需求标题' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -315,15 +358,15 @@ export function RequirementForm({
 
             <FormField
               control={form.control}
-              name="description"
+              name='description'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>需求描述 *</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="请详细描述需求内容、背景和目标" 
-                      className="min-h-[120px]"
-                      {...field} 
+                    <Textarea
+                      placeholder='请详细描述需求内容、背景和目标'
+                      className='min-h-[120px]'
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -331,17 +374,20 @@ export function RequirementForm({
               )}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
               <FormField
                 control={form.control}
-                name="type"
+                name='type'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>需求类型 *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="选择需求类型" />
+                          <SelectValue placeholder='选择需求类型' />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -359,14 +405,17 @@ export function RequirementForm({
 
               <FormField
                 control={form.control}
-                name="priority"
+                name='priority'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>优先级 *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="选择优先级" />
+                          <SelectValue placeholder='选择优先级' />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -383,17 +432,20 @@ export function RequirementForm({
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
               <FormField
                 control={form.control}
-                name="complexity"
+                name='complexity'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>复杂度 *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="选择复杂度" />
+                          <SelectValue placeholder='选择复杂度' />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -411,14 +463,17 @@ export function RequirementForm({
 
               <FormField
                 control={form.control}
-                name="status"
+                name='status'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>状态 *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="选择状态" />
+                          <SelectValue placeholder='选择状态' />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -441,26 +496,27 @@ export function RequirementForm({
         <Card>
           <CardHeader>
             <CardTitle>项目和人员</CardTitle>
-            <CardDescription>
-              关联项目和分配负责人
-            </CardDescription>
+            <CardDescription>关联项目和分配负责人</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CardContent className='space-y-4'>
+            <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
               <FormField
                 control={form.control}
-                name="projectId"
+                name='projectId'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>关联项目</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="选择项目" />
+                          <SelectValue placeholder='选择项目' />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">不关联项目</SelectItem>
+                        <SelectItem value=''>不关联项目</SelectItem>
                         {projects.map((project) => (
                           <SelectItem key={project.id} value={project.id}>
                             {project.name}
@@ -475,18 +531,21 @@ export function RequirementForm({
 
               <FormField
                 control={form.control}
-                name="assigneeId"
+                name='assigneeId'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>负责人</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="选择负责人" />
+                          <SelectValue placeholder='选择负责人' />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">暂不分配</SelectItem>
+                        <SelectItem value=''>暂不分配</SelectItem>
                         {users.map((user) => (
                           <SelectItem key={user.id} value={user.id}>
                             {user.name} ({user.email})
@@ -510,19 +569,19 @@ export function RequirementForm({
               设置业务价值、工作量估算和截止日期
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <CardContent className='space-y-4'>
+            <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
               <FormField
                 control={form.control}
-                name="businessValue"
+                name='businessValue'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>业务价值 (0-100)</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
-                        min="0" 
-                        max="100" 
+                      <Input
+                        type='number'
+                        min='0'
+                        max='100'
                         {...field}
                         onChange={(e) => field.onChange(Number(e.target.value))}
                       />
@@ -537,15 +596,15 @@ export function RequirementForm({
 
               <FormField
                 control={form.control}
-                name="estimatedEffort"
+                name='estimatedEffort'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>预估工作量 (小时)</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
-                        min="0" 
-                        step="0.5"
+                      <Input
+                        type='number'
+                        min='0'
+                        step='0.5'
                         {...field}
                         onChange={(e) => field.onChange(Number(e.target.value))}
                       />
@@ -560,7 +619,7 @@ export function RequirementForm({
 
               <FormField
                 control={form.control}
-                name="dueDate"
+                name='dueDate'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>截止日期</FormLabel>
@@ -568,24 +627,22 @@ export function RequirementForm({
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
-                            variant="outline"
+                            variant='outline'
                             className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
+                              'w-full pl-3 text-left font-normal',
+                              !field.value && 'text-muted-foreground'
                             )}
                           >
-                            {field.value ? (
-                              format(field.value, "PPP", { locale: zhCN })
-                            ) : (
-                              "选择日期"
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            {field.value
+                              ? format(field.value, 'PPP', { locale: zhCN })
+                              : '选择日期'}
+                            <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent className='w-auto p-0' align='start'>
                         <Calendar
-                          mode="single"
+                          mode='single'
                           selected={field.value}
                           onSelect={field.onChange}
                           disabled={(date) => date < new Date()}
@@ -605,22 +662,20 @@ export function RequirementForm({
         <Card>
           <CardHeader>
             <CardTitle>详细信息</CardTitle>
-            <CardDescription>
-              补充验收标准、业务规则和技术说明
-            </CardDescription>
+            <CardDescription>补充验收标准、业务规则和技术说明</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className='space-y-4'>
             <FormField
               control={form.control}
-              name="acceptanceCriteria"
+              name='acceptanceCriteria'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>验收标准</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="请描述该需求的验收标准和测试要点" 
-                      className="min-h-[100px]"
-                      {...field} 
+                    <Textarea
+                      placeholder='请描述该需求的验收标准和测试要点'
+                      className='min-h-[100px]'
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -630,15 +685,15 @@ export function RequirementForm({
 
             <FormField
               control={form.control}
-              name="businessRules"
+              name='businessRules'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>业务规则</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="请描述相关的业务规则和约束条件" 
-                      className="min-h-[100px]"
-                      {...field} 
+                    <Textarea
+                      placeholder='请描述相关的业务规则和约束条件'
+                      className='min-h-[100px]'
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -648,15 +703,15 @@ export function RequirementForm({
 
             <FormField
               control={form.control}
-              name="technicalNotes"
+              name='technicalNotes'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>技术说明</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="请描述技术实现要点、架构考虑等" 
-                      className="min-h-[100px]"
-                      {...field} 
+                    <Textarea
+                      placeholder='请描述技术实现要点、架构考虑等'
+                      className='min-h-[100px]'
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -669,21 +724,19 @@ export function RequirementForm({
         {/* 标签和依赖 */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <Tag className="h-5 w-5 mr-2" />
+            <CardTitle className='flex items-center'>
+              <Tag className='mr-2 h-5 w-5' />
               标签和依赖
             </CardTitle>
-            <CardDescription>
-              为需求添加标签和设置依赖关系
-            </CardDescription>
+            <CardDescription>为需求添加标签和设置依赖关系</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className='space-y-6'>
             {/* 标签 */}
-            <div className="space-y-3">
+            <div className='space-y-3'>
               <Label>标签</Label>
-              <div className="flex flex-wrap gap-2">
+              <div className='flex flex-wrap gap-2'>
                 {tags.map((tag) => (
-                  <div key={tag.id} className="flex items-center space-x-2">
+                  <div key={tag.id} className='flex items-center space-x-2'>
                     <Checkbox
                       id={`tag-${tag.id}`}
                       checked={selectedTags.includes(tag.id)}
@@ -691,10 +744,10 @@ export function RequirementForm({
                     />
                     <Label htmlFor={`tag-${tag.id}`}>
                       <Badge
-                        variant="outline"
-                        style={{ 
-                          backgroundColor: tag.color + '20', 
-                          borderColor: tag.color 
+                        variant='outline'
+                        style={{
+                          backgroundColor: tag.color + '20',
+                          borderColor: tag.color
                         }}
                       >
                         {tag.name}
@@ -708,29 +761,38 @@ export function RequirementForm({
             <Separator />
 
             {/* 依赖关系 */}
-            <div className="space-y-3">
-              <Label className="flex items-center">
-                <Link className="h-4 w-4 mr-2" />
+            <div className='space-y-3'>
+              <Label className='flex items-center'>
+                <Link className='mr-2 h-4 w-4' />
                 依赖需求
               </Label>
-              <div className="max-h-40 overflow-y-auto space-y-2">
+              <div className='max-h-40 space-y-2 overflow-y-auto'>
                 {requirements
-                  .filter(req => req.id !== requirementId)
+                  .filter((req) => req.id !== requirementId)
                   .map((requirement) => (
-                    <div key={requirement.id} className="flex items-center space-x-2">
+                    <div
+                      key={requirement.id}
+                      className='flex items-center space-x-2'
+                    >
                       <Checkbox
                         id={`dep-${requirement.id}`}
                         checked={selectedDependencies.includes(requirement.id)}
-                        onCheckedChange={() => handleDependencyToggle(requirement.id)}
+                        onCheckedChange={() =>
+                          handleDependencyToggle(requirement.id)
+                        }
                       />
-                      <Label htmlFor={`dep-${requirement.id}`} className="text-sm">
+                      <Label
+                        htmlFor={`dep-${requirement.id}`}
+                        className='text-sm'
+                      >
                         {requirement.title}
                       </Label>
                     </div>
-                  ))
-                }
+                  ))}
                 {requirements.length === 0 && (
-                  <p className="text-sm text-muted-foreground">暂无其他需求可选择</p>
+                  <p className='text-muted-foreground text-sm'>
+                    暂无其他需求可选择
+                  </p>
                 )}
               </div>
             </div>
@@ -738,18 +800,14 @@ export function RequirementForm({
         </Card>
 
         {/* 操作按钮 */}
-        <div className="flex items-center justify-end space-x-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-          >
-            <X className="h-4 w-4 mr-2" />
+        <div className='flex items-center justify-end space-x-4'>
+          <Button type='button' variant='outline' onClick={() => router.back()}>
+            <X className='mr-2 h-4 w-4' />
             取消
           </Button>
-          <Button type="submit" disabled={loading}>
-            <Save className="h-4 w-4 mr-2" />
-            {loading ? '保存中...' : (requirementId ? '更新需求' : '创建需求')}
+          <Button type='submit' disabled={loading}>
+            <Save className='mr-2 h-4 w-4' />
+            {loading ? '保存中...' : requirementId ? '更新需求' : '创建需求'}
           </Button>
         </div>
       </form>

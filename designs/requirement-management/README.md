@@ -5,6 +5,7 @@
 需求管理是连接业务需求与技术实现的桥梁，它将帮助团队更好地理解、跟踪和管理项目需求。
 
 ### 核心价值
+
 - **需求追溯性**：从业务需求到具体任务的完整追溯链
 - **变更管理**：需求变更的版本控制和影响分析
 - **优先级管理**：基于业务价值的需求优先级排序
@@ -28,7 +29,7 @@ model Requirement {
   complexity      RequirementComplexity @default(MEDIUM)
   estimatedEffort Float?              // 预估工作量(人天)
   actualEffort    Float?              // 实际工作量
-  
+
   // 关联关系
   projectId       String
   project         Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -36,31 +37,31 @@ model Requirement {
   createdBy       User                @relation("CreatedRequirements", fields: [createdById], references: [id])
   assignedToId    String?
   assignedTo      User?               @relation("AssignedRequirements", fields: [assignedToId], references: [id])
-  
+
   // 层级关系
   parentId        String?
   parent          Requirement?        @relation("RequirementHierarchy", fields: [parentId], references: [id])
   children        Requirement[]       @relation("RequirementHierarchy")
-  
+
   // 关联的任务
   tasks           RequirementTask[]
-  
+
   // 版本控制
   versions        RequirementVersion[]
   currentVersion  Int                 @default(1)
-  
+
   // 评论和附件
   comments        RequirementComment[]
   attachments     RequirementAttachment[]
-  
+
   // 标签
   tags            RequirementTag[]
-  
+
   // 时间戳
   dueDate         DateTime?
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
-  
+
   @@map("requirements")
   @@index([projectId])
   @@index([createdById])
@@ -122,7 +123,7 @@ model RequirementVersion {
   createdById     String
   createdBy       User        @relation(fields: [createdById], references: [id])
   createdAt       DateTime    @default(now())
-  
+
   @@unique([requirementId, versionNumber])
   @@map("requirement_versions")
 }
@@ -138,7 +139,7 @@ model RequirementTask {
   taskId          String
   task            Task        @relation(fields: [taskId], references: [id], onDelete: Cascade)
   createdAt       DateTime    @default(now())
-  
+
   @@unique([requirementId, taskId])
   @@map("requirement_tasks")
 }
@@ -156,7 +157,7 @@ model RequirementComment {
   user            User        @relation(fields: [userId], references: [id])
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
-  
+
   @@map("requirement_comments")
   @@index([requirementId])
   @@index([userId])
@@ -177,7 +178,7 @@ model RequirementAttachment {
   uploaderId      String
   uploader        User        @relation(fields: [uploaderId], references: [id])
   createdAt       DateTime    @default(now())
-  
+
   @@map("requirement_attachments")
   @@index([requirementId])
   @@index([uploaderId])
@@ -194,7 +195,7 @@ model RequirementTag {
   tagId           String
   tag             Tag         @relation(fields: [tagId], references: [id], onDelete: Cascade)
   createdAt       DateTime    @default(now())
-  
+
   @@unique([requirementId, tagId])
   @@map("requirement_tags")
 }
@@ -203,12 +204,14 @@ model RequirementTag {
 ## 🎨 前端功能设计
 
 ### 1. 需求管理主页面
+
 - **需求列表视图**：支持筛选、排序、搜索
 - **需求看板视图**：按状态分列的拖拽式管理
 - **需求层级视图**：树形结构展示需求层级关系
 - **需求统计仪表盘**：进度、优先级、类型等统计图表
 
 ### 2. 需求详情页面
+
 - **基本信息**：标题、描述、优先级、状态等
 - **验收标准**：明确的验收条件
 - **关联任务**：显示实现该需求的所有任务
@@ -217,6 +220,7 @@ model RequirementTag {
 - **附件管理**：相关文档和资料
 
 ### 3. 需求创建/编辑表单
+
 - **智能表单**：根据需求类型动态调整字段
 - **模板支持**：预定义的需求模板
 - **关联建议**：智能推荐相关需求和任务
@@ -228,23 +232,23 @@ model RequirementTag {
 
 ```typescript
 // 需求CRUD操作
-GET    /api/projects/[projectId]/requirements        // 获取需求列表
-POST   /api/projects/[projectId]/requirements        // 创建需求
-GET    /api/projects/[projectId]/requirements/[id]   // 获取需求详情
-PATCH  /api/projects/[projectId]/requirements/[id]   // 更新需求
-DELETE /api/projects/[projectId]/requirements/[id]   // 删除需求
+GET / api / projects / [projectId] / requirements; // 获取需求列表
+POST / api / projects / [projectId] / requirements; // 创建需求
+GET / api / projects / [projectId] / requirements / [id]; // 获取需求详情
+PATCH / api / projects / [projectId] / requirements / [id]; // 更新需求
+DELETE / api / projects / [projectId] / requirements / [id]; // 删除需求
 
 // 需求版本管理
-GET    /api/requirements/[id]/versions               // 获取版本历史
-POST   /api/requirements/[id]/versions               // 创建新版本
+GET / api / requirements / [id] / versions; // 获取版本历史
+POST / api / requirements / [id] / versions; // 创建新版本
 
 // 需求与任务关联
-GET    /api/requirements/[id]/tasks                  // 获取关联任务
-POST   /api/requirements/[id]/tasks                  // 关联任务
-DELETE /api/requirements/[id]/tasks/[taskId]       // 取消关联
+GET / api / requirements / [id] / tasks; // 获取关联任务
+POST / api / requirements / [id] / tasks; // 关联任务
+DELETE / api / requirements / [id] / tasks / [taskId]; // 取消关联
 
 // 需求统计
-GET    /api/projects/[projectId]/requirements/stats // 获取需求统计
+GET / api / projects / [projectId] / requirements / stats; // 获取需求统计
 ```
 
 ## 📱 用户界面组件
@@ -311,16 +315,19 @@ interface RequirementTreeProps {
 ## 🎯 与现有功能的集成
 
 ### 1. 与项目管理集成
+
 - 需求作为项目的重要组成部分
 - 项目概览页面显示需求统计
 - 项目权限控制应用到需求管理
 
 ### 2. 与任务管理集成
+
 - 任务可以关联一个或多个需求
 - 从需求直接创建实现任务
 - 任务完成自动更新需求进度
 
 ### 3. 与迭代管理集成
+
 - 迭代规划时可以选择需求
 - 需求可以分配到不同迭代
 - 迭代燃尽图包含需求维度
@@ -328,11 +335,13 @@ interface RequirementTreeProps {
 ## 📊 报表和分析
 
 ### 1. 需求统计报表
+
 - **需求分布**：按类型、优先级、状态分布
 - **完成率分析**：需求完成趋势
 - **工作量分析**：预估vs实际工作量对比
 
 ### 2. 需求追溯报表
+
 - **需求覆盖率**：任务对需求的覆盖情况
 - **需求变更统计**：变更频率和原因分析
 - **需求价值分析**：业务价值实现情况
@@ -340,18 +349,21 @@ interface RequirementTreeProps {
 ## 🚀 实施计划
 
 ### 阶段1：基础功能（2-3周）
+
 1. 数据模型实现和迁移
 2. 基础CRUD API
 3. 需求列表和详情页面
 4. 基本的创建/编辑功能
 
 ### 阶段2：高级功能（2-3周）
+
 1. 需求看板视图
 2. 版本控制功能
 3. 需求与任务关联
 4. 评论和协作功能
 
 ### 阶段3：分析和优化（1-2周）
+
 1. 统计报表功能
 2. 需求追溯功能
 3. 性能优化

@@ -95,9 +95,11 @@ export function ProjectDocumentSummary({
 
       const data = await response.json();
       console.log('API返回的数据:', data);
-      
+
       if (data.success) {
-        setDocuments(Array.isArray(data.data.documents) ? data.data.documents : []);
+        setDocuments(
+          Array.isArray(data.data.documents) ? data.data.documents : []
+        );
       } else {
         throw new Error(data.message || '获取文档列表失败');
       }
@@ -136,7 +138,7 @@ export function ProjectDocumentSummary({
   if (documents.length === 0) {
     return (
       <div className='py-8 text-center'>
-        <FileTextIcon className='mx-auto mb-4 h-12 w-12 text-muted-foreground' />
+        <FileTextIcon className='text-muted-foreground mx-auto mb-4 h-12 w-12' />
         <p className='text-muted-foreground mb-4'>{t('empty.project')}</p>
         <Button asChild>
           <Link href={`/dashboard/projects/${projectId}/documents/new`}>
@@ -152,18 +154,28 @@ export function ProjectDocumentSummary({
       {/* 统计信息 */}
       <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
         <div className='rounded-lg border p-4'>
-          <div className='text-2xl font-bold'>{Array.isArray(documents) ? documents.length : 0}</div>
-          <p className='text-muted-foreground text-sm'>{t('overview.totalDocuments')}</p>
-        </div>
-        <div className='rounded-lg border p-4'>
           <div className='text-2xl font-bold'>
-            {Array.isArray(documents) ? documents.filter(doc => doc.status === 'PUBLISHED').length : 0}
+            {Array.isArray(documents) ? documents.length : 0}
           </div>
-          <p className='text-muted-foreground text-sm'>{t('status.published')}</p>
+          <p className='text-muted-foreground text-sm'>
+            {t('overview.totalDocuments')}
+          </p>
         </div>
         <div className='rounded-lg border p-4'>
           <div className='text-2xl font-bold'>
-            {Array.isArray(documents) ? documents.filter(doc => doc.status === 'DRAFT').length : 0}
+            {Array.isArray(documents)
+              ? documents.filter((doc) => doc.status === 'PUBLISHED').length
+              : 0}
+          </div>
+          <p className='text-muted-foreground text-sm'>
+            {t('status.published')}
+          </p>
+        </div>
+        <div className='rounded-lg border p-4'>
+          <div className='text-2xl font-bold'>
+            {Array.isArray(documents)
+              ? documents.filter((doc) => doc.status === 'DRAFT').length
+              : 0}
           </div>
           <p className='text-muted-foreground text-sm'>{t('status.draft')}</p>
         </div>
@@ -183,59 +195,58 @@ export function ProjectDocumentSummary({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {Array.isArray(documents) && documents.map((document) => {
-              const statusInfo = getDocumentStatusLabel(document.status);
-              return (
-                <TableRow key={document.id}>
-                  <TableCell>
-                    <div className='flex items-center space-x-2'>
-                      {document.parentId ? (
-                        <FolderIcon className='h-4 w-4 text-muted-foreground' />
-                      ) : (
-                        <FileTextIcon className='h-4 w-4 text-muted-foreground' />
-                      )}
-                      <span className='font-medium'>{document.title}</span>
-                      {document._count.children > 0 && (
-                        <span className='text-muted-foreground text-xs'>
-                          ({document._count.children})
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={statusInfo.variant}>
-                      {statusInfo.label}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <span className='text-muted-foreground text-sm'>
-                      {getDocumentFormatLabel(document.format)}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className='text-sm'>
-                      {document.author.name || 'Unknown'}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className='text-muted-foreground text-sm'>
-                      {format(new Date(document.createdAt), 'yyyy-MM-dd')}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant='ghost'
-                      size='sm'
-                      asChild
-                    >
-                      <Link href={`/dashboard/projects/${projectId}/documents/${document.id}`}>
-                        <EyeIcon className='h-4 w-4' />
-                      </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            {Array.isArray(documents) &&
+              documents.map((document) => {
+                const statusInfo = getDocumentStatusLabel(document.status);
+                return (
+                  <TableRow key={document.id}>
+                    <TableCell>
+                      <div className='flex items-center space-x-2'>
+                        {document.parentId ? (
+                          <FolderIcon className='text-muted-foreground h-4 w-4' />
+                        ) : (
+                          <FileTextIcon className='text-muted-foreground h-4 w-4' />
+                        )}
+                        <span className='font-medium'>{document.title}</span>
+                        {document._count.children > 0 && (
+                          <span className='text-muted-foreground text-xs'>
+                            ({document._count.children})
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={statusInfo.variant}>
+                        {statusInfo.label}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className='text-muted-foreground text-sm'>
+                        {getDocumentFormatLabel(document.format)}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className='text-sm'>
+                        {document.author.name || 'Unknown'}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className='text-muted-foreground text-sm'>
+                        {format(new Date(document.createdAt), 'yyyy-MM-dd')}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <Button variant='ghost' size='sm' asChild>
+                        <Link
+                          href={`/dashboard/projects/${projectId}/documents/${document.id}`}
+                        >
+                          <EyeIcon className='h-4 w-4' />
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
           </TableBody>
         </Table>
       </div>
@@ -243,7 +254,9 @@ export function ProjectDocumentSummary({
       {/* 查看更多 */}
       <div className='text-center'>
         <Button variant='outline' asChild>
-          <Link href={`/dashboard/documents?tab=project&projectId=${projectId}`}>
+          <Link
+            href={`/dashboard/documents?tab=project&projectId=${projectId}`}
+          >
             {t('actions.viewAll')}
           </Link>
         </Button>

@@ -51,9 +51,7 @@ export function EditProjectDialog({
       if (data.success) {
         setProject(data.data);
       } else {
-        throw new Error(
-          data.error?.message || tm('fetchError')
-        );
+        throw new Error(data.error?.message || tm('fetchError'));
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');

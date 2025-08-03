@@ -74,7 +74,7 @@ export async function cleanRequirementPermissions() {
 
   const permissionNames = [
     'requirement.view',
-    'requirement.create', 
+    'requirement.create',
     'requirement.update',
     'requirement.delete',
     'requirement.assign',

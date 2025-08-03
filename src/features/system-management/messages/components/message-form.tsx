@@ -26,9 +26,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import {
-  Badge
-} from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Command,
@@ -147,10 +145,10 @@ export function MessageForm({
       }
 
       toast.success('消息发送成功');
-      
+
       // 立即刷新消息通知
       refreshMessages();
-      
+
       router.refresh();
 
       if (onSuccess) {
@@ -158,9 +156,7 @@ export function MessageForm({
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      toast.error(
-        error instanceof Error ? error.message : '发送消息失败'
-      );
+      toast.error(error instanceof Error ? error.message : '发送消息失败');
     } finally {
       setIsLoading(false);
     }
@@ -214,8 +210,13 @@ export function MessageForm({
               name='recipientType'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className='text-base font-medium'>接收者类型</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormLabel className='text-base font-medium'>
+                    接收者类型
+                  </FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder='选择接收者类型' />
@@ -253,8 +254,13 @@ export function MessageForm({
                 name='roleIds'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='text-base font-medium'>选择角色</FormLabel>
-                    <Popover open={rolePopoverOpen} onOpenChange={setRolePopoverOpen}>
+                    <FormLabel className='text-base font-medium'>
+                      选择角色
+                    </FormLabel>
+                    <Popover
+                      open={rolePopoverOpen}
+                      onOpenChange={setRolePopoverOpen}
+                    >
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
@@ -282,8 +288,12 @@ export function MessageForm({
                                       key={role.id}
                                       onSelect={() => {
                                         const currentValue = field.value || [];
-                                        const newValue = currentValue.includes(role.id)
-                                          ? currentValue.filter((id) => id !== role.id)
+                                        const newValue = currentValue.includes(
+                                          role.id
+                                        )
+                                          ? currentValue.filter(
+                                              (id) => id !== role.id
+                                            )
                                           : [...currentValue, role.id];
                                         field.onChange(newValue);
                                       }}
@@ -293,7 +303,9 @@ export function MessageForm({
                                       </div>
                                       <Check
                                         className={`ml-auto h-4 w-4 ${
-                                          field.value?.includes(role.id) ? 'opacity-100' : 'opacity-0'
+                                          field.value?.includes(role.id)
+                                            ? 'opacity-100'
+                                            : 'opacity-0'
                                         }`}
                                       />
                                     </CommandItem>
@@ -347,8 +359,13 @@ export function MessageForm({
                 name='recipientIds'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='text-base font-medium'>选择用户</FormLabel>
-                    <Popover open={userPopoverOpen} onOpenChange={setUserPopoverOpen}>
+                    <FormLabel className='text-base font-medium'>
+                      选择用户
+                    </FormLabel>
+                    <Popover
+                      open={userPopoverOpen}
+                      onOpenChange={setUserPopoverOpen}
+                    >
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
@@ -376,19 +393,27 @@ export function MessageForm({
                                       key={user.id}
                                       onSelect={() => {
                                         const currentValue = field.value || [];
-                                        const newValue = currentValue.includes(user.id)
-                                          ? currentValue.filter((id) => id !== user.id)
+                                        const newValue = currentValue.includes(
+                                          user.id
+                                        )
+                                          ? currentValue.filter(
+                                              (id) => id !== user.id
+                                            )
                                           : [...currentValue, user.id];
                                         field.onChange(newValue);
                                       }}
                                     >
                                       <div className='flex items-center space-x-2'>
                                         <span>{user.name}</span>
-                                        <span className='text-muted-foreground text-sm'>({user.email})</span>
+                                        <span className='text-muted-foreground text-sm'>
+                                          ({user.email})
+                                        </span>
                                       </div>
                                       <Check
                                         className={`ml-auto h-4 w-4 ${
-                                          field.value?.includes(user.id) ? 'opacity-100' : 'opacity-0'
+                                          field.value?.includes(user.id)
+                                            ? 'opacity-100'
+                                            : 'opacity-0'
                                         }`}
                                       />
                                     </CommandItem>
@@ -443,7 +468,7 @@ export function MessageForm({
               control={form.control}
               name='includeSender'
               render={({ field }) => (
-                <FormItem className='flex flex-row items-start space-x-3 space-y-0'>
+                <FormItem className='flex flex-row items-start space-y-0 space-x-3'>
                   <FormControl>
                     <Checkbox
                       checked={field.value}

@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/get-current-user';
 import { prisma } from '@/lib/prisma';
-import { apiResponse, apiUnauthorized, apiValidationError } from '@/lib/api-response';
+import {
+  apiResponse,
+  apiUnauthorized,
+  apiValidationError
+} from '@/lib/api-response';
 import { z } from 'zod';
 
 const updateStatusSchema = z.object({
@@ -12,14 +16,14 @@ const updateStatusSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user) {
       return apiUnauthorized();
     }
 
     const body = await request.json();
     const validation = updateStatusSchema.safeParse(body);
-    
+
     if (!validation.success) {
       return apiValidationError(validation.error.errors);
     }
@@ -56,7 +60,7 @@ export async function POST(request: NextRequest) {
         }
       }
     });
-    
+
     return apiResponse({
       ...updatedUser,
       status: onlineStatus.isOnline ? 'online' : 'offline',
@@ -75,7 +79,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const user = await getCurrentUser();
-    
+
     if (!user) {
       return apiUnauthorized();
     }
@@ -92,7 +96,7 @@ export async function GET(request: NextRequest) {
         }
       }
     });
-    
+
     return apiResponse({
       id: userStatus?.id,
       status: userStatus?.onlineStatus?.isOnline ? 'online' : 'offline',

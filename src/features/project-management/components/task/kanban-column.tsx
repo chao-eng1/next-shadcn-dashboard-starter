@@ -63,7 +63,7 @@ export function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`flex min-h-[400px] max-h-[70vh] flex-col ${isOver ? `bg-${color}-50` : 'bg-gray-50 dark:bg-gray-900'} rounded-md border p-3`}
+      className={`flex max-h-[70vh] min-h-[400px] flex-col ${isOver ? `bg-${color}-50` : 'bg-gray-50 dark:bg-gray-900'} rounded-md border p-3`}
     >
       <div className='mb-3 flex items-center justify-between'>
         <div className='flex items-center gap-2'>

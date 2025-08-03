@@ -139,9 +139,9 @@ export async function GET(request: NextRequest) {
     // 统计关联信息
     const stats = {
       totalRequirements: requirements.length,
-      withParent: requirements.filter(r => r.parent).length,
-      withChildren: requirements.filter(r => r.children.length > 0).length,
-      withTasks: requirements.filter(r => r.tasks.length > 0).length
+      withParent: requirements.filter((r) => r.parent).length,
+      withChildren: requirements.filter((r) => r.children.length > 0).length,
+      withTasks: requirements.filter((r) => r.tasks.length > 0).length
     };
 
     return apiResponse({

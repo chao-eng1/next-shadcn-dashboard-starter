@@ -203,7 +203,13 @@ export interface RequirementFilters {
 
 // 需求排序选项
 export interface RequirementSortOptions {
-  field: 'title' | 'priority' | 'status' | 'createdAt' | 'updatedAt' | 'dueDate';
+  field:
+    | 'title'
+    | 'priority'
+    | 'status'
+    | 'createdAt'
+    | 'updatedAt'
+    | 'dueDate';
   direction: 'asc' | 'desc';
 }
 

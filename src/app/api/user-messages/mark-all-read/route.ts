@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return apiResponse({ 
+    return apiResponse({
       message: '所有消息已标记为已读',
       updatedCount: result.count
     });

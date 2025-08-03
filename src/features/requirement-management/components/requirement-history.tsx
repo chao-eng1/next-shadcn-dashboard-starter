@@ -1,7 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -11,7 +17,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select';
 import {
   Dialog,
@@ -19,7 +25,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from '@/components/ui/dialog';
 import {
   History,
@@ -43,13 +49,22 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { zhCN } from 'date-fns/locale/zh-CN';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 interface HistoryEntry {
   id: string;
-  action: 'CREATE' | 'UPDATE' | 'STATUS_CHANGE' | 'ASSIGN' | 'COMMENT' | 'RELATION_ADD' | 'RELATION_REMOVE' | 'ARCHIVE' | 'RESTORE';
+  action:
+    | 'CREATE'
+    | 'UPDATE'
+    | 'STATUS_CHANGE'
+    | 'ASSIGN'
+    | 'COMMENT'
+    | 'RELATION_ADD'
+    | 'RELATION_REMOVE'
+    | 'ARCHIVE'
+    | 'RESTORE';
   field?: string;
   oldValue?: any;
   newValue?: any;
@@ -73,57 +88,57 @@ interface RequirementHistoryProps {
 }
 
 const actionConfig = {
-  CREATE: { 
-    label: '创建', 
-    color: 'bg-green-100 text-green-800', 
+  CREATE: {
+    label: '创建',
+    color: 'bg-green-100 text-green-800',
     icon: Plus,
     description: '创建了需求'
   },
-  UPDATE: { 
-    label: '更新', 
-    color: 'bg-blue-100 text-blue-800', 
+  UPDATE: {
+    label: '更新',
+    color: 'bg-blue-100 text-blue-800',
     icon: Edit,
     description: '更新了需求信息'
   },
-  STATUS_CHANGE: { 
-    label: '状态变更', 
-    color: 'bg-purple-100 text-purple-800', 
+  STATUS_CHANGE: {
+    label: '状态变更',
+    color: 'bg-purple-100 text-purple-800',
     icon: GitBranch,
     description: '变更了需求状态'
   },
-  ASSIGN: { 
-    label: '分配', 
-    color: 'bg-orange-100 text-orange-800', 
+  ASSIGN: {
+    label: '分配',
+    color: 'bg-orange-100 text-orange-800',
     icon: UserCheck,
     description: '分配了负责人'
   },
-  COMMENT: { 
-    label: '评论', 
-    color: 'bg-gray-100 text-gray-800', 
+  COMMENT: {
+    label: '评论',
+    color: 'bg-gray-100 text-gray-800',
     icon: FileText,
     description: '添加了评论'
   },
-  RELATION_ADD: { 
-    label: '添加关联', 
-    color: 'bg-cyan-100 text-cyan-800', 
+  RELATION_ADD: {
+    label: '添加关联',
+    color: 'bg-cyan-100 text-cyan-800',
     icon: Plus,
     description: '添加了关联关系'
   },
-  RELATION_REMOVE: { 
-    label: '移除关联', 
-    color: 'bg-red-100 text-red-800', 
+  RELATION_REMOVE: {
+    label: '移除关联',
+    color: 'bg-red-100 text-red-800',
     icon: Minus,
     description: '移除了关联关系'
   },
-  ARCHIVE: { 
-    label: '归档', 
-    color: 'bg-yellow-100 text-yellow-800', 
+  ARCHIVE: {
+    label: '归档',
+    color: 'bg-yellow-100 text-yellow-800',
     icon: AlertCircle,
     description: '归档了需求'
   },
-  RESTORE: { 
-    label: '恢复', 
-    color: 'bg-green-100 text-green-800', 
+  RESTORE: {
+    label: '恢复',
+    color: 'bg-green-100 text-green-800',
     icon: RotateCcw,
     description: '恢复了需求'
   }
@@ -184,11 +199,13 @@ export function RequirementHistory({ requirementId }: RequirementHistoryProps) {
   const fetchHistory = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/requirements/${requirementId}/history`);
+      const response = await fetch(
+        `/api/requirements/${requirementId}/history`
+      );
       if (!response.ok) {
         throw new Error('获取变更历史失败');
       }
-      
+
       const data = await response.json();
       setHistory(data.data);
     } catch (error) {
@@ -203,13 +220,18 @@ export function RequirementHistory({ requirementId }: RequirementHistoryProps) {
     }
   };
 
-  const filteredHistory = history.filter(entry => {
+  const filteredHistory = history.filter((entry) => {
     // 搜索过滤
-    if (searchQuery && !(
-      entry.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      entry.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      actionConfig[entry.action].label.toLowerCase().includes(searchQuery.toLowerCase())
-    )) {
+    if (
+      searchQuery &&
+      !(
+        entry.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        entry.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        actionConfig[entry.action].label
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+      )
+    ) {
       return false;
     }
 
@@ -227,8 +249,10 @@ export function RequirementHistory({ requirementId }: RequirementHistoryProps) {
     if (dateFilter !== 'ALL') {
       const entryDate = new Date(entry.createdAt);
       const now = new Date();
-      const daysDiff = Math.floor((now.getTime() - entryDate.getTime()) / (1000 * 60 * 60 * 24));
-      
+      const daysDiff = Math.floor(
+        (now.getTime() - entryDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
       switch (dateFilter) {
         case 'TODAY':
           if (daysDiff > 0) return false;
@@ -256,7 +280,9 @@ export function RequirementHistory({ requirementId }: RequirementHistoryProps) {
       case 'priority':
         return priorityLabels[value as keyof typeof priorityLabels] || value;
       case 'dueDate':
-        return value ? format(new Date(value), 'yyyy年MM月dd日', { locale: zhCN }) : '无';
+        return value
+          ? format(new Date(value), 'yyyy年MM月dd日', { locale: zhCN })
+          : '无';
       case 'businessValue':
       case 'estimatedEffort':
       case 'actualEffort':
@@ -270,13 +296,14 @@ export function RequirementHistory({ requirementId }: RequirementHistoryProps) {
 
   const getChangeDescription = (entry: HistoryEntry) => {
     const config = actionConfig[entry.action];
-    
+
     if (entry.description) {
       return entry.description;
     }
 
     if (entry.action === 'UPDATE' && entry.field) {
-      const fieldLabel = fieldLabels[entry.field as keyof typeof fieldLabels] || entry.field;
+      const fieldLabel =
+        fieldLabels[entry.field as keyof typeof fieldLabels] || entry.field;
       const oldValue = formatValue(entry.field, entry.oldValue);
       const newValue = formatValue(entry.field, entry.newValue);
       return `将 ${fieldLabel} 从 "${oldValue}" 更改为 "${newValue}"`;
@@ -291,19 +318,19 @@ export function RequirementHistory({ requirementId }: RequirementHistoryProps) {
     return config.description;
   };
 
-  const uniqueUsers = Array.from(new Set(history.map(entry => entry.user.id)))
-    .map(userId => history.find(entry => entry.user.id === userId)?.user)
+  const uniqueUsers = Array.from(new Set(history.map((entry) => entry.user.id)))
+    .map((userId) => history.find((entry) => entry.user.id === userId)?.user)
     .filter(Boolean);
 
   if (loading) {
     return (
-      <div className="space-y-4">
+      <div className='space-y-4'>
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="flex space-x-3">
-            <div className="h-8 w-8 bg-gray-200 rounded-full animate-pulse" />
-            <div className="flex-1 space-y-2">
-              <div className="h-4 bg-gray-200 rounded animate-pulse" />
-              <div className="h-3 bg-gray-200 rounded animate-pulse w-2/3" />
+          <div key={i} className='flex space-x-3'>
+            <div className='h-8 w-8 animate-pulse rounded-full bg-gray-200' />
+            <div className='flex-1 space-y-2'>
+              <div className='h-4 animate-pulse rounded bg-gray-200' />
+              <div className='h-3 w-2/3 animate-pulse rounded bg-gray-200' />
             </div>
           </div>
         ))}
@@ -312,37 +339,37 @@ export function RequirementHistory({ requirementId }: RequirementHistoryProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       {/* 过滤器 */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <Filter className="h-5 w-5 mr-2" />
+          <CardTitle className='flex items-center'>
+            <Filter className='mr-2 h-5 w-5' />
             筛选条件
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">搜索</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
+            <div className='space-y-2'>
+              <label className='text-sm font-medium'>搜索</label>
+              <div className='relative'>
+                <Search className='text-muted-foreground absolute top-3 left-3 h-4 w-4' />
                 <Input
-                  placeholder="搜索变更记录..."
+                  placeholder='搜索变更记录...'
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
+                  className='pl-10'
                 />
               </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">操作类型</label>
+            <div className='space-y-2'>
+              <label className='text-sm font-medium'>操作类型</label>
               <Select value={actionFilter} onValueChange={setActionFilter}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ALL">全部操作</SelectItem>
+                  <SelectItem value='ALL'>全部操作</SelectItem>
                   {Object.entries(actionConfig).map(([action, config]) => (
                     <SelectItem key={action} value={action}>
                       {config.label}
@@ -351,14 +378,14 @@ export function RequirementHistory({ requirementId }: RequirementHistoryProps) {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">操作人</label>
+            <div className='space-y-2'>
+              <label className='text-sm font-medium'>操作人</label>
               <Select value={userFilter} onValueChange={setUserFilter}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ALL">全部用户</SelectItem>
+                  <SelectItem value='ALL'>全部用户</SelectItem>
                   {uniqueUsers.map((user) => (
                     <SelectItem key={user!.id} value={user!.id}>
                       {user!.name}
@@ -367,17 +394,17 @@ export function RequirementHistory({ requirementId }: RequirementHistoryProps) {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">时间范围</label>
+            <div className='space-y-2'>
+              <label className='text-sm font-medium'>时间范围</label>
               <Select value={dateFilter} onValueChange={setDateFilter}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ALL">全部时间</SelectItem>
-                  <SelectItem value="TODAY">今天</SelectItem>
-                  <SelectItem value="WEEK">最近一周</SelectItem>
-                  <SelectItem value="MONTH">最近一月</SelectItem>
+                  <SelectItem value='ALL'>全部时间</SelectItem>
+                  <SelectItem value='TODAY'>今天</SelectItem>
+                  <SelectItem value='WEEK'>最近一周</SelectItem>
+                  <SelectItem value='MONTH'>最近一月</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -388,8 +415,8 @@ export function RequirementHistory({ requirementId }: RequirementHistoryProps) {
       {/* 变更历史 */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <History className="h-5 w-5 mr-2" />
+          <CardTitle className='flex items-center'>
+            <History className='mr-2 h-5 w-5' />
             变更历史
           </CardTitle>
           <CardDescription>
@@ -398,47 +425,51 @@ export function RequirementHistory({ requirementId }: RequirementHistoryProps) {
         </CardHeader>
         <CardContent>
           {filteredHistory.length === 0 ? (
-            <div className="text-center py-12">
-              <History className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">暂无变更记录</h3>
-              <p className="text-muted-foreground">
-                {searchQuery || actionFilter !== 'ALL' || userFilter !== 'ALL' || dateFilter !== 'ALL'
+            <div className='py-12 text-center'>
+              <History className='text-muted-foreground mx-auto mb-4 h-12 w-12' />
+              <h3 className='mb-2 text-lg font-medium'>暂无变更记录</h3>
+              <p className='text-muted-foreground'>
+                {searchQuery ||
+                actionFilter !== 'ALL' ||
+                userFilter !== 'ALL' ||
+                dateFilter !== 'ALL'
                   ? '没有符合筛选条件的变更记录'
-                  : '还没有任何变更记录'
-                }
+                  : '还没有任何变更记录'}
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className='space-y-4'>
               {filteredHistory.map((entry, index) => {
                 const config = actionConfig[entry.action];
                 const Icon = config.icon;
                 const isLast = index === filteredHistory.length - 1;
 
                 return (
-                  <div key={entry.id} className="relative">
+                  <div key={entry.id} className='relative'>
                     {/* 时间线 */}
                     {!isLast && (
-                      <div className="absolute left-4 top-12 bottom-0 w-px bg-gray-200" />
+                      <div className='absolute top-12 bottom-0 left-4 w-px bg-gray-200' />
                     )}
-                    
-                    <div className="flex items-start space-x-4">
+
+                    <div className='flex items-start space-x-4'>
                       {/* 图标 */}
-                      <div className={cn(
-                        "flex items-center justify-center w-8 h-8 rounded-full border-2 border-white shadow-sm",
-                        config.color
-                      )}>
-                        <Icon className="h-4 w-4" />
+                      <div
+                        className={cn(
+                          'flex h-8 w-8 items-center justify-center rounded-full border-2 border-white shadow-sm',
+                          config.color
+                        )}
+                      >
+                        <Icon className='h-4 w-4' />
                       </div>
-                      
+
                       {/* 内容 */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
+                      <div className='min-w-0 flex-1'>
+                        <div className='flex items-center justify-between'>
+                          <div className='flex items-center space-x-2'>
                             <Badge className={config.color}>
                               {config.label}
                             </Badge>
-                            <span className="text-sm text-muted-foreground">
+                            <span className='text-muted-foreground text-sm'>
                               {formatDistanceToNow(new Date(entry.createdAt), {
                                 addSuffix: true,
                                 locale: zhCN
@@ -446,27 +477,29 @@ export function RequirementHistory({ requirementId }: RequirementHistoryProps) {
                             </span>
                           </div>
                           <Button
-                            variant="ghost"
-                            size="sm"
+                            variant='ghost'
+                            size='sm'
                             onClick={() => {
                               setSelectedEntry(entry);
                               setShowDetails(true);
                             }}
                           >
-                            <Eye className="h-4 w-4" />
+                            <Eye className='h-4 w-4' />
                           </Button>
                         </div>
-                        
-                        <div className="mt-1">
-                          <div className="flex items-center space-x-2">
-                            <Avatar className="h-6 w-6">
+
+                        <div className='mt-1'>
+                          <div className='flex items-center space-x-2'>
+                            <Avatar className='h-6 w-6'>
                               <AvatarImage src={entry.user.avatar} />
-                              <AvatarFallback className="text-xs">
+                              <AvatarFallback className='text-xs'>
                                 {entry.user.name.slice(0, 2)}
                               </AvatarFallback>
                             </Avatar>
-                            <span className="font-medium text-sm">{entry.user.name}</span>
-                            <span className="text-sm text-muted-foreground">
+                            <span className='text-sm font-medium'>
+                              {entry.user.name}
+                            </span>
+                            <span className='text-muted-foreground text-sm'>
                               {getChangeDescription(entry)}
                             </span>
                           </div>
@@ -474,16 +507,19 @@ export function RequirementHistory({ requirementId }: RequirementHistoryProps) {
 
                         {/* 字段变更详情 */}
                         {entry.action === 'UPDATE' && entry.field && (
-                          <div className="mt-2 p-3 bg-gray-50 rounded-lg">
-                            <div className="flex items-center space-x-2 text-sm">
-                              <span className="font-medium">
-                                {fieldLabels[entry.field as keyof typeof fieldLabels] || entry.field}:
+                          <div className='mt-2 rounded-lg bg-gray-50 p-3'>
+                            <div className='flex items-center space-x-2 text-sm'>
+                              <span className='font-medium'>
+                                {fieldLabels[
+                                  entry.field as keyof typeof fieldLabels
+                                ] || entry.field}
+                                :
                               </span>
-                              <span className="text-red-600 line-through">
+                              <span className='text-red-600 line-through'>
                                 {formatValue(entry.field, entry.oldValue)}
                               </span>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-green-600 font-medium">
+                              <ArrowRight className='text-muted-foreground h-3 w-3' />
+                              <span className='font-medium text-green-600'>
                                 {formatValue(entry.field, entry.newValue)}
                               </span>
                             </div>
@@ -501,66 +537,82 @@ export function RequirementHistory({ requirementId }: RequirementHistoryProps) {
 
       {/* 详情对话框 */}
       <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className='max-w-2xl'>
           <DialogHeader>
             <DialogTitle>变更详情</DialogTitle>
-            <DialogDescription>
-              查看变更记录的详细信息
-            </DialogDescription>
+            <DialogDescription>查看变更记录的详细信息</DialogDescription>
           </DialogHeader>
           {selectedEntry && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <div className='space-y-4'>
+              <div className='grid grid-cols-2 gap-4'>
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">操作类型</label>
-                  <div className="mt-1">
+                  <label className='text-muted-foreground text-sm font-medium'>
+                    操作类型
+                  </label>
+                  <div className='mt-1'>
                     <Badge className={actionConfig[selectedEntry.action].color}>
                       {actionConfig[selectedEntry.action].label}
                     </Badge>
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">操作时间</label>
-                  <div className="mt-1 text-sm">
-                    {format(new Date(selectedEntry.createdAt), 'yyyy年MM月dd日 HH:mm:ss', { locale: zhCN })}
+                  <label className='text-muted-foreground text-sm font-medium'>
+                    操作时间
+                  </label>
+                  <div className='mt-1 text-sm'>
+                    {format(
+                      new Date(selectedEntry.createdAt),
+                      'yyyy年MM月dd日 HH:mm:ss',
+                      { locale: zhCN }
+                    )}
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="text-sm font-medium text-muted-foreground">操作人</label>
-                <div className="mt-1 flex items-center space-x-2">
-                  <Avatar className="h-8 w-8">
+                <label className='text-muted-foreground text-sm font-medium'>
+                  操作人
+                </label>
+                <div className='mt-1 flex items-center space-x-2'>
+                  <Avatar className='h-8 w-8'>
                     <AvatarImage src={selectedEntry.user.avatar} />
                     <AvatarFallback>
                       {selectedEntry.user.name.slice(0, 2)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="font-medium">{selectedEntry.user.name}</div>
-                    <div className="text-sm text-muted-foreground">{selectedEntry.user.email}</div>
+                    <div className='font-medium'>{selectedEntry.user.name}</div>
+                    <div className='text-muted-foreground text-sm'>
+                      {selectedEntry.user.email}
+                    </div>
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="text-sm font-medium text-muted-foreground">变更描述</label>
-                <div className="mt-1 text-sm">
+                <label className='text-muted-foreground text-sm font-medium'>
+                  变更描述
+                </label>
+                <div className='mt-1 text-sm'>
                   {getChangeDescription(selectedEntry)}
                 </div>
               </div>
 
               {selectedEntry.field && (
-                <div className="grid grid-cols-2 gap-4">
+                <div className='grid grid-cols-2 gap-4'>
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">原值</label>
-                    <div className="mt-1 p-2 bg-red-50 border border-red-200 rounded text-sm">
+                    <label className='text-muted-foreground text-sm font-medium'>
+                      原值
+                    </label>
+                    <div className='mt-1 rounded border border-red-200 bg-red-50 p-2 text-sm'>
                       {formatValue(selectedEntry.field, selectedEntry.oldValue)}
                     </div>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">新值</label>
-                    <div className="mt-1 p-2 bg-green-50 border border-green-200 rounded text-sm">
+                    <label className='text-muted-foreground text-sm font-medium'>
+                      新值
+                    </label>
+                    <div className='mt-1 rounded border border-green-200 bg-green-50 p-2 text-sm'>
                       {formatValue(selectedEntry.field, selectedEntry.newValue)}
                     </div>
                   </div>
@@ -569,8 +621,10 @@ export function RequirementHistory({ requirementId }: RequirementHistoryProps) {
 
               {selectedEntry.metadata && (
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">技术信息</label>
-                  <div className="mt-1 space-y-1 text-sm text-muted-foreground">
+                  <label className='text-muted-foreground text-sm font-medium'>
+                    技术信息
+                  </label>
+                  <div className='text-muted-foreground mt-1 space-y-1 text-sm'>
                     {selectedEntry.metadata.ip && (
                       <div>IP 地址: {selectedEntry.metadata.ip}</div>
                     )}
@@ -578,7 +632,10 @@ export function RequirementHistory({ requirementId }: RequirementHistoryProps) {
                       <div>操作来源: {selectedEntry.metadata.source}</div>
                     )}
                     {selectedEntry.metadata.userAgent && (
-                      <div className="truncate" title={selectedEntry.metadata.userAgent}>
+                      <div
+                        className='truncate'
+                        title={selectedEntry.metadata.userAgent}
+                      >
                         用户代理: {selectedEntry.metadata.userAgent}
                       </div>
                     )}

@@ -276,7 +276,7 @@ async function main() {
 
   // 创建测试项目
   let testProject = await prisma.project.findFirst({
-    where: { 
+    where: {
       name: 'Test Project',
       ownerId: adminUser.id
     }
@@ -303,19 +303,22 @@ async function main() {
   const testDocuments = [
     {
       title: 'Project Requirements',
-      content: '# Project Requirements\n\nThis document outlines the requirements for the test project.',
+      content:
+        '# Project Requirements\n\nThis document outlines the requirements for the test project.',
       format: 'MARKDOWN' as const,
       status: 'PUBLISHED' as const
     },
     {
       title: 'API Documentation',
-      content: '# API Documentation\n\n## Overview\n\nThis is the API documentation.',
+      content:
+        '# API Documentation\n\n## Overview\n\nThis is the API documentation.',
       format: 'MARKDOWN' as const,
       status: 'DRAFT' as const
     },
     {
       title: 'Meeting Notes',
-      content: '# Meeting Notes\n\n## Date: 2024-01-15\n\nAttendees: Team members\n\nTopics discussed...',
+      content:
+        '# Meeting Notes\n\n## Date: 2024-01-15\n\nAttendees: Team members\n\nTopics discussed...',
       format: 'MARKDOWN' as const,
       status: 'PUBLISHED' as const
     }
@@ -323,7 +326,7 @@ async function main() {
 
   for (const docData of testDocuments) {
     const existingDoc = await prisma.document.findFirst({
-      where: { 
+      where: {
         title: docData.title,
         projectId: testProject.id
       }

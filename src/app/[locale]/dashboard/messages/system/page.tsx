@@ -5,7 +5,7 @@ import { SystemMessages } from '@/components/messages/system-messages';
 
 export default function SystemMessagesPage() {
   return (
-    <div className="h-full">
+    <div className='h-full'>
       <SystemMessages />
     </div>
   );

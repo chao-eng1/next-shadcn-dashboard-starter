@@ -13,7 +13,7 @@ const FETCH_COOLDOWN = 5000; // 5秒冷却时间
 const notifySubscribers = (count: number, loading: boolean) => {
   globalUnreadCount = count;
   globalLoading = loading;
-  subscribers.forEach(callback => callback(count, loading));
+  subscribers.forEach((callback) => callback(count, loading));
 };
 
 const fetchUnreadCountGlobal = async (userId: string) => {
@@ -21,10 +21,10 @@ const fetchUnreadCountGlobal = async (userId: string) => {
   if (now - lastFetchTime < FETCH_COOLDOWN) {
     return; // 在冷却时间内，不重复请求
   }
-  
+
   lastFetchTime = now;
   notifySubscribers(globalUnreadCount, true);
-  
+
   try {
     const response = await fetch('/api/user-messages/unread-count');
     if (response.ok) {
@@ -51,7 +51,7 @@ export function useUnreadMessages() {
     };
     subscriberRef.current = callback;
     subscribers.add(callback);
-    
+
     return () => {
       if (subscriberRef.current) {
         subscribers.delete(subscriberRef.current);

@@ -51,24 +51,24 @@ export function useRecentMessages(limit: number = 5): UseRecentMessagesReturn {
     try {
       setLoading(true);
       setError(null);
-      
+
       // 并行获取最近消息和未读数量
       const [messagesResponse, unreadResponse] = await Promise.all([
         fetch(`/api/user-messages/recent?limit=${limit}`),
         fetch('/api/message-center/unread-count')
       ]);
-      
+
       if (!messagesResponse.ok) {
         throw new Error('获取最近消息失败');
       }
-      
+
       if (!unreadResponse.ok) {
         throw new Error('获取未读数量失败');
       }
-      
+
       const messagesData = await messagesResponse.json();
       const unreadData = await unreadResponse.json();
-      
+
       setMessages(messagesData.data.messages || []);
       setUnreadCount(unreadData.data || null);
     } catch (err) {

@@ -3,13 +3,19 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Calendar, Target, ExternalLink } from 'lucide-react';
 import { getApiUrl } from '@/lib/utils';
 import { formatDistanceToNow, differenceInDays } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { zhCN } from 'date-fns/locale/zh-CN';
 
 interface SprintOverview {
   id: string;
@@ -74,7 +80,9 @@ export function SprintOverview() {
 
         const projectsResult = await projectsResponse.json();
         if (!projectsResult.success) {
-          throw new Error(projectsResult.error?.message || 'Failed to fetch projects');
+          throw new Error(
+            projectsResult.error?.message || 'Failed to fetch projects'
+          );
         }
 
         const projects = projectsResult.data.projects || [];
@@ -85,7 +93,9 @@ export function SprintOverview() {
           projects.map(async (project: any) => {
             try {
               const sprintsResponse = await fetch(
-                getApiUrl(`/api/projects/${project.id}/sprints?limit=10&sortBy=updatedAt&sortOrder=desc`),
+                getApiUrl(
+                  `/api/projects/${project.id}/sprints?limit=10&sortBy=updatedAt&sortOrder=desc`
+                ),
                 {
                   method: 'GET',
                   headers: {
@@ -111,14 +121,20 @@ export function SprintOverview() {
                 }
               }
             } catch (err) {
-              console.error(`Error fetching sprints for project ${project.id}:`, err);
+              console.error(
+                `Error fetching sprints for project ${project.id}:`,
+                err
+              );
             }
           })
         );
 
         // 按更新时间排序，取最近的10个
         const sortedSprints = allSprints
-          .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+          .sort(
+            (a, b) =>
+              new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+          )
           .slice(0, 10);
 
         setSprints(sortedSprints);
@@ -135,7 +151,9 @@ export function SprintOverview() {
 
   const calculateProgress = (tasks: Array<{ status: string }>) => {
     if (!tasks || tasks.length === 0) return 0;
-    const completedTasks = tasks.filter(task => task.status === 'DONE').length;
+    const completedTasks = tasks.filter(
+      (task) => task.status === 'DONE'
+    ).length;
     return Math.round((completedTasks / tasks.length) * 100);
   };
 
@@ -143,7 +161,7 @@ export function SprintOverview() {
     const end = new Date(endDate);
     const now = new Date();
     const days = differenceInDays(end, now);
-    
+
     if (days < 0) {
       return { text: `已逾期 ${Math.abs(days)} 天`, isOverdue: true };
     } else if (days === 0) {
@@ -162,7 +180,7 @@ export function SprintOverview() {
         </CardHeader>
         <CardContent>
           <div className='flex h-[400px] items-center justify-center'>
-            <Loader2 className='h-8 w-8 animate-spin text-primary' />
+            <Loader2 className='text-primary h-8 w-8 animate-spin' />
           </div>
         </CardContent>
       </Card>
@@ -178,7 +196,7 @@ export function SprintOverview() {
         </CardHeader>
         <CardContent>
           <div className='flex h-[400px] items-center justify-center'>
-            <div className='text-center text-muted-foreground'>
+            <div className='text-muted-foreground text-center'>
               <p>{error}</p>
             </div>
           </div>
@@ -196,7 +214,7 @@ export function SprintOverview() {
         </CardHeader>
         <CardContent>
           <div className='flex h-[400px] items-center justify-center'>
-            <div className='text-center text-muted-foreground'>
+            <div className='text-muted-foreground text-center'>
               <p>暂无冲刺数据</p>
             </div>
           </div>
@@ -218,7 +236,7 @@ export function SprintOverview() {
           {sprints.map((sprint) => {
             const progress = calculateProgress(sprint.tasks);
             const remainingDays = getRemainingDays(sprint.endDate);
-            
+
             return (
               <div key={sprint.id} className='space-y-3'>
                 <div className='flex items-start justify-between'>
@@ -232,9 +250,17 @@ export function SprintOverview() {
                       </Link>
                       <Badge
                         variant='secondary'
-                        className={STATUS_COLORS[sprint.status as keyof typeof STATUS_COLORS]}
+                        className={
+                          STATUS_COLORS[
+                            sprint.status as keyof typeof STATUS_COLORS
+                          ]
+                        }
                       >
-                        {STATUS_LABELS[sprint.status as keyof typeof STATUS_LABELS]}
+                        {
+                          STATUS_LABELS[
+                            sprint.status as keyof typeof STATUS_LABELS
+                          ]
+                        }
                       </Badge>
                       <Link
                         href={`/dashboard/projects/${sprint.project.id}/sprints/${sprint.id}`}
@@ -243,8 +269,8 @@ export function SprintOverview() {
                         <ExternalLink className='h-3 w-3' />
                       </Link>
                     </div>
-                    
-                    <div className='text-sm text-muted-foreground'>
+
+                    <div className='text-muted-foreground text-sm'>
                       <Link
                         href={`/dashboard/projects/${sprint.project.id}`}
                         className='hover:text-foreground hover:underline'
@@ -252,36 +278,45 @@ export function SprintOverview() {
                         {sprint.project.name}
                       </Link>
                     </div>
-                    
+
                     {sprint.goal && (
-                      <div className='flex items-start gap-2 text-sm text-muted-foreground'>
-                        <Target className='h-4 w-4 mt-0.5 flex-shrink-0' />
+                      <div className='text-muted-foreground flex items-start gap-2 text-sm'>
+                        <Target className='mt-0.5 h-4 w-4 flex-shrink-0' />
                         <span className='line-clamp-2'>{sprint.goal}</span>
                       </div>
                     )}
                   </div>
-                  
-                  <div className='text-right space-y-1'>
+
+                  <div className='space-y-1 text-right'>
                     <div className='text-sm font-medium'>{progress}%</div>
-                    <div className={`text-xs ${
-                      remainingDays.isOverdue ? 'text-red-600' : 'text-muted-foreground'
-                    }`}>
+                    <div
+                      className={`text-xs ${
+                        remainingDays.isOverdue
+                          ? 'text-red-600'
+                          : 'text-muted-foreground'
+                      }`}
+                    >
                       {remainingDays.text}
                     </div>
                   </div>
                 </div>
-                
+
                 <Progress value={progress} className='h-2' />
-                
-                <div className='flex items-center justify-between text-xs text-muted-foreground'>
+
+                <div className='text-muted-foreground flex items-center justify-between text-xs'>
                   <div className='flex items-center gap-4'>
                     <span>
-                      {(sprint.tasks || []).filter(t => t.status === 'DONE').length}/{(sprint.tasks || []).length} 任务完成
+                      {
+                        (sprint.tasks || []).filter((t) => t.status === 'DONE')
+                          .length
+                      }
+                      /{(sprint.tasks || []).length} 任务完成
                     </span>
                     <div className='flex items-center gap-1'>
                       <Calendar className='h-3 w-3' />
                       <span>
-                        {new Date(sprint.startDate).toLocaleDateString('zh-CN')} - {new Date(sprint.endDate).toLocaleDateString('zh-CN')}
+                        {new Date(sprint.startDate).toLocaleDateString('zh-CN')}{' '}
+                        - {new Date(sprint.endDate).toLocaleDateString('zh-CN')}
                       </span>
                     </div>
                   </div>
@@ -290,11 +325,11 @@ export function SprintOverview() {
             );
           })}
         </div>
-        
+
         <div className='mt-6 text-center'>
           <Link
             href='/dashboard/sprints'
-            className='text-sm text-primary hover:underline'
+            className='text-primary text-sm hover:underline'
           >
             查看所有冲刺 →
           </Link>

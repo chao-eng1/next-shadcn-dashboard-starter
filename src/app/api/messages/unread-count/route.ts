@@ -7,10 +7,7 @@ export async function GET(request: NextRequest) {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // 获取用户的未读消息数量

@@ -10,9 +10,7 @@ import {
   apiValidationError
 } from '@/lib/api-response';
 import { isProjectMember } from '@/features/project-management/utils/project-auth';
-import {
-  updateRequirementSchema
-} from '@/features/requirement-management/schemas/requirement-schema';
+import { updateRequirementSchema } from '@/features/requirement-management/schemas/requirement-schema';
 import {
   canViewRequirements,
   canEditRequirement,
@@ -35,7 +33,7 @@ export async function GET(
     // 检查用户是否有查看需求的权限
     const hasViewPermission = await canViewRequirements(projectId, user.id);
     if (!hasViewPermission) {
-      return apiForbidden("您没有权限查看此项目的需求");
+      return apiForbidden('您没有权限查看此项目的需求');
     }
 
     // 查询需求详情
@@ -218,7 +216,7 @@ export async function PATCH(
     // 检查用户是否为项目成员
     const isMember = await isProjectMember(projectId, user.id);
     if (!isMember) {
-      return apiForbidden("您没有访问此项目的权限");
+      return apiForbidden('您没有访问此项目的权限');
     }
 
     // 查询现有需求
@@ -236,18 +234,18 @@ export async function PATCH(
     // 检查用户是否有编辑需求的权限
     const hasEditPermission = await canEditRequirement(requirementId, user.id);
     if (!hasEditPermission) {
-      return apiForbidden("您没有权限编辑此需求");
+      return apiForbidden('您没有权限编辑此需求');
     }
 
     // 解析请求体
     const body = await request.json();
-    
+
     // 验证请求数据
     const validationResult = updateRequirementSchema.safeParse(body);
     if (!validationResult.success) {
       return apiValidationError(validationResult.error.errors);
     }
-    
+
     const data = validationResult.data;
 
     // 如果指定了父需求，验证父需求是否存在且属于同一项目
@@ -255,11 +253,13 @@ export async function PATCH(
       const parentRequirement = await prisma.requirement.findUnique({
         where: { id: data.parentId }
       });
-      
+
       if (!parentRequirement || parentRequirement.projectId !== projectId) {
-        return apiValidationError([{ message: '指定的父需求不存在或不属于当前项目' }]);
+        return apiValidationError([
+          { message: '指定的父需求不存在或不属于当前项目' }
+        ]);
       }
-      
+
       // 防止循环引用
       if (data.parentId === requirementId) {
         return apiValidationError([{ message: '需求不能设置自己为父需求' }]);
@@ -268,24 +268,33 @@ export async function PATCH(
 
     // 如果指定了分配人，验证分配人是否为项目成员
     if (data.assignedToId) {
-      const isAssigneeMember = await isProjectMember(projectId, data.assignedToId);
+      const isAssigneeMember = await isProjectMember(
+        projectId,
+        data.assignedToId
+      );
       if (!isAssigneeMember) {
         return apiValidationError([{ message: '指定的分配人不是项目成员' }]);
       }
     }
 
     // 检查是否有重要字段变更，如果有则创建新版本
-    const importantFields = ['title', 'description', 'acceptanceCriteria', 'businessValue'];
-    const hasImportantChanges = importantFields.some(field => 
-      data[field as keyof typeof data] !== undefined && 
-      data[field as keyof typeof data] !== (existingRequirement as any)[field]
+    const importantFields = [
+      'title',
+      'description',
+      'acceptanceCriteria',
+      'businessValue'
+    ];
+    const hasImportantChanges = importantFields.some(
+      (field) =>
+        data[field as keyof typeof data] !== undefined &&
+        data[field as keyof typeof data] !== (existingRequirement as any)[field]
     );
 
     let newVersionNumber = existingRequirement.currentVersion;
-    
+
     if (hasImportantChanges) {
       newVersionNumber = existingRequirement.currentVersion + 1;
-      
+
       // 创建新版本记录
       await prisma.requirementVersion.create({
         data: {
@@ -293,8 +302,10 @@ export async function PATCH(
           versionNumber: newVersionNumber,
           title: data.title || existingRequirement.title,
           description: data.description || existingRequirement.description,
-          acceptanceCriteria: data.acceptanceCriteria || existingRequirement.acceptanceCriteria,
-          businessValue: data.businessValue || existingRequirement.businessValue,
+          acceptanceCriteria:
+            data.acceptanceCriteria || existingRequirement.acceptanceCriteria,
+          businessValue:
+            data.businessValue || existingRequirement.businessValue,
           changeReason: '需求内容更新',
           createdById: user.id
         }
@@ -396,11 +407,11 @@ export async function PATCH(
       await prisma.requirementTag.deleteMany({
         where: { requirementId }
       });
-      
+
       // 创建新的标签关联
       if (data.tagIds.length > 0) {
         await prisma.requirementTag.createMany({
-          data: data.tagIds.map(tagId => ({
+          data: data.tagIds.map((tagId) => ({
             requirementId,
             tagId
           }))
@@ -431,7 +442,7 @@ export async function DELETE(
     // 检查用户是否为项目成员
     const isMember = await isProjectMember(projectId, user.id);
     if (!isMember) {
-      return apiForbidden("您没有访问此项目的权限");
+      return apiForbidden('您没有访问此项目的权限');
     }
 
     // 查询需求
@@ -451,9 +462,12 @@ export async function DELETE(
     }
 
     // 检查用户是否有删除需求的权限
-    const hasDeletePermission = await canDeleteRequirement(requirementId, user.id);
+    const hasDeletePermission = await canDeleteRequirement(
+      requirementId,
+      user.id
+    );
     if (!hasDeletePermission) {
-      return apiForbidden("您没有权限删除此需求，或需求存在子需求/关联任务");
+      return apiForbidden('您没有权限删除此需求，或需求存在子需求/关联任务');
     }
 
     // 删除需求（级联删除相关数据）

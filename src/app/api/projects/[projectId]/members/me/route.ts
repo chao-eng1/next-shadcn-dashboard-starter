@@ -9,10 +9,7 @@ export async function GET(
   try {
     const user = await getCurrentUser();
     if (!user) {
-      return NextResponse.json(
-        { error: '未授权访问' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: '未授权访问' }, { status: 401 });
     }
 
     const { projectId } = await params;
@@ -31,10 +28,7 @@ export async function GET(
     });
 
     if (!projectMember) {
-      return NextResponse.json(
-        { error: '用户不是项目成员' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: '用户不是项目成员' }, { status: 403 });
     }
 
     return NextResponse.json({
@@ -42,12 +36,8 @@ export async function GET(
       joinedAt: projectMember.joinedAt,
       memberId: projectMember.id
     });
-
   } catch (error) {
     console.error('获取用户项目角色失败:', error);
-    return NextResponse.json(
-      { error: '服务器内部错误' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '服务器内部错误' }, { status: 500 });
   }
 }

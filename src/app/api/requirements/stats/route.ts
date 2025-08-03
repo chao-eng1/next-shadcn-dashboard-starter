@@ -1,11 +1,7 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
-import {
-  apiResponse,
-  apiError,
-  apiUnauthorized
-} from '@/lib/api-response';
+import { apiResponse, apiError, apiUnauthorized } from '@/lib/api-response';
 import {
   RequirementStatus,
   RequirementPriority,
@@ -105,18 +101,29 @@ export async function GET(request: NextRequest) {
     }
 
     // 计算完成率
-    const completedCount = statusStats.find(s => s.status === RequirementStatus.COMPLETED)?._count.id || 0;
-    const completionRate = totalRequirements > 0 ? (completedCount / totalRequirements) * 100 : 0;
+    const completedCount =
+      statusStats.find((s) => s.status === RequirementStatus.COMPLETED)?._count
+        .id || 0;
+    const completionRate =
+      totalRequirements > 0 ? (completedCount / totalRequirements) * 100 : 0;
 
     // 计算高优先级需求数量
-    const highPriorityCount = priorityStats.filter(p => 
-      p.priority === RequirementPriority.HIGH || p.priority === RequirementPriority.CRITICAL
-    ).reduce((sum, p) => sum + p._count.id, 0);
+    const highPriorityCount = priorityStats
+      .filter(
+        (p) =>
+          p.priority === RequirementPriority.HIGH ||
+          p.priority === RequirementPriority.CRITICAL
+      )
+      .reduce((sum, p) => sum + p._count.id, 0);
 
     // 计算进行中的需求数量
-    const inProgressCount = statusStats.filter(s => 
-      s.status === RequirementStatus.IN_PROGRESS || s.status === RequirementStatus.TESTING
-    ).reduce((sum, s) => sum + s._count.id, 0);
+    const inProgressCount = statusStats
+      .filter(
+        (s) =>
+          s.status === RequirementStatus.IN_PROGRESS ||
+          s.status === RequirementStatus.TESTING
+      )
+      .reduce((sum, s) => sum + s._count.id, 0);
 
     // 获取最近创建的需求
     const recentRequirements = await prisma.requirement.findMany({
@@ -151,7 +158,11 @@ export async function GET(request: NextRequest) {
           lte: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7天内
         },
         status: {
-          notIn: [RequirementStatus.COMPLETED, RequirementStatus.CANCELLED, RequirementStatus.REJECTED]
+          notIn: [
+            RequirementStatus.COMPLETED,
+            RequirementStatus.CANCELLED,
+            RequirementStatus.REJECTED
+          ]
         }
       },
       include: {
@@ -180,9 +191,17 @@ export async function GET(request: NextRequest) {
     const now = new Date();
     for (let i = 29; i >= 0; i--) {
       const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-      const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
-      
+      const startOfDay = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
+      );
+      const endOfDay = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate() + 1
+      );
+
       const createdCount = await prisma.requirement.count({
         where: {
           ...where,
@@ -192,7 +211,7 @@ export async function GET(request: NextRequest) {
           }
         }
       });
-      
+
       const completedCount = await prisma.requirement.count({
         where: {
           ...where,
@@ -203,7 +222,7 @@ export async function GET(request: NextRequest) {
           }
         }
       });
-      
+
       trendData.push({
         date: date.toISOString(),
         created: createdCount,
@@ -213,29 +232,37 @@ export async function GET(request: NextRequest) {
 
     // 转换统计数据为对象格式
     const byStatus: Record<string, number> = {};
-    statusStats.forEach(s => {
+    statusStats.forEach((s) => {
       byStatus[s.status] = s._count.id;
     });
 
     const byPriority: Record<string, number> = {};
-    priorityStats.forEach(p => {
+    priorityStats.forEach((p) => {
       byPriority[p.priority] = p._count.id;
     });
 
     const byType: Record<string, number> = {};
-    typeStats.forEach(t => {
+    typeStats.forEach((t) => {
       byType[t.type] = t._count.id;
     });
 
     const byComplexity: Record<string, number> = {};
-    complexityStats.forEach(c => {
+    complexityStats.forEach((c) => {
       byComplexity[c.complexity] = c._count.id;
     });
 
     // 计算本月数据
     const thisMonth = new Date();
-    const startOfMonth = new Date(thisMonth.getFullYear(), thisMonth.getMonth(), 1);
-    const endOfMonth = new Date(thisMonth.getFullYear(), thisMonth.getMonth() + 1, 0);
+    const startOfMonth = new Date(
+      thisMonth.getFullYear(),
+      thisMonth.getMonth(),
+      1
+    );
+    const endOfMonth = new Date(
+      thisMonth.getFullYear(),
+      thisMonth.getMonth() + 1,
+      0
+    );
 
     const createdThisMonth = await prisma.requirement.count({
       where: {
@@ -266,7 +293,11 @@ export async function GET(request: NextRequest) {
           lt: new Date()
         },
         status: {
-          notIn: [RequirementStatus.COMPLETED, RequirementStatus.CANCELLED, RequirementStatus.REJECTED]
+          notIn: [
+            RequirementStatus.COMPLETED,
+            RequirementStatus.CANCELLED,
+            RequirementStatus.REJECTED
+          ]
         }
       }
     });
@@ -289,7 +320,7 @@ export async function GET(request: NextRequest) {
       byPriority,
       byType,
       byComplexity,
-      byProject: projectStats.map(p => ({
+      byProject: projectStats.map((p) => ({
         projectId: p.projectId,
         projectName: `项目 ${p.projectId}`,
         count: p._count.id
@@ -303,7 +334,7 @@ export async function GET(request: NextRequest) {
       overdueCount,
       createdThisMonth,
       completedThisMonth,
-      trend: trendData.map(item => ({
+      trend: trendData.map((item) => ({
         ...item,
         inProgress: 0 // 简化处理
       }))

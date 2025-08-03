@@ -9,21 +9,25 @@ const getUsersQuerySchema = z.object({
   search: z.string().optional(),
   limit: z.coerce.number().min(1).max(100).default(50),
   excludeIds: z.string().optional(), // 逗号分隔的用户ID列表
-  includeOnlineStatus: z.string().optional().transform(val => val === 'true'),
+  includeOnlineStatus: z
+    .string()
+    .optional()
+    .transform((val) => val === 'true')
 });
 
 // 获取用户列表 - 用于用户选择器
 export async function GET(request: NextRequest) {
   try {
     const currentUser = await getCurrentUser();
-    
+
     if (!currentUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     // 检查用户查看权限
-    const canViewUsers = await hasPermission(currentUser.id, 'user:list') || 
-                        await hasPermission(currentUser.id, 'user.list');
+    const canViewUsers =
+      (await hasPermission(currentUser.id, 'user:list')) ||
+      (await hasPermission(currentUser.id, 'user.list'));
 
     if (!canViewUsers) {
       return NextResponse.json({ error: 'Permission denied' }, { status: 403 });
@@ -34,7 +38,7 @@ export async function GET(request: NextRequest) {
       search: searchParams.get('search') || undefined,
       limit: searchParams.get('limit') || 50,
       excludeIds: searchParams.get('excludeIds') || undefined,
-      includeOnlineStatus: searchParams.get('includeOnlineStatus') || 'false',
+      includeOnlineStatus: searchParams.get('includeOnlineStatus') || 'false'
     });
 
     // 构建查询条件
@@ -50,7 +54,9 @@ export async function GET(request: NextRequest) {
 
     // 排除指定用户
     if (query.excludeIds) {
-      const excludeIdArray = query.excludeIds.split(',').filter(id => id.trim());
+      const excludeIdArray = query.excludeIds
+        .split(',')
+        .filter((id) => id.trim());
       if (excludeIdArray.length > 0) {
         where.id = { notIn: excludeIdArray };
       }
@@ -75,13 +81,11 @@ export async function GET(request: NextRequest) {
           }
         }
       },
-      orderBy: [
-        { name: 'asc' }
-      ]
+      orderBy: [{ name: 'asc' }]
     });
 
     // 转换数据格式以匹配UserSelector期望的格式
-    const transformedUsers = users.map(user => ({
+    const transformedUsers = users.map((user) => ({
       id: user.id,
       name: user.name,
       email: user.email,
@@ -91,7 +95,6 @@ export async function GET(request: NextRequest) {
     }));
 
     return NextResponse.json(transformedUsers);
-
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

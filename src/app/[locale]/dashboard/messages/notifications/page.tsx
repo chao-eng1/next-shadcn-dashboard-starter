@@ -5,7 +5,7 @@ import { ProjectNotifications } from '@/components/messages/project-notification
 
 export default function ProjectNotificationsPage() {
   return (
-    <div className="h-full">
+    <div className='h-full'>
       <ProjectNotifications />
     </div>
   );

@@ -8,7 +8,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import {
   Check,
@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { zhCN } from 'date-fns/locale/zh-CN';
 
 export interface MessageUser {
   id: string;
@@ -98,11 +98,11 @@ export function MessageBubble({
     switch (attachment.type) {
       case 'image':
         return (
-          <div key={attachment.id} className="mt-2">
+          <div className='mt-2'>
             <img
               src={attachment.url}
               alt={attachment.name}
-              className="max-w-xs rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+              className='max-w-xs cursor-pointer rounded-lg transition-opacity hover:opacity-90'
               onClick={() => window.open(attachment.url, '_blank')}
             />
           </div>
@@ -111,19 +111,33 @@ export function MessageBubble({
       case 'video':
       case 'audio':
         return (
-          <div key={attachment.id} className="mt-2 p-3 border rounded-lg bg-muted/50 max-w-xs">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded bg-primary/10 flex items-center justify-center">
-                {attachment.type === 'video' && <ExternalLink className="h-5 w-5 text-primary" />}
-                {attachment.type === 'audio' && <ExternalLink className="h-5 w-5 text-primary" />}
-                {attachment.type === 'file' && <ExternalLink className="h-5 w-5 text-primary" />}
+          <div className='bg-muted/50 mt-2 max-w-xs rounded-lg border p-3'>
+            <div className='flex items-center gap-3'>
+              <div className='bg-primary/10 flex h-10 w-10 items-center justify-center rounded'>
+                {attachment.type === 'video' && (
+                  <ExternalLink className='text-primary h-5 w-5' />
+                )}
+                {attachment.type === 'audio' && (
+                  <ExternalLink className='text-primary h-5 w-5' />
+                )}
+                {attachment.type === 'file' && (
+                  <ExternalLink className='text-primary h-5 w-5' />
+                )}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{attachment.name}</p>
-                <p className="text-xs text-muted-foreground">{formatFileSize(attachment.size)}</p>
+              <div className='min-w-0 flex-1'>
+                <p className='truncate text-sm font-medium'>
+                  {attachment.name}
+                </p>
+                <p className='text-muted-foreground text-xs'>
+                  {formatFileSize(attachment.size)}
+                </p>
               </div>
-              <Button size="sm" variant="ghost" onClick={() => window.open(attachment.url, '_blank')}>
-                <Download className="h-4 w-4" />
+              <Button
+                size='sm'
+                variant='ghost'
+                onClick={() => window.open(attachment.url, '_blank')}
+              >
+                <Download className='h-4 w-4' />
               </Button>
             </div>
           </div>
@@ -135,16 +149,16 @@ export function MessageBubble({
 
   const renderStatus = () => {
     if (!isOwn || !message.status) return null;
-    
+
     switch (message.status) {
       case 'sending':
-        return <Clock className="h-3 w-3 text-muted-foreground" />;
+        return <Clock className='text-muted-foreground h-3 w-3' />;
       case 'sent':
-        return <Check className="h-3 w-3 text-muted-foreground" />;
+        return <Check className='text-muted-foreground h-3 w-3' />;
       case 'delivered':
-        return <CheckCheck className="h-3 w-3 text-muted-foreground" />;
+        return <CheckCheck className='text-muted-foreground h-3 w-3' />;
       case 'read':
-        return <CheckCheck className="h-3 w-3 text-blue-500" />;
+        return <CheckCheck className='h-3 w-3 text-blue-500' />;
       default:
         return null;
     }
@@ -152,13 +166,15 @@ export function MessageBubble({
 
   if (message.type === 'system' || message.type === 'notification') {
     return (
-      <div className="flex justify-center my-4">
-        <div className="bg-muted px-3 py-1 rounded-full text-xs text-muted-foreground flex items-center gap-2">
-          {message.isImportant && <AlertTriangle className="h-3 w-3 text-orange-500" />}
+      <div className='my-4 flex justify-center'>
+        <div className='bg-muted text-muted-foreground flex items-center gap-2 rounded-full px-3 py-1 text-xs'>
+          {message.isImportant && (
+            <AlertTriangle className='h-3 w-3 text-orange-500' />
+          )}
           {message.content}
           {showTimestamp && (
-            <span className="text-xs">
-              {format(message.timestamp, 'HH:mm', { locale: zhCN })}
+            <span className='text-xs'>
+              {/* {format(message.timestamp, 'HH:mm', { locale: zhCN })} */}
             </span>
           )}
         </div>
@@ -167,76 +183,92 @@ export function MessageBubble({
   }
 
   return (
-    <div className={cn('flex gap-3 group', isOwn ? 'flex-row-reverse' : 'flex-row')}>
+    <div
+      className={cn(
+        'group flex gap-3',
+        isOwn ? 'flex-row-reverse' : 'flex-row'
+      )}
+    >
       {/* 头像 */}
       {showAvatar && !isOwn && (
-        <Avatar className="h-8 w-8 flex-shrink-0">
+        <Avatar className='h-8 w-8 flex-shrink-0'>
           <AvatarImage src={message.sender.avatar} />
-          <AvatarFallback className="text-xs">
-            {message.sender.name.slice(0, 2)}
+          <AvatarFallback className='text-xs'>
+            {message.sender.name}
           </AvatarFallback>
         </Avatar>
       )}
 
       {/* 消息内容 */}
-      <div className={cn('flex flex-col max-w-[70%]', isOwn ? 'items-end' : 'items-start')}>
+      <div
+        className={cn(
+          'flex max-w-[70%] flex-col',
+          isOwn ? 'items-end' : 'items-start'
+        )}
+      >
         {/* 发送者信息 */}
         {!isOwn && showAvatar && (
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-medium text-muted-foreground">
+          <div className='mb-1 flex items-center gap-2'>
+            <span className='text-muted-foreground text-xs font-medium'>
               {message.sender.name}
             </span>
             {message.sender.role && (
-              <Badge variant="secondary" className="text-xs px-1 py-0">
+              <Badge variant='secondary' className='px-1 py-0 text-xs'>
                 {message.sender.role}
               </Badge>
             )}
             {message.sender.isOnline && (
-              <div className="h-2 w-2 bg-green-500 rounded-full" />
+              <div className='h-2 w-2 rounded-full bg-green-500' />
             )}
           </div>
         )}
 
         {/* 回复消息 */}
         {message.replyTo && (
-          <div className="mb-2 p-2 border-l-2 border-primary/30 bg-muted/30 rounded text-xs max-w-full">
-            <p className="font-medium text-muted-foreground">{message.replyTo.sender.name}</p>
-            <p className="truncate">{message.replyTo.content}</p>
+          <div className='border-primary/30 bg-muted/30 mb-2 max-w-full rounded border-l-2 p-2 text-xs'>
+            <p className='text-muted-foreground font-medium'>
+              {message.replyTo.sender.name}
+            </p>
+            <p className='truncate'>{message.replyTo.content}</p>
           </div>
         )}
 
         {/* 消息气泡 */}
         <div
           className={cn(
-            'relative px-3 py-2 rounded-lg break-words',
-            isOwn
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted',
+            'relative rounded-lg px-3 py-2 break-words',
+            isOwn ? 'bg-primary text-primary-foreground' : 'bg-muted',
             message.isImportant && 'ring-2 ring-orange-500/50'
           )}
         >
           {/* 重要标记 */}
           {message.isImportant && (
-            <Star className="absolute -top-1 -right-1 h-3 w-3 text-orange-500 fill-orange-500" />
+            <Star className='absolute -top-1 -right-1 h-3 w-3 fill-orange-500 text-orange-500' />
           )}
 
           {/* 文本内容 */}
-          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+          <p className='text-sm whitespace-pre-wrap'>{message.content}</p>
 
           {/* 附件 */}
-          {message.attachments?.map(renderAttachment)}
+          {message.attachments?.map((attachment) => (
+            <div key={attachment.id}>{renderAttachment(attachment)}</div>
+          ))}
 
           {/* 消息状态和时间 */}
-          <div className={cn(
-            'flex items-center gap-1 mt-1',
-            isOwn ? 'justify-end' : 'justify-start'
-          )}>
+          <div
+            className={cn(
+              'mt-1 flex items-center gap-1',
+              isOwn ? 'justify-end' : 'justify-start'
+            )}
+          >
             {showTimestamp && (
-              <span className={cn(
-                'text-xs',
-                isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'
-              )}>
-                {format(message.timestamp, 'HH:mm', { locale: zhCN })}
+              <span
+                className={cn(
+                  'text-xs',
+                  isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                )}
+              >
+                {/* {format(message.timestamp, 'HH:mm', { locale: zhCN })} */}
               </span>
             )}
             {renderStatus()}
@@ -245,13 +277,13 @@ export function MessageBubble({
 
         {/* 表情反应 */}
         {message.reactions && message.reactions.length > 0 && (
-          <div className="flex gap-1 mt-1">
+          <div className='mt-1 flex gap-1'>
             {message.reactions.map((reaction, index) => (
               <Button
-                key={index}
-                variant="outline"
-                size="sm"
-                className="h-6 px-2 text-xs"
+                key={`${reaction.emoji}-${reaction.count}-${index}`}
+                variant='outline'
+                size='sm'
+                className='h-6 px-2 text-xs'
                 onClick={() => onReaction?.(message.id, reaction.emoji)}
               >
                 {reaction.emoji} {reaction.count}
@@ -262,26 +294,28 @@ export function MessageBubble({
       </div>
 
       {/* 操作菜单 */}
-      <div className={cn(
-        'opacity-0 group-hover:opacity-100 transition-opacity flex items-start pt-2',
-        isOwn ? 'order-first' : 'order-last'
-      )}>
+      <div
+        className={cn(
+          'flex items-start pt-2 opacity-0 transition-opacity group-hover:opacity-100',
+          isOwn ? 'order-first' : 'order-last'
+        )}
+      >
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-              <MoreHorizontal className="h-3 w-3" />
+            <Button variant='ghost' size='sm' className='h-6 w-6 p-0'>
+              <MoreHorizontal className='h-3 w-3' />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align={isOwn ? 'end' : 'start'}>
             {onReply && (
               <DropdownMenuItem onClick={() => onReply(message)}>
-                <Reply className="h-4 w-4 mr-2" />
+                <Reply className='mr-2 h-4 w-4' />
                 回复
               </DropdownMenuItem>
             )}
             {onCopy && (
               <DropdownMenuItem onClick={() => onCopy(message.content)}>
-                <Copy className="h-4 w-4 mr-2" />
+                <Copy className='mr-2 h-4 w-4' />
                 复制
               </DropdownMenuItem>
             )}
@@ -291,11 +325,11 @@ export function MessageBubble({
               </DropdownMenuItem>
             )}
             {isOwn && onDelete && (
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={() => onDelete(message.id)}
-                className="text-destructive"
+                className='text-destructive'
               >
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash2 className='mr-2 h-4 w-4' />
                 删除
               </DropdownMenuItem>
             )}

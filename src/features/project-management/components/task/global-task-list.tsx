@@ -443,8 +443,6 @@ export function GlobalTaskList({
     );
   };
 
-
-
   // 根据项目ID过滤迭代
   const getSprintsByProject = (projectId?: string) => {
     if (!projectId) return sprints;
@@ -712,7 +710,6 @@ export function GlobalTaskList({
             </TableCaption>
             <TableHeader>
               <TableRow>
-
                 <TableHead>
                   <Button
                     variant='ghost'
@@ -750,7 +747,6 @@ export function GlobalTaskList({
               ) : (
                 tasks.map((task) => (
                   <TableRow key={task.id}>
-
                     <TableCell className='font-medium'>
                       <Link
                         href={`/dashboard/projects/${task.projectId}/tasks/${task.id}`}

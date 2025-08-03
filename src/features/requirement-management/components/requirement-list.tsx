@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -14,7 +20,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from '@/components/ui/table';
 import {
   DropdownMenu,
@@ -22,18 +28,38 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { Eye, Edit, Trash2, MoreHorizontal, ExternalLink, Calendar, User, Clock, CheckCircle2, AlertCircle, XCircle } from 'lucide-react';
+import {
+  Eye,
+  Edit,
+  Trash2,
+  MoreHorizontal,
+  ExternalLink,
+  Calendar,
+  User,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  XCircle
+} from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
+import { zhCN } from 'date-fns/locale/zh-CN';
 import { useToast } from '@/hooks/use-toast';
 
 interface Requirement {
   id: string;
   title: string;
   description: string;
-  status: 'DRAFT' | 'PENDING' | 'APPROVED' | 'IN_PROGRESS' | 'TESTING' | 'COMPLETED' | 'REJECTED' | 'CANCELLED';
+  status:
+    | 'DRAFT'
+    | 'PENDING'
+    | 'APPROVED'
+    | 'IN_PROGRESS'
+    | 'TESTING'
+    | 'COMPLETED'
+    | 'REJECTED'
+    | 'CANCELLED';
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
   type: 'FUNCTIONAL' | 'NON_FUNCTIONAL' | 'TECHNICAL' | 'BUSINESS';
   complexity: 'SIMPLE' | 'MEDIUM' | 'COMPLEX' | 'VERY_COMPLEX';
@@ -106,15 +132,15 @@ export function RequirementList({ projectId, filters }: RequirementListProps) {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'COMPLETED':
-        return <CheckCircle2 className="h-3 w-3" />;
+        return <CheckCircle2 className='h-3 w-3' />;
       case 'IN_PROGRESS':
-        return <Clock className="h-3 w-3" />;
+        return <Clock className='h-3 w-3' />;
       case 'PENDING':
-        return <AlertCircle className="h-3 w-3" />;
+        return <AlertCircle className='h-3 w-3' />;
       case 'CANCELLED':
-        return <XCircle className="h-3 w-3" />;
+        return <XCircle className='h-3 w-3' />;
       default:
-        return <AlertCircle className="h-3 w-3" />;
+        return <AlertCircle className='h-3 w-3' />;
     }
   };
 
@@ -129,15 +155,15 @@ export function RequirementList({ projectId, filters }: RequirementListProps) {
   const fetchRequirements = async () => {
     try {
       setLoading(true);
-      const url = projectId 
+      const url = projectId
         ? `/api/projects/${projectId}/requirements`
         : '/api/requirements';
-      
+
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error('获取需求列表失败');
       }
-      
+
       const data = await response.json();
       if (data.success) {
         setRequirements(data.data.requirements || []);
@@ -158,7 +184,7 @@ export function RequirementList({ projectId, filters }: RequirementListProps) {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedItems(requirements.map(req => req.id));
+      setSelectedItems(requirements.map((req) => req.id));
     } else {
       setSelectedItems([]);
     }
@@ -166,9 +192,9 @@ export function RequirementList({ projectId, filters }: RequirementListProps) {
 
   const handleSelectItem = (id: string, checked: boolean) => {
     if (checked) {
-      setSelectedItems(prev => [...prev, id]);
+      setSelectedItems((prev) => [...prev, id]);
     } else {
-      setSelectedItems(prev => prev.filter(item => item !== id));
+      setSelectedItems((prev) => prev.filter((item) => item !== id));
     }
   };
 
@@ -212,9 +238,9 @@ export function RequirementList({ projectId, filters }: RequirementListProps) {
 
   if (loading) {
     return (
-      <div className="space-y-4">
+      <div className='space-y-4'>
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="h-16 bg-gray-100 rounded animate-pulse" />
+          <div key={i} className='h-16 animate-pulse rounded bg-gray-100' />
         ))}
       </div>
     );
@@ -223,10 +249,10 @@ export function RequirementList({ projectId, filters }: RequirementListProps) {
   if (requirements.length === 0) {
     return (
       <Card>
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <div className="text-center space-y-2">
-            <h3 className="text-lg font-medium">暂无需求</h3>
-            <p className="text-muted-foreground">
+        <CardContent className='flex flex-col items-center justify-center py-12'>
+          <div className='space-y-2 text-center'>
+            <h3 className='text-lg font-medium'>暂无需求</h3>
+            <p className='text-muted-foreground'>
               {projectId ? '该项目还没有需求' : '还没有创建任何需求'}
             </p>
             <Button onClick={() => router.push('/dashboard/requirements/new')}>
@@ -239,22 +265,22 @@ export function RequirementList({ projectId, filters }: RequirementListProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className='space-y-4'>
       {selectedItems.length > 0 && (
         <Card>
-          <CardContent className="py-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
+          <CardContent className='py-4'>
+            <div className='flex items-center justify-between'>
+              <span className='text-muted-foreground text-sm'>
                 已选择 {selectedItems.length} 个需求
               </span>
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm">
+              <div className='flex items-center space-x-2'>
+                <Button variant='outline' size='sm'>
                   批量更新状态
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant='outline' size='sm'>
                   批量分配
                 </Button>
-                <Button variant="destructive" size="sm">
+                <Button variant='destructive' size='sm'>
                   批量删除
                 </Button>
               </div>
@@ -267,7 +293,7 @@ export function RequirementList({ projectId, filters }: RequirementListProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-12">
+              <TableHead className='w-12'>
                 <Checkbox
                   checked={selectedItems.length === requirements.length}
                   onCheckedChange={handleSelectAll}
@@ -281,7 +307,7 @@ export function RequirementList({ projectId, filters }: RequirementListProps) {
               <TableHead>负责人</TableHead>
               <TableHead>进度</TableHead>
               <TableHead>创建时间</TableHead>
-              <TableHead className="w-12"></TableHead>
+              <TableHead className='w-12'></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -290,21 +316,25 @@ export function RequirementList({ projectId, filters }: RequirementListProps) {
                 <TableCell>
                   <Checkbox
                     checked={selectedItems.includes(requirement.id)}
-                    onCheckedChange={(checked) => 
+                    onCheckedChange={(checked) =>
                       handleSelectItem(requirement.id, checked as boolean)
                     }
                   />
                 </TableCell>
                 <TableCell>
-                  <div className="space-y-1">
-                    <div className="font-medium">{requirement.title}</div>
-                    <div className="text-sm text-muted-foreground">
+                  <div className='space-y-1'>
+                    <div className='font-medium'>{requirement.title}</div>
+                    <div className='text-muted-foreground text-sm'>
                       {requirement.description}
                     </div>
                     {requirement.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
+                      <div className='flex flex-wrap gap-1'>
                         {requirement.tags.map(({ tag }) => (
-                          <Badge key={tag.id} variant="outline" className="text-xs">
+                          <Badge
+                            key={tag.id}
+                            variant='outline'
+                            className='text-xs'
+                          >
                             {tag.name}
                           </Badge>
                         ))}
@@ -323,41 +353,53 @@ export function RequirementList({ projectId, filters }: RequirementListProps) {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={typeConfig[requirement.type].color}>
+                  <Badge
+                    variant='outline'
+                    className={typeConfig[requirement.type].color}
+                  >
                     {typeConfig[requirement.type].label}
                   </Badge>
                 </TableCell>
                 <TableCell>
                   {requirement.project ? (
-                    <span className="text-sm">{requirement.project.name}</span>
+                    <span className='text-sm'>{requirement.project.name}</span>
                   ) : (
-                    <span className="text-muted-foreground text-sm">未关联</span>
+                    <span className='text-muted-foreground text-sm'>
+                      未关联
+                    </span>
                   )}
                 </TableCell>
                 <TableCell>
                   {requirement.assignee ? (
-                    <div className="flex items-center space-x-2">
-                      <Avatar className="h-6 w-6">
-                        <AvatarFallback className="text-xs">
+                    <div className='flex items-center space-x-2'>
+                      <Avatar className='h-6 w-6'>
+                        <AvatarFallback className='text-xs'>
                           {requirement.assignee.name.slice(0, 2)}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm">{requirement.assignee.name}</span>
+                      <span className='text-sm'>
+                        {requirement.assignee.name}
+                      </span>
                     </div>
                   ) : (
-                    <span className="text-muted-foreground text-sm">未分配</span>
+                    <span className='text-muted-foreground text-sm'>
+                      未分配
+                    </span>
                   )}
                 </TableCell>
                 <TableCell>
-                  <div className="space-y-1">
-                    <div className="text-xs text-muted-foreground">
+                  <div className='space-y-1'>
+                    <div className='text-muted-foreground text-xs'>
                       {Math.floor(Math.random() * 100)}%
                     </div>
-                    <Progress value={Math.floor(Math.random() * 100)} className="h-2" />
+                    <Progress
+                      value={Math.floor(Math.random() * 100)}
+                      className='h-2'
+                    />
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="text-sm text-muted-foreground">
+                  <div className='text-muted-foreground text-sm'>
                     {formatDistanceToNow(new Date(requirement.createdAt), {
                       addSuffix: true,
                       locale: zhCN
@@ -367,26 +409,30 @@ export function RequirementList({ projectId, filters }: RequirementListProps) {
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="h-4 w-4" />
+                      <Button variant='ghost' className='h-8 w-8 p-0'>
+                        <MoreHorizontal className='h-4 w-4' />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent align='end'>
                       <DropdownMenuLabel>操作</DropdownMenuLabel>
-                      <DropdownMenuItem onClick={() => handleView(requirement.id)}>
-                        <Eye className="h-4 w-4 mr-2" />
+                      <DropdownMenuItem
+                        onClick={() => handleView(requirement.id)}
+                      >
+                        <Eye className='mr-2 h-4 w-4' />
                         查看详情
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleEdit(requirement.id)}>
-                        <Edit className="h-4 w-4 mr-2" />
+                      <DropdownMenuItem
+                        onClick={() => handleEdit(requirement.id)}
+                      >
+                        <Edit className='mr-2 h-4 w-4' />
                         编辑需求
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={() => handleDelete(requirement.id)}
-                        className="text-red-600"
+                        className='text-red-600'
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
+                        <Trash2 className='mr-2 h-4 w-4' />
                         删除需求
                       </DropdownMenuItem>
                     </DropdownMenuContent>

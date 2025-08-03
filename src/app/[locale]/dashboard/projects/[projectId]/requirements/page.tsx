@@ -61,7 +61,7 @@ export async function generateMetadata({
   params
 }: RequirementsPageProps): Promise<Metadata> {
   const { projectId } = await params;
-  
+
   const project = await prisma.project.findUnique({
     where: { id: projectId },
     select: { name: true }
@@ -73,9 +73,9 @@ export async function generateMetadata({
   };
 }
 
-export default async function RequirementsPage({ 
-  params, 
-  searchParams 
+export default async function RequirementsPage({
+  params,
+  searchParams
 }: RequirementsPageProps) {
   const user = await getCurrentUser();
   const t = await getTranslations('requirements');
@@ -88,7 +88,13 @@ export default async function RequirementsPage({
   }
 
   const { projectId } = await params;
-  const { view = 'list', status, priority, assignee, search } = await searchParams;
+  const {
+    view = 'list',
+    status,
+    priority,
+    assignee,
+    search
+  } = await searchParams;
 
   // 检查用户是否有查看需求的权限
   const hasViewPermission = await canViewRequirements(projectId, user.id);
@@ -114,7 +120,7 @@ export default async function RequirementsPage({
 
   // 检查用户的权限
   const canCreate = await canCreateRequirement(projectId, user.id);
-  
+
   // 对于编辑和删除权限，我们需要在组件中针对具体需求进行检查
   // 这里先检查基础的项目权限
   const canEdit = await hasProjectPermission(
@@ -122,10 +128,10 @@ export default async function RequirementsPage({
     'project.view',
     user.id
   );
-  
+
   const canDelete = await hasProjectPermission(
     projectId,
-    'project.view', 
+    'project.view',
     user.id
   );
 
@@ -141,14 +147,23 @@ export default async function RequirementsPage({
   });
 
   // 转换统计数据
-  const statsByStatus = requirementStats.reduce((acc, stat) => {
-    acc[stat.status] = stat._count.id;
-    return acc;
-  }, {} as Record<string, number>);
+  const statsByStatus = requirementStats.reduce(
+    (acc, stat) => {
+      acc[stat.status] = stat._count.id;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
-  const totalRequirements = Object.values(statsByStatus).reduce((sum, count) => sum + count, 0);
+  const totalRequirements = Object.values(statsByStatus).reduce(
+    (sum, count) => sum + count,
+    0
+  );
   const completedRequirements = statsByStatus.COMPLETED || 0;
-  const completionRate = totalRequirements > 0 ? Math.round((completedRequirements / totalRequirements) * 100) : 0;
+  const completionRate =
+    totalRequirements > 0
+      ? Math.round((completedRequirements / totalRequirements) * 100)
+      : 0;
 
   // 获取优先级统计
   const priorityStats = await prisma.requirement.groupBy({
@@ -161,10 +176,13 @@ export default async function RequirementsPage({
     }
   });
 
-  const statsByPriority = priorityStats.reduce((acc, stat) => {
-    acc[stat.priority] = stat._count.id;
-    return acc;
-  }, {} as Record<string, number>);
+  const statsByPriority = priorityStats.reduce(
+    (acc, stat) => {
+      acc[stat.priority] = stat._count.id;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
   // 获取需求列表数据
   const requirements = await prisma.requirement.findMany({
@@ -240,18 +258,16 @@ export default async function RequirementsPage({
         {/* 页面标题和操作 */}
         <div className='flex flex-col justify-between gap-4 md:flex-row md:items-center'>
           <div>
-            <h1 className='text-3xl font-bold tracking-tight'>
-              {t('title')}
-            </h1>
-            <p className='text-muted-foreground mt-1'>
-              {t('description')}
-            </p>
+            <h1 className='text-3xl font-bold tracking-tight'>{t('title')}</h1>
+            <p className='text-muted-foreground mt-1'>{t('description')}</p>
           </div>
 
           <div className='flex flex-wrap items-center gap-2'>
             {canCreate && (
               <Button asChild>
-                <Link href={`/dashboard/projects/${projectId}/requirements/new`}>
+                <Link
+                  href={`/dashboard/projects/${projectId}/requirements/new`}
+                >
                   <PlusIcon className='mr-2 h-4 w-4' />
                   {t('create')}
                 </Link>
@@ -264,9 +280,7 @@ export default async function RequirementsPage({
         <div className='grid grid-cols-1 gap-4 md:grid-cols-4'>
           <Card>
             <CardHeader className='pb-2'>
-              <CardTitle className='text-base'>
-                {t('stats.total')}
-              </CardTitle>
+              <CardTitle className='text-base'>{t('stats.total')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className='text-2xl font-bold'>{totalRequirements}</div>
@@ -316,7 +330,8 @@ export default async function RequirementsPage({
             </CardHeader>
             <CardContent>
               <div className='text-2xl font-bold'>
-                {(statsByStatus.IN_PROGRESS || 0) + (statsByStatus.IN_REVIEW || 0)}
+                {(statsByStatus.IN_PROGRESS || 0) +
+                  (statsByStatus.IN_REVIEW || 0)}
               </div>
               <p className='text-muted-foreground text-xs'>
                 {t('stats.inProgressDesc')}
@@ -330,19 +345,25 @@ export default async function RequirementsPage({
           <div className='flex flex-col gap-4 md:flex-row md:items-center md:justify-between'>
             <TabsList>
               <TabsTrigger value='list' asChild>
-                <Link href={`/dashboard/projects/${projectId}/requirements?view=list`}>
+                <Link
+                  href={`/dashboard/projects/${projectId}/requirements?view=list`}
+                >
                   <ListIcon className='mr-2 h-4 w-4' />
                   {t('views.list')}
                 </Link>
               </TabsTrigger>
               <TabsTrigger value='kanban' asChild>
-                <Link href={`/dashboard/projects/${projectId}/requirements?view=kanban`}>
+                <Link
+                  href={`/dashboard/projects/${projectId}/requirements?view=kanban`}
+                >
                   <KanbanIcon className='mr-2 h-4 w-4' />
                   {t('views.kanban')}
                 </Link>
               </TabsTrigger>
               <TabsTrigger value='tree' asChild>
-                <Link href={`/dashboard/projects/${projectId}/requirements?view=tree`}>
+                <Link
+                  href={`/dashboard/projects/${projectId}/requirements?view=tree`}
+                >
                   <TreePineIcon className='mr-2 h-4 w-4' />
                   {t('views.tree')}
                 </Link>
@@ -367,12 +388,14 @@ export default async function RequirementsPage({
             <Card>
               <CardHeader>
                 <CardTitle>{t('views.list')}</CardTitle>
-                <CardDescription>
-                  {t('views.listDesc')}
-                </CardDescription>
+                <CardDescription>{t('views.listDesc')}</CardDescription>
               </CardHeader>
               <CardContent>
-                <Suspense fallback={<div className='py-8 text-center'>{tc('loading')}</div>}>
+                <Suspense
+                  fallback={
+                    <div className='py-8 text-center'>{tc('loading')}</div>
+                  }
+                >
                   <RequirementList
                     projectId={projectId}
                     requirements={requirements}
@@ -392,12 +415,14 @@ export default async function RequirementsPage({
             <Card>
               <CardHeader>
                 <CardTitle>{t('views.kanban')}</CardTitle>
-                <CardDescription>
-                  {t('views.kanbanDesc')}
-                </CardDescription>
+                <CardDescription>{t('views.kanbanDesc')}</CardDescription>
               </CardHeader>
               <CardContent>
-                <Suspense fallback={<div className='py-8 text-center'>{tc('loading')}</div>}>
+                <Suspense
+                  fallback={
+                    <div className='py-8 text-center'>{tc('loading')}</div>
+                  }
+                >
                   <RequirementKanban
                     projectId={projectId}
                     requirements={requirements}
@@ -412,7 +437,9 @@ export default async function RequirementsPage({
 
           {/* 树形视图 */}
           <TabsContent value='tree'>
-            <Suspense fallback={<div className='py-8 text-center'>{tc('loading')}</div>}>
+            <Suspense
+              fallback={<div className='py-8 text-center'>{tc('loading')}</div>}
+            >
               <RequirementTree
                 projectId={projectId}
                 requirements={requirements}

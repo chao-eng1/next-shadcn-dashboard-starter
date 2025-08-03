@@ -4,7 +4,7 @@ const fetch = require('node-fetch');
 async function testRequirementsStatsAPI() {
   try {
     console.log('测试需求统计API...');
-    
+
     // 首先测试登录
     const loginResponse = await fetch('http://localhost:3000/api/auth/login', {
       method: 'POST',
@@ -16,26 +16,29 @@ async function testRequirementsStatsAPI() {
         password: 'admin123'
       })
     });
-    
+
     console.log('登录状态:', loginResponse.status);
-    
+
     if (loginResponse.status === 200) {
       // 获取cookie
       const cookies = loginResponse.headers.get('set-cookie');
       console.log('获取到的cookies:', cookies);
-      
+
       if (cookies) {
         // 测试需求统计API
-        const statsResponse = await fetch('http://localhost:3000/api/requirements/stats', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Cookie': cookies
+        const statsResponse = await fetch(
+          'http://localhost:3000/api/requirements/stats',
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Cookie: cookies
+            }
           }
-        });
-        
+        );
+
         console.log('统计API状态:', statsResponse.status);
-        
+
         if (statsResponse.status === 200) {
           const data = await statsResponse.json();
           console.log('统计数据:', JSON.stringify(data, null, 2));
