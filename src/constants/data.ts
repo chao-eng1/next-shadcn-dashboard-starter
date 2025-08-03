@@ -21,14 +21,7 @@ export const navItems: NavItem[] = [
     shortcut: ['d', 'd'],
     items: [] // Empty array as there are no child items for Dashboard
   },
-  {
-    title: 'navigation.im',
-    url: '/dashboard/im',
-    icon: 'messageCircle',
-    shortcut: ['i', 'm'],
-    isActive: false,
-    items: []
-  },
+
   {
     title: 'navigation.messages',
     url: '/dashboard/messages',
