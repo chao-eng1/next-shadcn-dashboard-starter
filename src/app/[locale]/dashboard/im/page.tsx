@@ -11,12 +11,11 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { MessageCircle, Send, Users, Search, UserPlus, MessageSquare, Loader2, AlertCircle, Settings, Sparkles } from 'lucide-react';
+import { MessageCircle, Send, Users, Search, UserPlus, MessageSquare, Loader2, AlertCircle, Settings } from 'lucide-react';
 import { useTranslations } from "next-intl";
 import { useIM } from '@/hooks/useIM';
 import { toast } from 'sonner';
 import type { User, Project } from '@/store/im-store';
-import Link from 'next/link';
 
 
 
@@ -329,46 +328,26 @@ export default function IMPage() {
   });
 
   return (
-    <div className="h-full flex-1 flex flex-col gap-4 p-4 overflow-hidden">
-      {/* 新版本导航 */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">即时通讯</h1>
-          <p className="text-sm text-muted-foreground">与团队成员进行实时沟通</p>
-        </div>
-        <Link href="/dashboard/enhanced-im">
-          <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white">
-            <Sparkles className="h-4 w-4 mr-2" />
-            体验新版界面
-          </Button>
-        </Link>
+    <div className="h-screen flex flex-col overflow-hidden">
+      {/* 页面标题 */}
+      <div className="flex-shrink-0 px-6 py-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <h1 className="text-2xl font-semibold tracking-tight">即时通讯</h1>
+        <p className="text-sm text-muted-foreground">与团队成员进行实时沟通</p>
       </div>
-      
-      <div className="flex-1 flex gap-4 min-h-0 overflow-hidden">
-      {/* 连接状态指示器 */}
-      {connectionStatus !== 'connected' && (
-        <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
-          <Badge variant={connectionStatus === 'connecting' ? 'secondary' : 'outline'} className="flex items-center gap-2">
-            {connectionStatus === 'connecting' && <Loader2 className="h-3 w-3 animate-spin" />}
-            {connectionStatus === 'connecting' ? '连接中...' : 
-             !isConnected ? '轮询模式' : '已断开'}
-          </Badge>
-          {/* 调试按钮 */}
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => {
-              console.log('手动启动轮询');
-              startPollingRef.current();
-            }}
-          >
-            启动轮询
-          </Button>
-        </div>
-      )}
-      
-      {/* 会话列表 */}
-      <Card className="w-80 flex flex-col min-h-0">
+      <div className="flex-1 flex gap-4 p-4 min-h-0 overflow-hidden">
+        {/* 连接状态指示器 */}
+        {connectionStatus !== 'connected' && (
+          <div className="fixed top-4 right-4 z-50">
+            <Badge variant={connectionStatus === 'connecting' ? 'secondary' : 'outline'} className="flex items-center gap-2">
+              {connectionStatus === 'connecting' && <Loader2 className="h-3 w-3 animate-spin" />}
+              {connectionStatus === 'connecting' ? '连接中...' : 
+               !isConnected ? '轮询模式' : '已断开'}
+            </Badge>
+          </div>
+        )}
+        
+        {/* 会话列表 */}
+        <Card className="w-80 flex flex-col h-full min-h-0">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2">
             <MessageCircle className="h-5 w-5" />
@@ -599,7 +578,7 @@ export default function IMPage() {
       </Card>
 
       {/* 聊天区域 */}
-      <Card className="flex-1 flex flex-col min-h-0">
+      <Card className="flex-1 flex flex-col h-full min-h-0">
         {currentConversation ? (
           <>
             <CardHeader className="pb-3">
