@@ -36,6 +36,7 @@ import { MessageInput } from './message-input';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale/zh-CN';
 import { useAuth } from '@/hooks/use-auth';
+import { getWebSocketService } from '@/lib/websocket-service';
 import { toast } from 'sonner';
 
 // 会话类型
@@ -75,6 +76,7 @@ export function ChatContent({ conversation }: ChatContentProps) {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
+  const wsService = getWebSocketService();
 
   // 加载会话消息
   const loadMessages = async (conversationId: string) => {
@@ -96,7 +98,7 @@ export function ChatContent({ conversation }: ChatContentProps) {
               name: msg.senderName || '未知用户',
               avatar: msg.senderImage
             },
-            timestamp: new Date(msg.createdAt),
+            timestamp: msg.createdAt ? new Date(msg.createdAt) : new Date(),
             type: msg.messageType,
             status: (['sending', 'sent', 'delivered', 'read'].includes(
               msg.status
@@ -111,7 +113,9 @@ export function ChatContent({ conversation }: ChatContentProps) {
                     id: msg.replyTo.senderId || '',
                     name: msg.replyTo.senderName || '未知用户'
                   },
-                  timestamp: new Date(),
+                  timestamp: msg.replyTo.createdAt
+                    ? new Date(msg.replyTo.createdAt)
+                    : new Date(),
                   type: 'text',
                   status: 'delivered'
                 }
@@ -137,25 +141,39 @@ export function ChatContent({ conversation }: ChatContentProps) {
       return;
     }
 
+    // 加载消息
     loadMessages(conversation.id);
 
-    // 监听新消息事件
+    // 简化的消息监听 - 只监听自定义事件
     const handleNewMessage = (event: CustomEvent) => {
+      console.log('Chat content received newMessage event:', event.detail);
       if (event.detail.conversationId === conversation.id) {
+        console.log('Message is for current conversation:', conversation.id);
         const newMessages = event.detail.messages.map((msg: any) => ({
           id: msg.id,
           content: msg.content,
           sender: {
-            id: msg.senderId || '',
-            name: msg.senderName || '未知用户',
-            avatar: msg.senderImage
+            id: msg.sender?.id || msg.senderId || '',
+            name: msg.sender?.name || msg.senderName || '未知用户',
+            avatar: msg.sender?.avatar || msg.senderImage
           },
-          timestamp: new Date(msg.createdAt),
-          type: msg.messageType,
-          status: 'delivered' as const
+          timestamp:
+            msg.timestamp instanceof Date
+              ? msg.timestamp
+              : msg.timestamp || msg.createdAt
+                ? new Date(msg.timestamp || msg.createdAt)
+                : new Date(),
+          type: msg.type || msg.messageType || 'text',
+          status: msg.status || ('delivered' as const),
+          replyTo: msg.replyTo
         }));
 
-        setMessages((prev) => [...prev, ...newMessages]);
+        console.log('Adding new messages to state:', newMessages);
+        setMessages((prev) => {
+          const updated = [...prev, ...newMessages];
+          console.log('Updated messages count:', updated.length);
+          return updated;
+        });
       }
     };
 
@@ -167,7 +185,7 @@ export function ChatContent({ conversation }: ChatContentProps) {
         handleNewMessage as EventListener
       );
     };
-  }, [conversation, user]);
+  }, [conversation]);
 
   // 滚动到底部
   const scrollToBottom = () => {
@@ -193,7 +211,7 @@ export function ChatContent({ conversation }: ChatContentProps) {
       sender: {
         id: user.id || '',
         name: user.name || '未知用户',
-        avatar: user.image
+        avatar: user.image || undefined
       },
       timestamp: new Date(),
       type: 'text',
@@ -222,27 +240,28 @@ export function ChatContent({ conversation }: ChatContentProps) {
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Message sent successfully:', data);
+
         // 用服务器返回的消息替换临时消息
+        const serverMessage: Message = {
+          id: data.data.id,
+          content: data.data.content,
+          sender: {
+            id: data.data.senderId,
+            name: data.data.senderName,
+            avatar: data.data.senderImage
+          },
+          timestamp: new Date(data.data.createdAt),
+          type: data.data.messageType,
+          status: 'sent',
+          replyTo: replyToMessage
+        };
+
         setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === tempMessage.id
-              ? ({
-                  id: data.id,
-                  content: data.content,
-                  sender: {
-                    id: data.senderId,
-                    name: data.senderName,
-                    avatar: data.senderImage
-                  },
-                  timestamp: new Date(data.createdAt),
-                  type: data.messageType,
-                  status: 'sent',
-                  replyTo: replyToMessage
-                } as Message)
-              : msg
-          )
+          prev.map((msg) => (msg.id === tempMessage.id ? serverMessage : msg))
         );
 
+        console.log('Message state updated successfully');
         toast.success('消息发送成功');
       } else {
         throw new Error('Failed to send message');
@@ -251,12 +270,8 @@ export function ChatContent({ conversation }: ChatContentProps) {
       console.error('Error sending message:', error);
       toast.error('发送消息失败');
 
-      // 标记消息发送失败
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === tempMessage.id ? { ...msg, status: 'sent' as const } : msg
-        )
-      );
+      // 移除发送失败的临时消息
+      setMessages((prev) => prev.filter((msg) => msg.id !== tempMessage.id));
     }
   };
 
@@ -405,50 +420,67 @@ export function ChatContent({ conversation }: ChatContentProps) {
               </div>
             </div>
           ) : (
-            [
-              ...messages.map((message) => {
-                console.log(message, 'dddddddddddddd');
-                const isOwn = user?.id ? message.sender.id === user.id : false;
-                return (
-                  <MessageBubble
-                    key={message.sender.id + message.timestamp.getTime()}
-                    message={message}
-                    isOwn={isOwn}
-                    onReply={(msg) => setReplyTo(msg)}
-                    onDelete={(messageId) => {
-                      setMessages((prev) =>
-                        prev.filter((msg) => msg.id !== messageId)
-                      );
-                    }}
-                    onCopy={(content) => {
-                      navigator.clipboard.writeText(content);
-                      toast.success('消息已复制到剪贴板');
-                    }}
-                  />
-                );
-              }),
-              ...(isTyping
-                ? [
+            <>
+              {console.log('Rendering messages, count:', messages.length)}
+              {messages.length === 0 ? (
+                <div className='flex items-center justify-center py-8'>
+                  <div className='text-muted-foreground text-center'>
+                    <p>暂无消息</p>
+                    <p className='mt-1 text-xs'>开始聊天吧！</p>
+                  </div>
+                </div>
+              ) : (
+                messages.map((message) => {
+                  const isOwn = user?.id
+                    ? message.sender.id === user.id
+                    : false;
+                  console.log(
+                    'Rendering message:',
+                    message.id,
+                    message.content
+                  );
+                  return (
+                    <MessageBubble
+                      key={
+                        message.id ||
+                        `${message.sender.id}-${message.timestamp.getTime()}`
+                      }
+                      message={message}
+                      isOwn={isOwn}
+                      onReply={(msg) => setReplyTo(msg)}
+                      onDelete={(messageId) => {
+                        setMessages((prev) =>
+                          prev.filter((msg) => msg.id !== messageId)
+                        );
+                      }}
+                      onCopy={(content) => {
+                        navigator.clipboard.writeText(content);
+                        toast.success('消息已复制到剪贴板');
+                      }}
+                    />
+                  );
+                })
+              )}
+              {isTyping && (
+                <div
+                  key='typing-indicator'
+                  className='text-muted-foreground flex items-center gap-2 text-sm'
+                >
+                  <div className='flex gap-1'>
+                    <div className='bg-muted-foreground h-2 w-2 animate-bounce rounded-full' />
                     <div
-                      key='typing-indicator'
-                      className='text-muted-foreground flex items-center gap-2 text-sm'
-                    >
-                      <div className='flex gap-1'>
-                        <div className='bg-muted-foreground h-2 w-2 animate-bounce rounded-full' />
-                        <div
-                          className='bg-muted-foreground h-2 w-2 animate-bounce rounded-full'
-                          style={{ animationDelay: '0.1s' }}
-                        />
-                        <div
-                          className='bg-muted-foreground h-2 w-2 animate-bounce rounded-full'
-                          style={{ animationDelay: '0.2s' }}
-                        />
-                      </div>
-                      <span>{conversation.name} 正在输入...</span>
-                    </div>
-                  ]
-                : [])
-            ]
+                      className='bg-muted-foreground h-2 w-2 animate-bounce rounded-full'
+                      style={{ animationDelay: '0.1s' }}
+                    />
+                    <div
+                      className='bg-muted-foreground h-2 w-2 animate-bounce rounded-full'
+                      style={{ animationDelay: '0.2s' }}
+                    />
+                  </div>
+                  <span>{conversation.name} 正在输入...</span>
+                </div>
+              )}
+            </>
           )}
           <div ref={messagesEndRef} />
         </div>

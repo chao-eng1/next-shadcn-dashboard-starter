@@ -27,6 +27,10 @@ export const MESSAGE_TYPES = {
   MESSAGE_READ: 'message:read',
   MESSAGE_TYPING: 'message:typing',
 
+  // 输入状态
+  TYPING_START: 'typing:start',
+  TYPING_STOP: 'typing:stop',
+
   // 会话相关
   CONVERSATION_JOIN: 'conversation:join',
   CONVERSATION_LEAVE: 'conversation:leave',
@@ -118,7 +122,11 @@ export class WebSocketService {
       // 获取认证token
       const token = await this.getAuthToken();
 
-      this.socket = io(this.config.url, {
+      // 检查WebSocket服务器是否可用
+      const wsUrl = this.config.url;
+      console.log('Attempting to connect to WebSocket server:', wsUrl);
+
+      this.socket = io(wsUrl, {
         auth: {
           token,
           userId
@@ -127,16 +135,33 @@ export class WebSocketService {
         reconnection: true,
         reconnectionAttempts: this.config.maxReconnectAttempts,
         reconnectionDelay: this.config.reconnectInterval,
-        timeout: this.config.timeout
+        timeout: this.config.timeout,
+        forceNew: true // 强制创建新连接
       });
 
       this.setupSocketListeners();
 
-      this.log('Connecting to Socket.io...', this.config.url);
+      this.log('Connecting to Socket.io...', wsUrl);
+
+      // 设置连接超时
+      const connectionTimeout = setTimeout(() => {
+        if (this.isConnecting) {
+          this.isConnecting = false;
+          store.setConnectionStatus('disconnected');
+          this.log('Connection timeout - WebSocket服务器可能未运行');
+          // 连接超时不抛出错误，允许应用继续运行
+        }
+      }, this.config.timeout);
+
+      // 当连接成功时清除超时
+      this.socket.once('connect', () => {
+        clearTimeout(connectionTimeout);
+      });
     } catch (error) {
       this.isConnecting = false;
-      this.handleError(error);
-      throw error;
+      this.log('WebSocket connection failed:', error);
+      store.setConnectionStatus('disconnected');
+      // 不抛出错误，允许应用在没有WebSocket的情况下继续工作
     }
   }
 
@@ -528,13 +553,54 @@ export class WebSocketService {
   }
 
   // 消息处理方法
-  private handleMessageReceive(data: Message): void {
+  private handleMessageReceive(data: any): void {
+    console.log('WebSocket received message data:', data);
     const store = useMessageStore.getState();
-    store.addMessage(data);
+
+    // 转换服务端消息格式为前端Message格式
+    const message: Message = {
+      id: data.id,
+      content: data.content,
+      type: data.messageType || 'text',
+      sender: {
+        id: data.senderId,
+        name: data.senderName || '未知用户',
+        avatar: data.senderImage
+      },
+      timestamp: data.createdAt ? new Date(data.createdAt) : new Date(),
+      status: data.status || 'delivered',
+      isOwn: false, // 接收到的消息不是自己发的
+      conversationId: data.conversationId,
+      replyTo: data.replyTo
+        ? {
+            id: data.replyTo.id,
+            content: data.replyTo.content,
+            sender: {
+              id: data.replyTo.senderId,
+              name: data.replyTo.senderName || '未知用户',
+              avatar: data.replyTo.senderImage
+            },
+            type: data.replyTo.messageType || 'text'
+          }
+        : undefined
+    };
+
+    console.log('Formatted message for frontend:', message);
+    store.addMessage(message);
+
+    // 分发自定义事件给chat-content组件
+    const customEvent = new CustomEvent('newMessage', {
+      detail: {
+        conversationId: message.conversationId,
+        messages: [message]
+      }
+    });
+    console.log('Dispatching newMessage event:', customEvent.detail);
+    window.dispatchEvent(customEvent);
 
     // 如果不是当前选中的会话，显示通知
-    if (data.conversationId !== store.selectedConversationId) {
-      this.showNotification(data);
+    if (message.conversationId !== store.selectedConversationId) {
+      this.showNotification(message);
     }
   }
 
@@ -691,7 +757,7 @@ export class WebSocketService {
 
   public joinConversation(
     conversationId: string,
-    type: string = 'project'
+    type: string = 'private'
   ): void {
     this.send(MESSAGE_TYPES.CONVERSATION_JOIN, { conversationId, type });
   }
@@ -708,7 +774,9 @@ export class WebSocketService {
     isTyping: boolean,
     type: string = 'project'
   ): void {
-    const eventType = isTyping ? 'typing:start' : 'typing:stop';
+    const eventType = isTyping
+      ? MESSAGE_TYPES.TYPING_START
+      : MESSAGE_TYPES.TYPING_STOP;
     this.send(eventType, { conversationId, type });
   }
 

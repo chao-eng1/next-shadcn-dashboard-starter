@@ -86,6 +86,20 @@ export function MessageBubble({
   onCopy,
   onReaction
 }: MessageBubbleProps) {
+  // 安全的时间戳格式化函数
+  const formatTimestamp = (timestamp: Date | string | number): string => {
+    if (!timestamp) return '';
+
+    try {
+      const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
+      if (isNaN(date.getTime())) return '';
+      return format(date, 'HH:mm', { locale: zhCN });
+    } catch (error) {
+      console.warn('Failed to format timestamp:', timestamp, error);
+      return '';
+    }
+  };
+
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -174,7 +188,7 @@ export function MessageBubble({
           {message.content}
           {showTimestamp && (
             <span className='text-xs'>
-              {/* {format(message.timestamp, 'HH:mm', { locale: zhCN })} */}
+              {formatTimestamp(message.timestamp)}
             </span>
           )}
         </div>
@@ -268,7 +282,7 @@ export function MessageBubble({
                   isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'
                 )}
               >
-                {/* {format(message.timestamp, 'HH:mm', { locale: zhCN })} */}
+                {formatTimestamp(message.timestamp)}
               </span>
             )}
             {renderStatus()}
