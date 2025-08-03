@@ -340,8 +340,8 @@ export default function AppSidebar() {
                     <div className='flex items-center'>
                       <IconBell className='mr-2 h-4 w-4' />
                       {t('sidebar.notifications')}
-                      {(unreadCount + totalUnreadCount) > 0 && (
-                        <NotificationBadge count={unreadCount + totalUnreadCount} className='ml-auto' />
+                      {(systemUnreadCount + imUnreadCount) > 0 && (
+                        <NotificationBadge count={systemUnreadCount + imUnreadCount} className='ml-auto' />
                       )}
                     </div>
                   </DropdownMenuItem>
