@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,12 +9,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { MessageCircle, Send, Users, Search, Plus, UserPlus, MessageSquare, Loader2, AlertCircle, Settings, Sparkles } from 'lucide-react';
+import { MessageCircle, Send, Users, Search, UserPlus, MessageSquare, Loader2, AlertCircle, Settings, Sparkles } from 'lucide-react';
 import { useTranslations } from "next-intl";
 import { useIM } from '@/hooks/useIM';
-import { imAPI } from '@/lib/api/im-api';
 import { toast } from 'sonner';
 import type { User, Project } from '@/store/im-store';
 import Link from 'next/link';
@@ -52,7 +51,10 @@ export default function IMPage() {
     sendMessage,
     createPrivateConversation,
     loadProjectMembers,
-    uploadFile
+    uploadFile,
+    startPolling,
+    stopPolling,
+    cleanup
   } = useIM();
   
   const [newMessage, setNewMessage] = useState('');
@@ -63,6 +65,19 @@ export default function IMPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [projectMembers, setProjectMembers] = useState<User[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // 使用refs来存储函数引用，避免useEffect依赖问题
+  const startPollingRef = useRef(startPolling);
+  const stopPollingRef = useRef(stopPolling);
+  const cleanupRef = useRef(cleanup);
+  
+  // 更新refs
+  useEffect(() => {
+    startPollingRef.current = startPolling;
+    stopPollingRef.current = stopPolling;
+    cleanupRef.current = cleanup;
+  }, [startPolling, stopPolling, cleanup]);
 
   // 初始化IM系统
   useEffect(() => {
@@ -85,6 +100,41 @@ export default function IMPage() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentConversation?.id]); // 只依赖会话ID，移除 loadMessages 依赖
+  
+  // 启动轮询（如果WebSocket未连接且有当前会话）
+  useEffect(() => {
+    const shouldStartPolling = currentConversation && !isConnected && connectionStatus !== 'connected';
+    const shouldStopPolling = isConnected;
+    
+    if (shouldStartPolling) {
+      console.log(`WebSocket未连接（状态：${connectionStatus}），启动轮询模式`);
+      startPollingRef.current();
+    } else if (shouldStopPolling) {
+      console.log('WebSocket已连接，停止轮询模式');
+      stopPollingRef.current();
+    }
+    
+    // 清理函数
+    return () => {
+      if (!isConnected) {
+        stopPollingRef.current();
+      }
+    };
+  }, [currentConversation?.id, isConnected, connectionStatus]); // 只依赖primitive值
+  
+  // 当消息列表更新时，滚动到底部
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages.length]);
+  
+  // 组件卸载时清理
+  useEffect(() => {
+    return () => {
+      cleanupRef.current();
+    };
+  }, []); // 空依赖数组，只在组件卸载时执行
   
   // 发送消息
   const handleSendMessage = async () => {
@@ -254,7 +304,7 @@ export default function IMPage() {
   });
 
   return (
-    <div className="min-h-0 flex-1 flex flex-col gap-4 p-4">
+    <div className="h-full flex-1 flex flex-col gap-4 p-4 overflow-hidden">
       {/* 新版本导航 */}
       <div className="flex items-center justify-between">
         <div>
@@ -269,20 +319,31 @@ export default function IMPage() {
         </Link>
       </div>
       
-      <div className="flex-1 flex gap-4">
+      <div className="flex-1 flex gap-4 min-h-0 overflow-hidden">
       {/* 连接状态指示器 */}
       {connectionStatus !== 'connected' && (
-        <div className="fixed top-4 right-4 z-50">
+        <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
           <Badge variant={connectionStatus === 'connecting' ? 'secondary' : 'outline'} className="flex items-center gap-2">
             {connectionStatus === 'connecting' && <Loader2 className="h-3 w-3 animate-spin" />}
             {connectionStatus === 'connecting' ? '连接中...' : 
-             connectionStatus === 'error' ? '离线模式' : '已断开'}
+             !isConnected ? '轮询模式' : '已断开'}
           </Badge>
+          {/* 调试按钮 */}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => {
+              console.log('手动启动轮询');
+              startPollingRef.current();
+            }}
+          >
+            启动轮询
+          </Button>
         </div>
       )}
       
       {/* 会话列表 */}
-      <Card className="w-80 flex flex-col">
+      <Card className="w-80 flex flex-col min-h-0">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2">
             <MessageCircle className="h-5 w-5" />
@@ -409,7 +470,7 @@ export default function IMPage() {
             </div>
           )}
         </CardHeader>
-        <CardContent className="flex-1 p-0">
+        <CardContent className="flex-1 p-0 overflow-hidden min-h-0">
           <ScrollArea className="h-full">
             {loading.conversations ? (
               <div className="flex items-center justify-center h-32">
@@ -507,7 +568,7 @@ export default function IMPage() {
       </Card>
 
       {/* 聊天区域 */}
-      <Card className="flex-1 flex flex-col">
+      <Card className="flex-1 flex flex-col min-h-0">
         {currentConversation ? (
           <>
             <CardHeader className="pb-3">
@@ -613,8 +674,9 @@ export default function IMPage() {
             <Separator />
             
             {/* 消息列表 */}
-            <CardContent className="flex-1 p-0">
-              <ScrollArea className="h-full p-4">
+            <div className="flex-1 overflow-hidden relative">
+              <div className="absolute inset-0">
+                <ScrollArea className="h-full p-4">
                 {loading.messages ? (
                   <div className="flex items-center justify-center h-32">
                     <Loader2 className="h-6 w-6 animate-spin" />
@@ -671,10 +733,12 @@ export default function IMPage() {
                         </div>
                       ))
                     )}
+                    <div ref={messagesEndRef} />
                   </div>
                 )}
-              </ScrollArea>
-            </CardContent>
+                </ScrollArea>
+              </div>
+            </div>
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">
@@ -687,7 +751,7 @@ export default function IMPage() {
         )}
         
         {currentConversation && (
-          <>
+          <div className="flex-shrink-0">
             <Separator />
             
             {/* 消息输入 */}
@@ -741,7 +805,7 @@ export default function IMPage() {
                 </Button>
               </div>
             </div>
-          </>
+          </div>
         )}
       </Card>
       </div>

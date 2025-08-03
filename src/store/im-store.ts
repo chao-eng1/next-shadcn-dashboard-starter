@@ -284,7 +284,10 @@ export const useIMStore = create<IMState>((set, get) => ({
     switch (message.type) {
       case 'message':
         if (message.data.conversationId && message.data.content) {
-          // 这里需要根据实际的WebSocket消息格式来构造Message对象
+          // 检查消息是否来自当前用户，避免重复添加自己发送的消息
+          const isOwnMessage = message.data.senderId === state.currentUser?.id;
+          
+          // 构造新消息对象
           const newMessage: Message = {
             id: message.data.messageId || Date.now().toString(),
             conversationId: message.data.conversationId,
@@ -298,7 +301,24 @@ export const useIMStore = create<IMState>((set, get) => ({
             updatedAt: message.data.timestamp || new Date().toISOString()
           };
           
-          get().addMessage(newMessage);
+          // 如果不是自己发送的消息，或者当前会话就是消息所在的会话，则添加消息
+          if (!isOwnMessage || state.currentConversation?.id === message.data.conversationId) {
+            get().addMessage(newMessage);
+            
+            // 如果是其他人发送的消息并且不在当前会话中，播放提示音（可选）
+            if (!isOwnMessage && state.currentConversation?.id !== message.data.conversationId) {
+              // 这里可以添加消息提示音或桌面通知
+              console.log('收到新消息:', newMessage);
+              
+              // 可以触发桌面通知
+              if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(`${newMessage.senderName}发来新消息`, {
+                  body: newMessage.content,
+                  icon: newMessage.senderImage || '/default-avatar.png'
+                });
+              }
+            }
+          }
         }
         break;
         

@@ -54,6 +54,13 @@ export const useIM = () => {
   
   const wsTokenRef = useRef<string>('');
   const typingTimeoutRef = useRef<{ [conversationId: string]: NodeJS.Timeout }>({});
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastMessageTimestampRef = useRef<string>(new Date().toISOString());
+  
+  // 使用refs来存储函数引用，避免useEffect依赖问题
+  const startPollingRef = useRef<() => void>(() => {});
+  const stopPollingRef = useRef<() => void>(() => {});
+  const loadOnlineUsersRef = useRef<() => Promise<void>>(async () => {});
   
   // WebSocket连接 - 只在客户端初始化
   const webSocketResult = typeof window !== 'undefined' ? useWebSocket({
@@ -63,25 +70,101 @@ export const useIM = () => {
     onConnect: () => {
       setIsConnected(true);
       setConnectionStatus('connected');
+      // 连接成功后停止轮询
+      stopPollingRef.current();
       // 连接成功后同步在线用户状态
-      loadOnlineUsers();
+      loadOnlineUsersRef.current();
     },
     onDisconnect: () => {
       setIsConnected(false);
       setConnectionStatus('disconnected');
+      // 断开连接后启动轮询作为备选方案
+      startPollingRef.current();
     },
     onError: () => {
-      console.warn('WebSocket连接失败，使用离线模式');
+      console.warn('WebSocket连接失败，启动轮询模式');
       setConnectionStatus('error');
       setIsConnected(false);
-      // 不显示错误提示，因为WebSocket服务器可能没有启动
+      // WebSocket失败后启动轮询
+      startPollingRef.current();
     },
-    autoReconnect: false, // 禁用自动重连，避免不断尝试连接不存在的服务器
-    reconnectInterval: 3000,
-    maxReconnectAttempts: 0 // 设置为0，禁用重连
+    autoReconnect: true, // 启用自动重连
+    reconnectInterval: 5000,
+    maxReconnectAttempts: 10 // 增加重连次数
   }) : { sendMessage: () => false, reconnect: () => {} };
   
   const { sendMessage: sendWSMessage, reconnect } = webSocketResult;
+  
+  // 轮询获取新消息的函数
+  const pollForNewMessages = useCallback(async () => {
+    const state = getStoreState();
+    if (!state.currentUser || !state.currentConversation) {
+      console.log('轮询跳过：缺少用户或会话信息');
+      return;
+    }
+    
+    console.log(`轮询检查新消息 - 会话: ${state.currentConversation.id}, 用户: ${state.currentUser.name}`);
+    
+    try {
+      // 获取最新的消息
+      const result = await imAPI.message.getMessages(state.currentConversation.id, 1, 20);
+      console.log(`轮询获取到 ${result.messages.length} 条消息`);
+      
+      // 找出新消息（基于时间戳和ID过滤）
+      const currentMessageIds = new Set(state.messages.map(msg => msg.id));
+      const newMessages = result.messages.filter(msg => {
+        const isNewByTime = new Date(msg.createdAt) > new Date(lastMessageTimestampRef.current);
+        const isNewById = !currentMessageIds.has(msg.id);
+        
+        console.log(`消息 ${msg.id}: 时间新=${isNewByTime}, ID新=${isNewById}, 发送者=${msg.senderName}, 当前用户=${state.currentUser?.name}`);
+        
+        // 移除 isNotOwnMessage 过滤条件，让所有新消息都能被显示
+        return isNewByTime || isNewById;
+      });
+      
+      if (newMessages.length > 0) {
+        console.log(`轮询发现${newMessages.length}条新消息:`, newMessages.map(m => ({id: m.id, content: m.content, sender: m.senderName})));
+        
+        // 更新最后消息时间戳
+        const latestMessage = newMessages.reduce((latest, msg) => 
+          new Date(msg.createdAt) > new Date(latest.createdAt) ? msg : latest
+        );
+        lastMessageTimestampRef.current = latestMessage.createdAt;
+        
+        // 按时间顺序添加新消息
+        newMessages
+          .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+          .forEach(msg => {
+            console.log(`添加新消息到界面: ${msg.content}`);
+            addMessage(msg);
+          });
+      } else {
+        console.log('轮询未发现新消息');
+      }
+    } catch (error) {
+      console.error('轮询消息失败:', error);
+    }
+  }, [getStoreState, addMessage]);
+  
+  // 启动轮询
+  const startPolling = useCallback(() => {
+    if (pollingIntervalRef.current) return; // 避免重复启动
+    
+    console.log('启动消息轮询模式');
+    // 立即执行一次轮询
+    pollForNewMessages();
+    // 然后每3秒轮询一次（更合理的频率）
+    pollingIntervalRef.current = setInterval(pollForNewMessages, 3000);
+  }, [pollForNewMessages]);
+  
+  // 停止轮询
+  const stopPolling = useCallback(() => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+      console.log('停止消息轮询');
+    }
+  }, []);
   
   // 初始化IM系统
   const initialize = useCallback(async () => {
@@ -96,7 +179,13 @@ export const useIM = () => {
       // 尝试获取WebSocket token，但不因失败而中断初始化
       try {
         const wsToken = await imAPI.websocket.getWebSocketToken();
+        const previousToken = wsTokenRef.current;
         wsTokenRef.current = wsToken;
+        
+        // 如果token发生变化，触发重新连接
+        if (previousToken !== wsToken && webSocketResult.reconnect) {
+          webSocketResult.reconnect();
+        }
       } catch (wsError) {
         console.warn('无法获取WebSocket token，将使用离线模式:', wsError);
         // 设置为离线模式但不阻止继续初始化
@@ -155,6 +244,10 @@ export const useIM = () => {
       
       if (page === 1) {
         setMessages(result.messages);
+        // 更新最后消息时间戳
+        if (result.messages.length > 0) {
+          lastMessageTimestampRef.current = result.messages[result.messages.length - 1].createdAt;
+        }
       } else {
         // 分页加载，追加到现有消息前面 - 使用getStoreState读取当前消息
         const currentMessages = getStoreState().messages;
@@ -224,6 +317,9 @@ export const useIM = () => {
         updatedAt: sentMessage.updatedAt
       });
       
+      // 更新最后消息时间戳
+      lastMessageTimestampRef.current = sentMessage.createdAt;
+      
       // 通过WebSocket发送消息通知（如果连接可用）
       if (isConnected) {
         const wsMessage: WebSocketMessage = {
@@ -233,7 +329,13 @@ export const useIM = () => {
             content,
             messageType,
             messageId: sentMessage.id,
-            timestamp: sentMessage.createdAt
+            senderId: currentUser.id,
+            senderName: currentUser.name,
+            senderImage: currentUser.image,
+            timestamp: sentMessage.createdAt,
+            receiverId: currentConversation.type === 'private' 
+              ? currentConversation.participants.find(p => p.id !== currentUser.id)?.id 
+              : undefined
           }
         };
         
@@ -392,6 +494,13 @@ export const useIM = () => {
     }
   }, [setError]);
   
+  // 更新函数refs来避免useEffect循环依赖
+  useEffect(() => {
+    startPollingRef.current = startPolling;
+    stopPollingRef.current = stopPolling;
+    loadOnlineUsersRef.current = loadOnlineUsers;
+  }, [startPolling, stopPolling, loadOnlineUsers]);
+  
   return {
     // 状态
     currentUser,
@@ -430,7 +539,15 @@ export const useIM = () => {
     setChatType,
     setSearchTerm,
     
-    // WebSocket
-    reconnect
+    // WebSocket和轮询控制
+    reconnect,
+    startPolling,
+    stopPolling,
+    
+    // 清理函数
+    cleanup: () => {
+      stopPolling();
+      reset();
+    }
   };
 };

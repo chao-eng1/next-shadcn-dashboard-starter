@@ -191,6 +191,8 @@ export const useWebSocket = ({
     if (token) {
       isManualClose.current = false;
       connectRef.current();
+    } else {
+      disconnectRef.current();
     }
 
     return () => {
