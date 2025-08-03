@@ -141,14 +141,42 @@ export function ChatContent({ conversation }: ChatContentProps) {
       return;
     }
 
+    console.log('🔵 [Chat Content] Conversation changed:', conversation.id);
+    console.log('🔵 [Chat Content] User ID:', user?.id);
+
     // 加载消息
     loadMessages(conversation.id);
 
+    // 加入WebSocket房间
+    if (wsService && user) {
+      console.log('🔵 [Chat Content] Connecting to WebSocket...');
+      wsService
+        .connect(user.id)
+        .then(() => {
+          console.log(
+            '🔵 [Chat Content] WebSocket connected, joining room:',
+            conversation.type,
+            conversation.id
+          );
+          wsService.joinConversation(conversation.id, conversation.type);
+        })
+        .catch((error) => {
+          console.error(
+            '🔵 [Chat Content] WebSocket connection failed:',
+            error
+          );
+        });
+    }
+
     // 简化的消息监听 - 只监听自定义事件
     const handleNewMessage = (event: CustomEvent) => {
-      console.log('Chat content received newMessage event:', event.detail);
+      debugger; // 🔴 调试断点：前端组件接收到newMessage事件
+      console.log('🔵 [Chat Content] Received newMessage event:', event.detail);
       if (event.detail.conversationId === conversation.id) {
-        console.log('Message is for current conversation:', conversation.id);
+        console.log(
+          '🔵 [Chat Content] Message is for current conversation:',
+          conversation.id
+        );
         const newMessages = event.detail.messages.map((msg: any) => ({
           id: msg.id,
           content: msg.content,
@@ -168,24 +196,47 @@ export function ChatContent({ conversation }: ChatContentProps) {
           replyTo: msg.replyTo
         }));
 
-        console.log('Adding new messages to state:', newMessages);
+        console.log(
+          '🔵 [Chat Content] Adding new messages to state:',
+          newMessages
+        );
         setMessages((prev) => {
           const updated = [...prev, ...newMessages];
-          console.log('Updated messages count:', updated.length);
+          console.log(
+            '🔵 [Chat Content] Updated messages count:',
+            updated.length
+          );
           return updated;
         });
+      } else {
+        console.log(
+          '🔵 [Chat Content] Message not for current conversation:',
+          event.detail.conversationId,
+          'current:',
+          conversation.id
+        );
       }
     };
 
     window.addEventListener('newMessage', handleNewMessage as EventListener);
 
     return () => {
+      // 离开WebSocket房间
+      if (wsService && user) {
+        console.log(
+          '🔵 [Chat Content] Leaving WebSocket room:',
+          conversation.type,
+          conversation.id
+        );
+        wsService.leaveConversation(conversation.id, conversation.type);
+      }
+
       window.removeEventListener(
         'newMessage',
         handleNewMessage as EventListener
       );
     };
-  }, [conversation]);
+  }, [conversation, user]);
 
   // 滚动到底部
   const scrollToBottom = () => {

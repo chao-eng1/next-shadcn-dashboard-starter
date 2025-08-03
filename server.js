@@ -34,19 +34,30 @@ function setupServerClientHandlers(socket) {
   socket.on('server:broadcast:message', (data) => {
     const { room, event, data: messageData, excludeUserId } = data;
 
+    console.log('🟢 [WebSocket Server] Received server:broadcast:message');
+    console.log('🟢 [WebSocket Server] Room:', room);
+    console.log('🟢 [WebSocket Server] Event:', event);
+    console.log('🟢 [WebSocket Server] Message data:', messageData);
+    console.log('🟢 [WebSocket Server] Exclude user:', excludeUserId);
+
     if (excludeUserId) {
       // 排除特定用户
       const excludeSocketId = userConnections.get(excludeUserId);
       if (excludeSocketId) {
+        console.log('🟢 [WebSocket Server] Excluding socket:', excludeSocketId);
         socket.to(room).except(excludeSocketId).emit(event, messageData);
       } else {
+        console.log(
+          '🟢 [WebSocket Server] Exclude user not found, broadcasting to all in room'
+        );
         socket.to(room).emit(event, messageData);
       }
     } else {
+      console.log('🟢 [WebSocket Server] Broadcasting to all in room');
       socket.to(room).emit(event, messageData);
     }
 
-    console.log(`服务端广播消息到房间 ${room}:`, event);
+    console.log(`🟢 [WebSocket Server] Broadcasted ${event} to room ${room}`);
   });
 
   // 处理项目通知广播
@@ -176,6 +187,12 @@ io.on('connection', (socket) => {
     const { conversationId, type } = data;
     const roomName = `${type}:${conversationId}`;
 
+    console.log(
+      '🟢 [WebSocket Server] User joining room:',
+      socket.userId,
+      'roomName:',
+      roomName
+    );
     socket.join(roomName);
 
     // 记录用户所在房间
@@ -184,7 +201,13 @@ io.on('connection', (socket) => {
     }
     userRooms.get(socket.userId).add(roomName);
 
-    console.log(`用户 ${socket.userId} 加入房间: ${roomName}`);
+    console.log(
+      `🟢 [WebSocket Server] User ${socket.userId} joined room: ${roomName}`
+    );
+    console.log(
+      '🟢 [WebSocket Server] User rooms:',
+      Array.from(userRooms.get(socket.userId) || [])
+    );
 
     socket.emit('conversation:joined', {
       conversationId,
@@ -212,8 +235,13 @@ io.on('connection', (socket) => {
     const { conversationId, type, content, messageId, timestamp } = data;
     const roomName = `${type}:${conversationId}`;
 
+    console.log('🟢 [WebSocket Server] Received message:send event');
+    console.log('🟢 [WebSocket Server] Data:', data);
+    console.log('🟢 [WebSocket Server] Room name:', roomName);
+    console.log('🟢 [WebSocket Server] Socket userId:', socket.userId);
+
     // 广播消息到房间内的其他用户
-    socket.to(roomName).emit('message:new', {
+    const broadcastData = {
       id: messageId,
       conversationId,
       type,
@@ -222,7 +250,12 @@ io.on('connection', (socket) => {
       senderEmail: socket.userEmail,
       timestamp,
       status: 'sent'
-    });
+    };
+
+    console.log('🟢 [WebSocket Server] Broadcasting to room:', roomName);
+    console.log('🟢 [WebSocket Server] Broadcast data:', broadcastData);
+
+    socket.to(roomName).emit('message:new', broadcastData);
 
     // 确认消息已发送
     socket.emit('message:sent', {
@@ -232,7 +265,10 @@ io.on('connection', (socket) => {
       status: 'delivered'
     });
 
-    console.log(`消息已发送到房间 ${roomName}:`, content.substring(0, 50));
+    console.log(
+      `🟢 [WebSocket Server] Message sent to room ${roomName}:`,
+      content.substring(0, 50)
+    );
   });
 
   // 消息已读状态

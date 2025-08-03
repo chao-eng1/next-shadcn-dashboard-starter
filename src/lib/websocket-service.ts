@@ -190,6 +190,8 @@ export class WebSocketService {
 
     // 监听消息相关事件
     this.socket.on('message:new', (data: any) => {
+      debugger; // 🔴 调试断点：Socket.io接收到message:new事件
+      console.log('🔴 [WebSocket] Received message:new event:', data);
       this.handleMessageReceive(data);
     });
 
@@ -207,6 +209,10 @@ export class WebSocketService {
 
     // 监听会话相关事件
     this.socket.on('conversation:joined', (data: any) => {
+      console.log(
+        '🔴 [WebSocket] Received conversation:joined confirmation:',
+        data
+      );
       this.emit('conversation:joined', data);
     });
 
@@ -328,7 +334,12 @@ export class WebSocketService {
     store.setConnectionStatus('connected');
     store.resetReconnectAttempts();
 
-    this.log('Socket.io connected');
+    console.log('🔴 [WebSocket] Socket.io connected successfully');
+    console.log('🔴 [WebSocket] Socket ID:', this.socket?.id);
+    console.log(
+      '🔴 [WebSocket] Socket connected status:',
+      this.socket?.connected
+    );
 
     // 开始心跳
     this.startHeartbeat();
@@ -342,6 +353,10 @@ export class WebSocketService {
     // 加入当前选中的会话
     const selectedConversationId = store.selectedConversationId;
     if (selectedConversationId) {
+      console.log(
+        '🔴 [WebSocket] Auto-joining selected conversation:',
+        selectedConversationId
+      );
       this.joinConversation(selectedConversationId);
     }
   }
@@ -554,7 +569,10 @@ export class WebSocketService {
 
   // 消息处理方法
   private handleMessageReceive(data: any): void {
-    console.log('WebSocket received message data:', data);
+    debugger; // 🔴 调试断点：WebSocket接收到消息
+    console.log('🔴 [WebSocket] handleMessageReceive - Raw data:', data);
+    console.log('🔴 [WebSocket] Data type:', typeof data);
+    console.log('🔴 [WebSocket] Data keys:', Object.keys(data || {}));
     const store = useMessageStore.getState();
 
     // 转换服务端消息格式为前端Message格式
@@ -585,9 +603,10 @@ export class WebSocketService {
         : undefined
     };
 
-    console.log('Formatted message for frontend:', message);
+    console.log('🔴 [WebSocket] Formatted message for frontend:', message);
     store.addMessage(message);
 
+    console.log('🔴 [WebSocket] About to dispatch custom event');
     // 分发自定义事件给chat-content组件
     const customEvent = new CustomEvent('newMessage', {
       detail: {
@@ -595,7 +614,11 @@ export class WebSocketService {
         messages: [message]
       }
     });
-    console.log('Dispatching newMessage event:', customEvent.detail);
+    debugger; // 🔴 调试断点：准备分发自定义事件到前端组件
+    console.log(
+      '🔴 [WebSocket] Dispatching newMessage event:',
+      customEvent.detail
+    );
     window.dispatchEvent(customEvent);
 
     // 如果不是当前选中的会话，显示通知
@@ -759,14 +782,44 @@ export class WebSocketService {
     conversationId: string,
     type: string = 'private'
   ): void {
-    this.send(MESSAGE_TYPES.CONVERSATION_JOIN, { conversationId, type });
+    console.log(
+      '🔴 [WebSocket] Joining conversation:',
+      conversationId,
+      'type:',
+      type
+    );
+    console.log('🔴 [WebSocket] Socket connected:', this.socket?.connected);
+    console.log('🔴 [WebSocket] Socket ID:', this.socket?.id);
+
+    if (this.socket && this.socket.connected) {
+      this.socket.emit('conversation:join', { conversationId, type });
+      console.log('🔴 [WebSocket] Sent conversation:join event');
+    } else {
+      console.warn(
+        '🔴 [WebSocket] Cannot join conversation - socket not connected'
+      );
+    }
   }
 
   public leaveConversation(
     conversationId: string,
-    type: string = 'project'
+    type: string = 'private'
   ): void {
-    this.send(MESSAGE_TYPES.CONVERSATION_LEAVE, { conversationId, type });
+    console.log(
+      '🔴 [WebSocket] Leaving conversation:',
+      conversationId,
+      'type:',
+      type
+    );
+
+    if (this.socket && this.socket.connected) {
+      this.socket.emit('conversation:leave', { conversationId, type });
+      console.log('🔴 [WebSocket] Sent conversation:leave event');
+    } else {
+      console.warn(
+        '🔴 [WebSocket] Cannot leave conversation - socket not connected'
+      );
+    }
   }
 
   public sendTypingStatus(

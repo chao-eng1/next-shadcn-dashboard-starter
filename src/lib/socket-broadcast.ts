@@ -12,9 +12,11 @@ class SocketBroadcastService {
   private async connect() {
     try {
       const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001';
+      console.log('🟡 [Broadcast Service] Attempting to connect to:', wsUrl);
 
       // 获取服务端认证token
       const token = await this.getServerToken();
+      console.log('🟡 [Broadcast Service] Using token:', token);
 
       this.socket = ioClient(wsUrl, {
         auth: {
@@ -26,19 +28,21 @@ class SocketBroadcastService {
 
       this.socket.on('connect', () => {
         this.isConnected = true;
-        console.log('Socket.io broadcast service connected');
+        console.log('🟡 [Broadcast Service] Connected successfully');
       });
 
       this.socket.on('disconnect', () => {
         this.isConnected = false;
-        console.log('Socket.io broadcast service disconnected');
+        console.log('🟡 [Broadcast Service] Disconnected');
       });
 
       this.socket.on('connect_error', (error) => {
-        console.error('Socket.io broadcast service connection error:', error);
+        console.error('🟡 [Broadcast Service] Connection error:', error);
+        this.isConnected = false;
       });
     } catch (error) {
-      console.error('Failed to connect broadcast service:', error);
+      console.error('🟡 [Broadcast Service] Failed to connect:', error);
+      this.isConnected = false;
     }
   }
 
@@ -56,11 +60,20 @@ class SocketBroadcastService {
     excludeUserId?: string;
   }) {
     if (!this.socket || !this.isConnected) {
-      console.warn('Socket.io not connected, cannot broadcast message');
+      console.warn(
+        '🟡 [Broadcast Service] Socket.io not connected, cannot broadcast message'
+      );
       return;
     }
 
     const roomName = `${data.type}:${data.conversationId}`;
+
+    console.log(
+      '🟡 [Broadcast Service] Broadcasting message to room:',
+      roomName
+    );
+    console.log('🟡 [Broadcast Service] Message data:', data.message);
+    console.log('🟡 [Broadcast Service] Exclude user:', data.excludeUserId);
 
     this.socket.emit('server:broadcast:message', {
       room: roomName,
@@ -69,7 +82,9 @@ class SocketBroadcastService {
       excludeUserId: data.excludeUserId
     });
 
-    console.log(`Broadcasted message to room: ${roomName}`);
+    console.log(
+      `🟡 [Broadcast Service] Broadcasted message to room: ${roomName}`
+    );
   }
 
   // 广播消息已读状态
