@@ -41,6 +41,7 @@ export default function IMPage() {
     // Actions
     setCurrentProject,
     setCurrentConversation,
+    updateConversation,
     setChatType,
     setSearchTerm,
     
@@ -496,7 +497,13 @@ export default function IMPage() {
                       className={`p-3 rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
                         currentConversation?.id === conversation.id ? 'bg-primary/10 border border-primary/20' : ''
                       }`}
-                      onClick={() => setCurrentConversation(conversation)}
+                      onClick={() => {
+                        setCurrentConversation(conversation);
+                        // 立即更新未读计数为0（UI响应性优化）
+                        if (conversation.unreadCount > 0) {
+                          updateConversation(conversation.id, { unreadCount: 0 });
+                        }
+                      }}
                     >
                       {conversation.type === 'project' ? (
                         // 项目群聊

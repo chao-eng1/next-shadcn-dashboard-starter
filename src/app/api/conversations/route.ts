@@ -121,6 +121,7 @@ export async function GET(request: NextRequest) {
             select: {
               messages: {
                 where: {
+                  isDeleted: false, // 排除已删除的消息
                   readBy: {
                     none: {
                       userId: user.id
@@ -245,6 +246,7 @@ export async function GET(request: NextRequest) {
             select: {
               messages: {
                 where: {
+                  isDeleted: false, // 排除已删除的消息
                   isRead: false,
                   receiverId: user.id
                 }

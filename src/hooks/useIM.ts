@@ -255,7 +255,13 @@ export const useIM = () => {
       }
       
       // 标记会话为已读
-      await imAPI.conversation.markConversationAsRead(conversationId);
+      try {
+        await imAPI.conversation.markConversationAsRead(conversationId);
+        console.log('Successfully marked conversation as read');
+      } catch (readError) {
+        console.error('Failed to mark conversation as read:', readError);
+        // 即使标记已读失败，也继续更新前端状态以保证用户体验
+      }
       
       // 更新会话的未读数量
       updateConversation(conversationId, { unreadCount: 0 });

@@ -70,9 +70,71 @@ export async function PUT(
       return apiNotFound('会话不存在');
     }
 
-    // 由于这个 API 主要用于标记消息为已读，而且错误很复杂
-    // 让我们先简单返回成功，避免阻塞聊天功能
-    console.log('Conversation read marking completed (simplified)');
+    // 标记消息为已读
+    if (projectChat) {
+      // 对于项目聊天，我们需要在 projectMessageReads 表中创建记录
+      console.log('Marking project chat messages as read');
+      
+      // 获取当前会话中所有用户未读的消息
+      const unreadMessages = await prisma.projectMessage.findMany({
+        where: {
+          chatId: conversationId,
+          isDeleted: false, // 排除已删除的消息
+          readBy: {
+            none: {
+              userId: user.id
+            }
+          }
+        },
+        select: { id: true }
+      });
+
+      console.log('Found unread project messages:', unreadMessages.length);
+
+      // 为所有未读消息创建已读记录
+      if (unreadMessages.length > 0) {
+        // 使用 Promise.all 来并行创建记录，忽略重复错误
+        const createPromises = unreadMessages.map(async (message) => {
+          try {
+            await prisma.messageRead.create({
+              data: {
+                messageId: message.id,
+                userId: user.id,
+                readAt: new Date()
+              }
+            });
+          } catch (error) {
+            // 忽略唯一约束错误（记录已存在）
+            if (!error.message?.includes('Unique constraint')) {
+              throw error;
+            }
+          }
+        });
+        
+        await Promise.all(createPromises);
+        console.log('Created project message read records');
+      }
+    } else if (privateConversation) {
+      // 对于私聊，我们需要更新 privateMessage 的 isRead 字段
+      console.log('Marking private conversation messages as read');
+      
+      const updateResult = await prisma.privateMessage.updateMany({
+        where: {
+          conversationId: conversationId,
+          receiverId: user.id,
+          isDeleted: false, // 排除已删除的消息
+          isRead: false
+        },
+        data: {
+          isRead: true,
+          readAt: new Date()
+        }
+      });
+
+      console.log('Updated private messages read status:', updateResult.count);
+    }
+
+    console.log('Conversation read marking completed successfully');
     return apiResponse({ success: true, message: '会话已标记为已读' });
 
   } catch (error) {
