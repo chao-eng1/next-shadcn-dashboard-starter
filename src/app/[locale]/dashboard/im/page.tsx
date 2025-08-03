@@ -330,10 +330,10 @@ export default function IMPage() {
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       {/* 页面标题 */}
-      <div className="flex-shrink-0 px-6 py-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      {/* <div className="flex-shrink-0 px-6 py-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <h1 className="text-2xl font-semibold tracking-tight">即时通讯</h1>
         <p className="text-sm text-muted-foreground">与团队成员进行实时沟通</p>
-      </div>
+      </div> */}
       <div className="flex-1 flex gap-4 p-4 min-h-0 overflow-hidden">
         {/* 连接状态指示器 */}
         {connectionStatus !== 'connected' && (
