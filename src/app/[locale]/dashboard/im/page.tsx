@@ -328,15 +328,15 @@ export default function IMPage() {
   });
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className="flex flex-col overflow-hidden" style={{ height: 'calc(100vh - 64px)' }}>
       {/* 页面标题 */}
       {/* <div className="flex-shrink-0 px-6 py-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <h1 className="text-2xl font-semibold tracking-tight">即时通讯</h1>
         <p className="text-sm text-muted-foreground">与团队成员进行实时沟通</p>
       </div> */}
-      <div className="flex-1 flex gap-4 p-4 min-h-0 overflow-hidden">
+      <div className="flex-1 flex gap-4 p-4 h-full overflow-hidden">
         {/* 连接状态指示器 */}
-        {connectionStatus !== 'connected' && (
+        {/* {connectionStatus !== 'connected' && (
           <div className="fixed top-4 right-4 z-50">
             <Badge variant={connectionStatus === 'connecting' ? 'secondary' : 'outline'} className="flex items-center gap-2">
               {connectionStatus === 'connecting' && <Loader2 className="h-3 w-3 animate-spin" />}
@@ -344,7 +344,7 @@ export default function IMPage() {
                !isConnected ? '轮询模式' : '已断开'}
             </Badge>
           </div>
-        )}
+        )} */}
         
         {/* 会话列表 */}
         <Card className="w-80 flex flex-col h-full min-h-0">
