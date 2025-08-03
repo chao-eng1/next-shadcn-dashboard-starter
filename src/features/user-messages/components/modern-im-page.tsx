@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useIM } from '@/hooks/useIM';
 
 // 类型定义
 interface User {
@@ -52,7 +53,7 @@ interface Message {
   senderName: string;
   senderImage?: string;
   timestamp: string;
-  type: 'text' | 'image' | 'file' | 'system';
+  messageType: 'text' | 'image' | 'file' | 'system';
   status: 'sending' | 'sent' | 'delivered' | 'read';
   replyTo?: {
     id: string;
@@ -78,131 +79,58 @@ interface ModernIMPageProps {
 }
 
 export function ModernIMPage({ currentUser }: ModernIMPageProps) {
+  // 使用IM hook获取全局数据
+  const {
+    conversations,
+    messages,
+    onlineUsers,
+    currentConversation,
+    chatType,
+    loading,
+    error,
+    loadConversations,
+    selectConversation,
+    sendMessage,
+    setChatType
+  } = useIM();
+
   const [activeTab, setActiveTab] = useState<'project' | 'private' | 'system'>('project');
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // 模拟数据
-  const mockConversations: Conversation[] = [
-    {
-      id: '1',
-      name: '项目Alpha开发组',
-      type: 'project',
-      participants: [
-        { id: '1', name: '张三', email: 'zhang@example.com', status: 'online' },
-        { id: '2', name: '李四', email: 'li@example.com', status: 'away' },
-        { id: '3', name: '王五', email: 'wang@example.com', status: 'offline' }
-      ],
-      lastMessage: {
-        id: '1',
-        content: '今天的代码审查会议推迟到下午3点',
-        senderId: '1',
-        senderName: '张三',
-        timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-        type: 'text',
-        status: 'read'
-      },
-      unreadCount: 2,
-      isOnline: true,
-      projectId: 'proj1'
-    },
-    {
-      id: '2',
-      name: '李四',
-      type: 'private',
-      participants: [
-        { id: '2', name: '李四', email: 'li@example.com', status: 'online', image: '/avatars/li.jpg' }
-      ],
-      lastMessage: {
-        id: '2',
-        content: '关于明天的需求评审，我有几个问题想和你讨论',
-        senderId: '2',
-        senderName: '李四',
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-        type: 'text',
-        status: 'delivered'
-      },
-      unreadCount: 1,
-      isOnline: true
-    },
-    {
-      id: '3',
-      name: '系统通知',
-      type: 'system',
-      participants: [],
-      lastMessage: {
-        id: '3',
-        content: '您的账户安全设置已更新',
-        senderId: 'system',
-        senderName: '系统',
-        timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-        type: 'system',
-        status: 'read'
-      },
-      unreadCount: 0,
-      isOnline: false
-    }
-  ];
+  // 选中的会话（使用全局状态）
+  const selectedConversation = currentConversation;
 
-  const mockMessages: Message[] = [
-    {
-      id: '1',
-      content: '大家好，今天我们来讨论一下项目的进度安排',
-      senderId: '1',
-      senderName: '张三',
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      type: 'text',
-      status: 'read'
-    },
-    {
-      id: '2',
-      content: '好的，我这边的前端开发已经完成了80%',
-      senderId: currentUser.id,
-      senderName: currentUser.name,
-      timestamp: new Date(Date.now() - 1.5 * 60 * 60 * 1000).toISOString(),
-      type: 'text',
-      status: 'read'
-    },
-    {
-      id: '3',
-      content: '后端API还需要再优化一下性能',
-      senderId: '2',
-      senderName: '李四',
-      timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-      type: 'text',
-      status: 'read',
-      replyTo: {
-        id: '2',
-        content: '好的，我这边的前端开发已经完成了80%',
-        senderName: currentUser.name
-      }
-    },
-    {
-      id: '4',
-      content: '今天的代码审查会议推迟到下午3点',
-      senderId: '1',
-      senderName: '张三',
-      timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-      type: 'text',
-      status: 'delivered'
-    }
-  ];
-
+  // 根据activeTab加载对应的会话数据
   useEffect(() => {
-    setConversations(mockConversations.filter(conv => conv.type === activeTab));
-  }, [activeTab]);
+    if (activeTab === 'system') {
+      // 系统消息类型，设置聊天类型但不加载会话
+      setChatType('system');
+    } else {
+      // 加载对应类型的会话
+      setChatType(activeTab);
+      loadConversations(activeTab);
+    }
+  }, [activeTab, loadConversations, setChatType]);
 
+  // 同步activeTab和chatType
+  useEffect(() => {
+    if (chatType !== activeTab) {
+      setActiveTab(chatType);
+    }
+  }, [chatType, activeTab]);
+
+  // 当消息更新时滚动到底部
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  // 当选中会话时，自动滚动到底部
   useEffect(() => {
     if (selectedConversation) {
-      setMessages(mockMessages);
       scrollToBottom();
     }
   }, [selectedConversation]);
@@ -214,31 +142,18 @@ export function ModernIMPage({ currentUser }: ModernIMPageProps) {
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedConversation) return;
 
-    const message: Message = {
-      id: Date.now().toString(),
-      content: newMessage,
-      senderId: currentUser.id,
-      senderName: currentUser.name,
-      senderImage: currentUser.image,
-      timestamp: new Date().toISOString(),
-      type: 'text',
-      status: 'sending'
-    };
-
-    setMessages(prev => [...prev, message]);
-    setNewMessage('');
+    try {
+      // 使用IM hook的sendMessage方法发送消息
+      await sendMessage(newMessage.trim());
+      setNewMessage('');
+      
+      // 聚焦到输入框
+      inputRef.current?.focus();
+    } catch (error) {
+      console.error('发送消息失败:', error);
+      toast.error('发送消息失败，请重试');
+    }
     scrollToBottom();
-
-    // 模拟发送
-    setTimeout(() => {
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === message.id 
-            ? { ...msg, status: 'sent' as const }
-            : msg
-        )
-      );
-    }, 1000);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -293,6 +208,24 @@ export function ModernIMPage({ currentUser }: ModernIMPageProps) {
   const filteredConversations = conversations.filter(conv => 
     conv.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // 错误状态显示
+  if (error) {
+    return (
+      <div className="h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+        <div className="text-center">
+          <div className="text-red-500 mb-4">
+            <X className="h-16 w-16 mx-auto" />
+          </div>
+          <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">加载失败</h3>
+          <p className="text-slate-500 dark:text-slate-400 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()} variant="outline">
+            重新加载
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
@@ -358,7 +291,14 @@ export function ModernIMPage({ currentUser }: ModernIMPageProps) {
           {/* 会话列表 */}
           <ScrollArea className="flex-1">
             <div className="p-2">
-              {filteredConversations.length === 0 ? (
+              {loading.conversations ? (
+                <div className="text-center py-8">
+                  <Loader2 className="h-8 w-8 text-slate-400 mx-auto mb-3 animate-spin" />
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    加载会话中...
+                  </p>
+                </div>
+              ) : filteredConversations.length === 0 ? (
                 <div className="text-center py-8">
                   <MessageCircle className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
                   <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -369,7 +309,7 @@ export function ModernIMPage({ currentUser }: ModernIMPageProps) {
                 filteredConversations.map((conversation) => (
                   <div
                     key={conversation.id}
-                    onClick={() => setSelectedConversation(conversation)}
+                    onClick={() => selectConversation(conversation.id)}
                     className={cn(
                       "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800 mb-1",
                       selectedConversation?.id === conversation.id && "bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800"
@@ -403,7 +343,7 @@ export function ModernIMPage({ currentUser }: ModernIMPageProps) {
                         </h3>
                         {conversation.lastMessage && (
                           <span className="text-xs text-slate-500 dark:text-slate-400 shrink-0">
-                            {formatTime(conversation.lastMessage.timestamp)}
+                            {formatTime(conversation.lastMessage.createdAt || conversation.lastMessage.timestamp)}
                           </span>
                         )}
                       </div>
@@ -491,7 +431,14 @@ export function ModernIMPage({ currentUser }: ModernIMPageProps) {
               {/* 消息区域 */}
               <ScrollArea className="flex-1 p-4">
                 <div className="space-y-4">
-                  {messages.length === 0 ? (
+                  {loading.messages ? (
+                    <div className="text-center py-12">
+                      <Loader2 className="h-8 w-8 text-slate-400 mx-auto mb-3 animate-spin" />
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        加载消息中...
+                      </p>
+                    </div>
+                  ) : messages.length === 0 ? (
                     <div className="text-center py-12">
                       <MessageCircle className="h-16 w-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
                       <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">开始对话</h3>
@@ -542,7 +489,7 @@ export function ModernIMPage({ currentUser }: ModernIMPageProps) {
                                 "flex items-center gap-1 text-xs text-slate-400 px-3",
                                 isOwn ? "justify-end" : "justify-start"
                               )}>
-                                <span>{formatTime(message.timestamp)}</span>
+                                <span>{formatTime(message.createdAt || message.timestamp)}</span>
                                 {isOwn && getStatusIcon(message.status)}
                               </div>
                             </div>
@@ -601,10 +548,14 @@ export function ModernIMPage({ currentUser }: ModernIMPageProps) {
                   
                   <Button 
                     onClick={handleSendMessage}
-                    disabled={!newMessage.trim()}
+                    disabled={!newMessage.trim() || !selectedConversation || loading.sending}
                     className="shrink-0 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
                   >
-                    <Send className="h-4 w-4" />
+                    {loading.sending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </div>

@@ -42,11 +42,24 @@ export function GlobalIMProvider({ children }: { children: React.ReactNode }) {
     };
   }, [isInitialized]); // 只在初始化状态改变时执行
 
-  // 当用户信息可用时，加载会话列表以获取未读计数
+  // 当用户信息可用时，加载所有会话列表以获取未读计数
   useEffect(() => {
     if (currentUser && isInitialized) {
-      // 加载私聊会话来获取未读消息计数
-      loadConversationsRef.current('private');
+      // 加载所有类型的会话来获取完整的未读消息计数
+      const loadAllConversations = async () => {
+        try {
+          // 并行加载私聊和项目会话
+          await Promise.all([
+            loadConversationsRef.current('private'),
+            loadConversationsRef.current('project')
+          ]);
+          console.log('全局IM数据加载完成');
+        } catch (error) {
+          console.error('加载会话数据失败:', error);
+        }
+      };
+      
+      loadAllConversations();
     }
   }, [currentUser, isInitialized]); // 依赖currentUser和初始化状态
 
