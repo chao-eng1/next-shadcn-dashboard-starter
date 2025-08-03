@@ -31,6 +31,7 @@ import { ConversationList } from './conversation-list';
 import { ChatContent } from './chat-content';
 import { GlobalNotificationStatus } from './global-notification-status';
 import { NewPrivateChatDialog } from './new-private-chat-dialog';
+import { useRecentMessages } from '@/hooks/use-recent-messages';
 
 // 会话类型
 type ConversationType = 'private' | 'group' | 'system' | 'project';
@@ -58,82 +59,50 @@ interface Conversation {
   lastActivity: Date;
 }
 
-// 模拟会话数据
-const mockConversations: Conversation[] = [
-  {
-    id: 'conv1',
-    type: 'private',
-    name: '张三',
-    avatar: 'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20business%20portrait%20asian%20man%20suit&image_size=square',
-    lastMessage: {
-      content: '好的，我明天会准时参加会议',
-      timestamp: new Date(Date.now() - 5 * 60 * 1000),
-      sender: { id: 'user1', name: '张三' }
-    },
-    unreadCount: 2,
-    isOnline: true,
-    isPinned: false,
-    isMuted: false,
-    lastActivity: new Date(Date.now() - 5 * 60 * 1000)
-  },
-  {
-    id: 'conv2',
-    type: 'group',
-    name: '项目Alpha讨论组',
-    avatar: 'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20team%20collaboration%20icon%20blue%20gradient&image_size=square',
-    lastMessage: {
-      content: '大家对新的UI设计有什么看法？',
-      timestamp: new Date(Date.now() - 30 * 60 * 1000),
-      sender: { id: 'user2', name: '李四' }
-    },
-    unreadCount: 5,
-    isPinned: true,
-    isMuted: false,
-    lastActivity: new Date(Date.now() - 30 * 60 * 1000)
-  },
-  {
-    id: 'conv3',
-    type: 'system',
-    name: '系统通知',
-    lastMessage: {
-      content: '您的密码将在7天后过期，请及时更新',
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000)
-    },
-    unreadCount: 1,
-    isPinned: false,
-    isMuted: false,
-    priority: 'important',
-    lastActivity: new Date(Date.now() - 2 * 60 * 60 * 1000)
-  },
-  {
-    id: 'conv4',
-    type: 'project',
-    name: '项目Beta通知',
-    avatar: 'https://trae-api-sg.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20project%20notification%20icon%20purple%20gradient&image_size=square',
-    lastMessage: {
-      content: '任务"API接口开发"已完成',
-      timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000)
-    },
-    unreadCount: 3,
-    isPinned: false,
-    isMuted: false,
-    priority: 'normal',
-    projectId: 'proj2',
-    lastActivity: new Date(Date.now() - 4 * 60 * 60 * 1000)
-  }
-];
-
 export function MessageCenterMain() {
   const router = useRouter();
-  const [conversations, setConversations] = useState<Conversation[]>(mockConversations);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<ConversationType | 'all'>('all');
   const [isConnected, setIsConnected] = useState(true);
   const [showNewChatDialog, setShowNewChatDialog] = useState(false);
+  const [loading, setLoading] = useState(true);
+  
+  const { unreadCount } = useRecentMessages();
+
+  // 获取会话列表
+  const fetchConversations = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/message-center/conversations');
+      if (response.ok) {
+        const data = await response.json();
+        const formattedConversations = data.data.map((conv: any) => ({
+          ...conv,
+          lastMessage: conv.lastMessage ? {
+            ...conv.lastMessage,
+            timestamp: new Date(conv.lastMessage.timestamp)
+          } : undefined,
+          lastActivity: new Date(conv.lastActivity),
+          isPinned: false, // TODO: 实现置顶功能
+          isMuted: false   // TODO: 实现免打扰功能
+        }));
+        setConversations(formattedConversations);
+      }
+    } catch (error) {
+      console.error('获取会话列表失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchConversations();
+  }, []);
 
   // 计算未读消息总数
-  const totalUnreadCount = conversations.reduce((total, conv) => total + conv.unreadCount, 0);
+  const totalUnreadCount = unreadCount?.total || conversations.reduce((total, conv) => total + conv.unreadCount, 0);
 
   // 过滤会话
   const filteredConversations = conversations.filter(conv => {

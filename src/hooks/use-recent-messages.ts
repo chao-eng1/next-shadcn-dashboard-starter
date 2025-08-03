@@ -17,8 +17,18 @@ interface RecentMessage {
   };
 }
 
+interface UnreadCount {
+  total: number;
+  breakdown: {
+    system: number;
+    project: number;
+    private: number;
+  };
+}
+
 interface UseRecentMessagesReturn {
   messages: RecentMessage[];
+  unreadCount: UnreadCount | null;
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
@@ -26,6 +36,7 @@ interface UseRecentMessagesReturn {
 
 export function useRecentMessages(limit: number = 5): UseRecentMessagesReturn {
   const [messages, setMessages] = useState<RecentMessage[]>([]);
+  const [unreadCount, setUnreadCount] = useState<UnreadCount | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
@@ -33,6 +44,7 @@ export function useRecentMessages(limit: number = 5): UseRecentMessagesReturn {
   const fetchRecentMessages = useCallback(async () => {
     if (!user) {
       setMessages([]);
+      setUnreadCount(null);
       return;
     }
 
@@ -40,18 +52,30 @@ export function useRecentMessages(limit: number = 5): UseRecentMessagesReturn {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`/api/user-messages/recent?limit=${limit}`);
+      // 并行获取最近消息和未读数量
+      const [messagesResponse, unreadResponse] = await Promise.all([
+        fetch(`/api/user-messages/recent?limit=${limit}`),
+        fetch('/api/message-center/unread-count')
+      ]);
       
-      if (!response.ok) {
+      if (!messagesResponse.ok) {
         throw new Error('获取最近消息失败');
       }
       
-      const data = await response.json();
-      setMessages(data.data.messages || []);
+      if (!unreadResponse.ok) {
+        throw new Error('获取未读数量失败');
+      }
+      
+      const messagesData = await messagesResponse.json();
+      const unreadData = await unreadResponse.json();
+      
+      setMessages(messagesData.data.messages || []);
+      setUnreadCount(unreadData.data || null);
     } catch (err) {
       console.error('Error fetching recent messages:', err);
-      setError(err instanceof Error ? err.message : '获取最近消息失败');
+      setError(err instanceof Error ? err.message : '获取消息数据失败');
       setMessages([]);
+      setUnreadCount(null);
     } finally {
       setLoading(false);
     }
@@ -63,6 +87,7 @@ export function useRecentMessages(limit: number = 5): UseRecentMessagesReturn {
 
   return {
     messages,
+    unreadCount,
     loading,
     error,
     refetch: fetchRecentMessages
