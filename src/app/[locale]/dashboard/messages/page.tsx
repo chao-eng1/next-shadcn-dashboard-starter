@@ -1,27 +1,28 @@
-import { Metadata } from 'next';
-import { getCurrentUser } from '@/lib/get-current-user';
-import { redirect } from 'next/navigation';
-import { UserMessagesPage } from '@/features/user-messages/components/user-messages-page';
+'use client';
 
-export const metadata: Metadata = {
-  title: '我的消息',
-  description: '查看和管理您收到的系统消息'
-};
+import React from 'react';
+import { MessageCenter } from '@/components/messages/message-center';
+import { useMessageCenter } from '@/hooks/use-message-center';
 
-export default async function MessagesPage() {
-  const user = await getCurrentUser();
-  
-  if (!user) {
-    redirect('/auth/sign-in');
-  }
+
+
+export default function MessagesPage() {
+  // 使用消息中心Hook
+  const messageCenter = useMessageCenter({
+    userId: 'current', // TODO: 从认证状态获取真实用户ID
+    autoConnect: true,
+    enableNotifications: true,
+    enableTypingIndicator: true
+  });
 
   return (
-    <UserMessagesPage 
-      currentUser={{
-        id: user.id,
-        name: user.name || '',
-        email: user.email
-      }}
-    />
+    <div className="h-full">
+      <MessageCenter
+        initialConversations={messageCenter.conversations}
+        initialMessages={messageCenter.messages}
+        currentUserId="current"
+        onlineUsers={['user1', 'user2']} // TODO: 从WebSocket获取在线用户
+      />
+    </div>
   );
 }
