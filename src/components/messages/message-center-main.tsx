@@ -160,9 +160,9 @@ export function MessageCenterMain() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col bg-background overflow-hidden">
       {/* 顶部状态栏 */}
-      <div className="flex items-center justify-between p-4 border-b bg-card">
+      <div className="flex items-center justify-between p-4 border-b bg-card flex-shrink-0">
         <div className="flex items-center gap-3">
           <MessageSquare className="h-6 w-6 text-primary" />
           <h1 className="text-xl font-semibold">消息中心</h1>
@@ -181,12 +181,12 @@ export function MessageCenterMain() {
         </div>
       </div>
 
-      <ResizablePanelGroup direction="horizontal" className="flex-1">
+      <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
         {/* 左侧会话列表 */}
         <ResizablePanel defaultSize={35} minSize={25} maxSize={50}>
-          <div className="h-full flex flex-col">
+          <div className="h-full flex flex-col overflow-hidden">
             {/* 搜索和筛选 */}
-            <div className="p-4 space-y-3 border-b">
+            <div className="p-4 space-y-3 border-b flex-shrink-0">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -242,7 +242,7 @@ export function MessageCenterMain() {
             </div>
 
             {/* 会话列表 */}
-            <ScrollArea className="flex-1">
+            <ScrollArea className="flex-1 min-h-0">
               <ConversationList
                 conversations={filteredConversations}
                 selectedConversation={selectedConversation}
@@ -251,7 +251,7 @@ export function MessageCenterMain() {
             </ScrollArea>
 
             {/* 快速操作 */}
-            <div className="p-4 border-t">
+            <div className="p-4 border-t flex-shrink-0">
               <Button onClick={handleNewPrivateChat} className="w-full">
                 <Plus className="h-4 w-4 mr-2" />
                 新建私聊
