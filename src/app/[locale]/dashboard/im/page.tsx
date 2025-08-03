@@ -64,6 +64,7 @@ export default function IMPage() {
   const [selectedProjectForChat, setSelectedProjectForChat] = useState<Project | null>(null);
   const [pastedImage, setPastedImage] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showImagePreview, setShowImagePreview] = useState(false);
   const [projectMembers, setProjectMembers] = useState<User[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -189,6 +190,29 @@ export default function IMPage() {
       }
     }
   };
+
+  // 处理图片点击 - 打开预览模态框
+  const handleImageClick = (imageUrl: string) => {
+    setImagePreview(imageUrl);
+    setShowImagePreview(true);
+  };
+
+  // 处理键盘事件 - ESC键关闭图片预览
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && showImagePreview) {
+        setShowImagePreview(false);
+      }
+    };
+
+    if (showImagePreview) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showImagePreview]);
 
   // 开始私聊
   const handleStartPrivateChat = async (member: User) => {
@@ -731,7 +755,8 @@ export default function IMPage() {
                                 <img
                                   src={message.content}
                                   alt="Shared image"
-                                  className="max-w-[300px] max-h-[200px] rounded-lg border object-cover"
+                                  className="max-w-[300px] max-h-[200px] rounded-lg border object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                                  onClick={() => handleImageClick(message.content)}
                                 />
                               ) : message.messageType === 'file' ? (
                                 <div className="flex items-center gap-2 p-2 bg-background/10 rounded-lg min-w-[200px]">
@@ -822,6 +847,19 @@ export default function IMPage() {
         )}
       </Card>
       </div>
+
+      {/* 图片预览模态框 */}
+      <Dialog open={showImagePreview} onOpenChange={setShowImagePreview}>
+        <DialogContent className="max-w-4xl w-auto p-0 overflow-hidden">
+          {imagePreview && (
+            <img
+              src={imagePreview}
+              alt="Image preview"
+              className="max-w-full max-h-[90vh] w-auto h-auto object-contain"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片预览功能测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-image {
+            max-width: 300px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            transition: opacity 0.3s;
+        }
+        .test-image:hover {
+            opacity: 0.8;
+        }
+        .feature-list {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .feature-list li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>图片预览功能测试</h1>
+    
+    <h2>功能说明</h2>
+    <div class="feature-list">
+        <h3>已实现的功能：</h3>
+        <ul>
+            <li>✅ 点击聊天中的图片可以打开预览模态框</li>
+            <li>✅ 预览框中图片可以自适应大小（最大90vh高度）</li>
+            <li>✅ 鼠标悬停图片时透明度变化提示可点击</li>
+            <li>✅ 点击右上角 × 按钮关闭预览</li>
+            <li>✅ 按ESC键关闭预览</li>
+            <li>✅ 点击模态框外部关闭预览</li>
+            <li>✅ 响应式设计，最大宽度4xl</li>
+        </ul>
+    </div>
+    
+    <h2>图片上传和显示流程</h2>
+    <p>1. 用户粘贴图片或选择文件</p>
+    <p>2. 图片上传到 <code>/uploads/</code> 目录</p>
+    <p>3. 消息中显示缩略图（300x200px最大）</p>
+    <p>4. <strong>点击图片 → 弹出大图预览</strong></p>
+    
+    <h2>测试样例</h2>
+    <p>聊天界面中的图片应该具有以下样式和功能：</p>
+    <img src="/uploads/7b1ed53c-24f9-44f9-acd3-464ece4f6446.png" 
+         alt="测试图片样例" 
+         class="test-image"
+         onclick="alert('在真实的聊天界面中，这里会打开预览模态框')" />
+    <p><small>↑ 这张图片模拟了聊天中的效果：鼠标悬停透明度变化，可点击</small></p>
+    
+    <h2>技术实现</h2>
+    <p><strong>UI组件：</strong> shadcn/ui Dialog组件</p>
+    <p><strong>样式：</strong> Tailwind CSS响应式设计</p>
+    <p><strong>交互：</strong> 点击、ESC键、外部点击关闭</p>
+    <p><strong>图片处理：</strong> object-contain保持宽高比</p>
+    
+    <hr>
+    <p><strong>使用方法：</strong></p>
+    <ol>
+        <li>进入聊天界面</li>
+        <li>粘贴或发送图片</li>
+        <li>点击聊天中的图片</li>
+        <li>享受大图预览功能！</li>
+    </ol>
+</body>
+</html>

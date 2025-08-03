@@ -12,9 +12,12 @@ async function apiRequest<T>(
 ): Promise<{ data: T; success: boolean; message?: string }> {
   const url = `${API_BASE_URL}${endpoint}`;
   
-  const defaultHeaders: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+  const defaultHeaders: Record<string, string> = {};
+  
+  // 只有当body不是FormData时才设置Content-Type为application/json
+  if (!(options.body instanceof FormData)) {
+    defaultHeaders['Content-Type'] = 'application/json';
+  }
   
   // 获取认证token
   const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
@@ -24,6 +27,7 @@ async function apiRequest<T>(
   
   const config: RequestInit = {
     ...options,
+    credentials: 'include', // 确保包含cookies
     headers: {
       ...defaultHeaders,
       ...options.headers,
