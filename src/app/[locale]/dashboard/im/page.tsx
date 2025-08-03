@@ -689,7 +689,7 @@ export default function IMPage() {
                     <Loader2 className="h-6 w-6 animate-spin" />
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3 px-2">
                     {messages.length === 0 ? (
                       <div className="text-center text-muted-foreground py-8">
                         <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -701,23 +701,29 @@ export default function IMPage() {
                           key={message.id}
                           className={`flex gap-3 ${message.senderId === currentUser?.id ? 'flex-row-reverse' : ''}`}
                         >
-                          <Avatar className="h-8 w-8">
+                          <Avatar className="h-8 w-8 flex-shrink-0">
                             <AvatarImage src={message.senderImage} />
                             <AvatarFallback>
                               {message.senderName?.charAt(0) || 'U'}
                             </AvatarFallback>
                           </Avatar>
-                          <div className={`flex-1 max-w-[70%] ${message.senderId === currentUser?.id ? 'text-right' : ''}`}>
-                            <div className="flex items-center gap-2 mb-1">
+                          <div className={`flex flex-col min-w-0 max-w-[85%] sm:max-w-[70%] md:max-w-[65%] ${message.senderId === currentUser?.id ? 'items-end' : 'items-start'}`}>
+                            <div className={`flex items-center gap-2 mb-1 ${message.senderId === currentUser?.id ? 'flex-row-reverse' : ''}`}>
                               <span className="text-sm font-medium">{message.senderName || '未知用户'}</span>
                               <span className="text-xs text-muted-foreground">{formatTime(message.createdAt)}</span>
                             </div>
                             <div
-                              className={`p-3 rounded-lg text-sm ${
+                              className={`inline-block px-4 py-2 rounded-2xl text-sm break-words ${
                                 message.senderId === currentUser?.id
-                                  ? 'bg-primary text-primary-foreground ml-auto'
-                                  : 'bg-muted'
+                                  ? 'bg-primary text-primary-foreground rounded-br-md'
+                                  : 'bg-muted rounded-bl-md'
                               }`}
+                              style={{ 
+                                wordBreak: 'break-word', 
+                                overflowWrap: 'break-word',
+                                maxWidth: 'min(400px, 80vw)',
+                                minWidth: '60px'
+                              }}
                             >
                               {message.messageType === 'text' ? (
                                 message.content
@@ -725,13 +731,13 @@ export default function IMPage() {
                                 <img
                                   src={message.content}
                                   alt="Shared image"
-                                  className="max-w-xs rounded-lg border"
+                                  className="max-w-[300px] max-h-[200px] rounded-lg border object-cover"
                                 />
                               ) : message.messageType === 'file' ? (
-                                <div className="flex items-center gap-2 p-3 bg-muted rounded-lg max-w-xs">
+                                <div className="flex items-center gap-2 p-2 bg-background/10 rounded-lg min-w-[200px]">
                                   <div className="flex-1 min-w-0">
                                     <p className="text-sm font-medium truncate">{message.fileName}</p>
-                                    <p className="text-xs text-muted-foreground">{message.fileSize}</p>
+                                    <p className="text-xs opacity-70">{message.fileSize}</p>
                                   </div>
                                 </div>
                               ) : null}
