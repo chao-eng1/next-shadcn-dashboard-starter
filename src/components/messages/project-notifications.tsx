@@ -658,10 +658,10 @@ export function ProjectNotifications() {
         </div>
 
         {/* 通知列表 */}
-        <div className='flex flex-1'>
+        <div className='flex min-h-0 flex-1'>
           {/* 通知列表 */}
           <div className='flex-1 border-r'>
-            <ScrollArea className='h-full'>
+            <ScrollArea className='h-[calc(100vh-240px)]'>
               <div className='space-y-3 p-4'>
                 {filteredNotifications.length === 0 ? (
                   <div className='py-12 text-center'>
@@ -845,150 +845,152 @@ export function ProjectNotifications() {
           {/* 通知详情 */}
           <div className='w-96'>
             {selectedNotification ? (
-              <Card className='h-full rounded-none border-0'>
-                <CardHeader>
-                  <div className='flex items-start gap-3'>
-                    {getTypeIcon(selectedNotification.type)}
-                    <div className='flex-1'>
-                      <CardTitle className='text-lg'>
-                        {selectedNotification.title}
-                      </CardTitle>
-                      <div className='text-muted-foreground mt-2 flex items-center gap-2 text-sm'>
-                        <Badge variant='outline'>
-                          {selectedNotification.projectName}
-                        </Badge>
-                        <Badge variant='secondary'>
-                          {getTypeText(selectedNotification.type)}
-                        </Badge>
-                        <div
-                          className={cn(
-                            'h-2 w-2 rounded-full',
-                            getPriorityColor(selectedNotification.priority)
-                          )}
-                        />
-                        <span>
-                          {getPriorityText(selectedNotification.priority)}
-                        </span>
+              <div className='h-[calc(100vh-240px)] overflow-y-auto'>
+                <Card className='h-full rounded-none border-0'>
+                  <CardHeader>
+                    <div className='flex items-start gap-3'>
+                      {getTypeIcon(selectedNotification.type)}
+                      <div className='flex-1'>
+                        <CardTitle className='text-lg'>
+                          {selectedNotification.title}
+                        </CardTitle>
+                        <div className='text-muted-foreground mt-2 flex items-center gap-2 text-sm'>
+                          <Badge variant='outline'>
+                            {selectedNotification.projectName}
+                          </Badge>
+                          <Badge variant='secondary'>
+                            {getTypeText(selectedNotification.type)}
+                          </Badge>
+                          <div
+                            className={cn(
+                              'h-2 w-2 rounded-full',
+                              getPriorityColor(selectedNotification.priority)
+                            )}
+                          />
+                          <span>
+                            {getPriorityText(selectedNotification.priority)}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent className='space-y-4'>
-                  {/* 通知内容 */}
-                  <div>
-                    <p className='text-sm leading-relaxed'>
-                      {selectedNotification.content}
-                    </p>
-                  </div>
-
-                  {/* 元数据信息 */}
-                  {selectedNotification.metadata && (
+                  </CardHeader>
+                  <CardContent className='space-y-4'>
+                    {/* 通知内容 */}
                     <div>
-                      <h4 className='mb-2 font-medium'>详细信息</h4>
-                      <div className='space-y-2 text-sm'>
-                        {selectedNotification.metadata.dueDate && (
-                          <div className='flex justify-between'>
-                            <span className='text-muted-foreground'>
-                              截止日期:
-                            </span>
-                            <span>
-                              {format(
-                                selectedNotification.metadata.dueDate,
-                                'yyyy-MM-dd',
-                                { locale: zhCN }
-                              )}
-                            </span>
-                          </div>
-                        )}
-                        {selectedNotification.metadata.assignee && (
-                          <div className='flex justify-between'>
-                            <span className='text-muted-foreground'>
-                              分配给:
-                            </span>
-                            <span>
-                              {selectedNotification.metadata.assignee}
-                            </span>
-                          </div>
-                        )}
-                        {selectedNotification.metadata.oldStatus &&
-                          selectedNotification.metadata.newStatus && (
+                      <p className='text-sm leading-relaxed'>
+                        {selectedNotification.content}
+                      </p>
+                    </div>
+
+                    {/* 元数据信息 */}
+                    {selectedNotification.metadata && (
+                      <div>
+                        <h4 className='mb-2 font-medium'>详细信息</h4>
+                        <div className='space-y-2 text-sm'>
+                          {selectedNotification.metadata.dueDate && (
                             <div className='flex justify-between'>
                               <span className='text-muted-foreground'>
-                                状态变更:
+                                截止日期:
                               </span>
                               <span>
-                                {selectedNotification.metadata.oldStatus} →{' '}
-                                {selectedNotification.metadata.newStatus}
+                                {format(
+                                  selectedNotification.metadata.dueDate,
+                                  'yyyy-MM-dd',
+                                  { locale: zhCN }
+                                )}
                               </span>
                             </div>
                           )}
+                          {selectedNotification.metadata.assignee && (
+                            <div className='flex justify-between'>
+                              <span className='text-muted-foreground'>
+                                分配给:
+                              </span>
+                              <span>
+                                {selectedNotification.metadata.assignee}
+                              </span>
+                            </div>
+                          )}
+                          {selectedNotification.metadata.oldStatus &&
+                            selectedNotification.metadata.newStatus && (
+                              <div className='flex justify-between'>
+                                <span className='text-muted-foreground'>
+                                  状态变更:
+                                </span>
+                                <span>
+                                  {selectedNotification.metadata.oldStatus} →{' '}
+                                  {selectedNotification.metadata.newStatus}
+                                </span>
+                              </div>
+                            )}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* 相关链接 */}
-                  {selectedNotification.relatedUrl && (
-                    <div>
-                      <Button
-                        className='w-full'
-                        onClick={() => {
-                          if (
-                            selectedNotification.relatedUrl!.startsWith('/')
-                          ) {
-                            router.push(selectedNotification.relatedUrl!);
-                          } else {
-                            window.open(
-                              selectedNotification.relatedUrl!,
-                              '_blank'
-                            );
-                          }
-                        }}
-                      >
-                        <ExternalLink className='mr-2 h-4 w-4' />
-                        查看详情
-                      </Button>
-                    </div>
-                  )}
-
-                  {/* 发送者信息 */}
-                  <div className='border-t pt-4'>
-                    <h4 className='mb-2 font-medium'>发送者</h4>
-                    <div className='flex items-center gap-3'>
-                      <div className='bg-primary/10 flex h-8 w-8 items-center justify-center rounded-full'>
-                        <User className='text-primary h-4 w-4' />
-                      </div>
+                    {/* 相关链接 */}
+                    {selectedNotification.relatedUrl && (
                       <div>
-                        <p className='text-sm font-medium'>
-                          {selectedNotification.sender.name}
-                        </p>
-                        <p className='text-muted-foreground text-xs'>
-                          {selectedNotification.sender.role}
-                        </p>
+                        <Button
+                          className='w-full'
+                          onClick={() => {
+                            if (
+                              selectedNotification.relatedUrl!.startsWith('/')
+                            ) {
+                              router.push(selectedNotification.relatedUrl!);
+                            } else {
+                              window.open(
+                                selectedNotification.relatedUrl!,
+                                '_blank'
+                              );
+                            }
+                          }}
+                        >
+                          <ExternalLink className='mr-2 h-4 w-4' />
+                          查看详情
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* 发送者信息 */}
+                    <div className='border-t pt-4'>
+                      <h4 className='mb-2 font-medium'>发送者</h4>
+                      <div className='flex items-center gap-3'>
+                        <div className='bg-primary/10 flex h-8 w-8 items-center justify-center rounded-full'>
+                          <User className='text-primary h-4 w-4' />
+                        </div>
+                        <div>
+                          <p className='text-sm font-medium'>
+                            {selectedNotification.sender.name}
+                          </p>
+                          <p className='text-muted-foreground text-xs'>
+                            {selectedNotification.sender.role}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* 通知信息 */}
-                  <div className='text-muted-foreground space-y-1 border-t pt-4 text-xs'>
-                    <div className='flex justify-between'>
-                      <span>时间:</span>
-                      <span>
-                        {format(
-                          selectedNotification.timestamp,
-                          'yyyy-MM-dd HH:mm:ss',
-                          { locale: zhCN }
-                        )}
-                      </span>
+                    {/* 通知信息 */}
+                    <div className='text-muted-foreground space-y-1 border-t pt-4 text-xs'>
+                      <div className='flex justify-between'>
+                        <span>时间:</span>
+                        <span>
+                          {format(
+                            selectedNotification.timestamp,
+                            'yyyy-MM-dd HH:mm:ss',
+                            { locale: zhCN }
+                          )}
+                        </span>
+                      </div>
+                      <div className='flex justify-between'>
+                        <span>状态:</span>
+                        <span>
+                          {selectedNotification.isRead ? '已读' : '未读'}
+                        </span>
+                      </div>
                     </div>
-                    <div className='flex justify-between'>
-                      <span>状态:</span>
-                      <span>
-                        {selectedNotification.isRead ? '已读' : '未读'}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
             ) : (
               <div className='text-muted-foreground flex h-full items-center justify-center'>
                 <div className='text-center'>

@@ -424,10 +424,10 @@ export function SystemMessages() {
       </div>
 
       {/* 消息列表 */}
-      <div className='flex flex-1'>
+      <div className='flex min-h-0 flex-1'>
         {/* 消息列表 */}
         <div className='flex-1 border-r'>
-          <ScrollArea className='h-full'>
+          <ScrollArea className='h-[calc(100vh-180px)]'>
             <div className='space-y-3 p-4'>
               {filteredMessages.length === 0 ? (
                 <div className='py-12 text-center'>
@@ -594,119 +594,123 @@ export function SystemMessages() {
         {/* 消息详情 */}
         <div className='w-96'>
           {selectedMessage ? (
-            <Card className='h-full rounded-none border-0'>
-              <CardHeader>
-                <div className='flex items-start gap-3'>
-                  {getTypeIcon(selectedMessage.type)}
-                  <div className='flex-1'>
-                    <CardTitle className='text-lg'>
-                      {selectedMessage.title}
-                    </CardTitle>
-                    <div className='text-muted-foreground mt-2 flex items-center gap-2 text-sm'>
-                      <Badge variant='outline'>
-                        {selectedMessage.category}
-                      </Badge>
-                      <div
-                        className={cn(
-                          'h-2 w-2 rounded-full',
-                          getPriorityColor(selectedMessage.priority)
-                        )}
-                      />
-                      <span>{getPriorityText(selectedMessage.priority)}</span>
-                    </div>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className='space-y-4'>
-                {/* 消息内容 */}
-                <div>
-                  <p className='text-sm leading-relaxed'>
-                    {selectedMessage.content}
-                  </p>
-                </div>
-
-                {/* 附件 */}
-                {selectedMessage.attachments &&
-                  selectedMessage.attachments.length > 0 && (
-                    <div>
-                      <h4 className='mb-2 font-medium'>附件</h4>
-                      <div className='space-y-2'>
-                        {selectedMessage.attachments.map((attachment) => (
-                          <div
-                            key={attachment.id}
-                            className='flex items-center gap-3 rounded-lg border p-2'
-                          >
-                            <div className='bg-primary/10 flex h-8 w-8 items-center justify-center rounded'>
-                              <Download className='text-primary h-4 w-4' />
-                            </div>
-                            <div className='min-w-0 flex-1'>
-                              <p className='truncate text-sm font-medium'>
-                                {attachment.name}
-                              </p>
-                              <p className='text-muted-foreground text-xs'>
-                                {formatFileSize(attachment.size)}
-                              </p>
-                            </div>
-                            <Button size='sm' variant='ghost'>
-                              <Download className='h-4 w-4' />
-                            </Button>
-                          </div>
-                        ))}
+            <div className='h-[calc(100vh-180px)] overflow-y-auto'>
+              <Card className='h-full rounded-none border-0'>
+                <CardHeader>
+                  <div className='flex items-start gap-3'>
+                    {getTypeIcon(selectedMessage.type)}
+                    <div className='flex-1'>
+                      <CardTitle className='text-lg'>
+                        {selectedMessage.title}
+                      </CardTitle>
+                      <div className='text-muted-foreground mt-2 flex items-center gap-2 text-sm'>
+                        <Badge variant='outline'>
+                          {selectedMessage.category}
+                        </Badge>
+                        <div
+                          className={cn(
+                            'h-2 w-2 rounded-full',
+                            getPriorityColor(selectedMessage.priority)
+                          )}
+                        />
+                        <span>{getPriorityText(selectedMessage.priority)}</span>
                       </div>
                     </div>
-                  )}
+                  </div>
+                </CardHeader>
+                <CardContent className='space-y-4'>
+                  {/* 消息内容 */}
+                  <div>
+                    <p className='text-sm leading-relaxed'>
+                      {selectedMessage.content}
+                    </p>
+                  </div>
 
-                {/* 操作按钮 */}
-                {selectedMessage.actions &&
-                  selectedMessage.actions.length > 0 && (
-                    <div>
-                      <h4 className='mb-2 font-medium'>操作</h4>
-                      <div className='space-y-2'>
-                        {selectedMessage.actions.map((action) => (
-                          <Button
-                            key={action.id}
-                            variant={
-                              action.type === 'primary' ? 'default' : 'outline'
-                            }
-                            className='w-full'
-                            onClick={() => {
-                              if (action.url.startsWith('/')) {
-                                router.push(action.url);
-                              } else {
-                                window.open(action.url, '_blank');
+                  {/* 附件 */}
+                  {selectedMessage.attachments &&
+                    selectedMessage.attachments.length > 0 && (
+                      <div>
+                        <h4 className='mb-2 font-medium'>附件</h4>
+                        <div className='space-y-2'>
+                          {selectedMessage.attachments.map((attachment) => (
+                            <div
+                              key={attachment.id}
+                              className='flex items-center gap-3 rounded-lg border p-2'
+                            >
+                              <div className='bg-primary/10 flex h-8 w-8 items-center justify-center rounded'>
+                                <Download className='text-primary h-4 w-4' />
+                              </div>
+                              <div className='min-w-0 flex-1'>
+                                <p className='truncate text-sm font-medium'>
+                                  {attachment.name}
+                                </p>
+                                <p className='text-muted-foreground text-xs'>
+                                  {formatFileSize(attachment.size)}
+                                </p>
+                              </div>
+                              <Button size='sm' variant='ghost'>
+                                <Download className='h-4 w-4' />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                  {/* 操作按钮 */}
+                  {selectedMessage.actions &&
+                    selectedMessage.actions.length > 0 && (
+                      <div>
+                        <h4 className='mb-2 font-medium'>操作</h4>
+                        <div className='space-y-2'>
+                          {selectedMessage.actions.map((action) => (
+                            <Button
+                              key={action.id}
+                              variant={
+                                action.type === 'primary'
+                                  ? 'default'
+                                  : 'outline'
                               }
-                            }}
-                          >
-                            {action.label}
-                          </Button>
-                        ))}
+                              className='w-full'
+                              onClick={() => {
+                                if (action.url.startsWith('/')) {
+                                  router.push(action.url);
+                                } else {
+                                  window.open(action.url, '_blank');
+                                }
+                              }}
+                            >
+                              {action.label}
+                            </Button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                {/* 消息信息 */}
-                <div className='text-muted-foreground space-y-1 border-t pt-4 text-xs'>
-                  <div className='flex justify-between'>
-                    <span>发送者:</span>
-                    <span>{selectedMessage.sender}</span>
+                  {/* 消息信息 */}
+                  <div className='text-muted-foreground space-y-1 border-t pt-4 text-xs'>
+                    <div className='flex justify-between'>
+                      <span>发送者:</span>
+                      <span>{selectedMessage.sender}</span>
+                    </div>
+                    <div className='flex justify-between'>
+                      <span>时间:</span>
+                      <span>
+                        {format(
+                          selectedMessage.timestamp,
+                          'yyyy-MM-dd HH:mm:ss',
+                          { locale: zhCN }
+                        )}
+                      </span>
+                    </div>
+                    <div className='flex justify-between'>
+                      <span>状态:</span>
+                      <span>{selectedMessage.isRead ? '已读' : '未读'}</span>
+                    </div>
                   </div>
-                  <div className='flex justify-between'>
-                    <span>时间:</span>
-                    <span>
-                      {format(
-                        selectedMessage.timestamp,
-                        'yyyy-MM-dd HH:mm:ss',
-                        { locale: zhCN }
-                      )}
-                    </span>
-                  </div>
-                  <div className='flex justify-between'>
-                    <span>状态:</span>
-                    <span>{selectedMessage.isRead ? '已读' : '未读'}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           ) : (
             <div className='text-muted-foreground flex h-full items-center justify-center'>
               <div className='text-center'>
