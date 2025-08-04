@@ -23,7 +23,9 @@ import {
   Wifi,
   WifiOff,
   Filter,
-  MoreHorizontal
+  MoreHorizontal,
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
@@ -70,6 +72,8 @@ export function MessageCenterMain() {
   const [filterType, setFilterType] = useState<ConversationType | 'all'>('all');
   const [showNewChatDialog, setShowNewChatDialog] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   const { unreadCount } = useRecentMessages();
   const { unreadCount: globalUnreadCount, fetchUnreadCount } =
@@ -83,9 +87,11 @@ export function MessageCenterMain() {
   }, [connect, disconnect]);
 
   // 获取会话列表
-  const fetchConversations = async () => {
+  const fetchConversations = async (retry = false) => {
     try {
       setLoading(true);
+      setError(null);
+
       const response = await fetch('/api/message-center/conversations');
       if (response.ok) {
         const data = await response.json();
@@ -102,9 +108,27 @@ export function MessageCenterMain() {
           isMuted: false // TODO: 实现免打扰功能
         }));
         setConversations(formattedConversations);
+        setRetryCount(0); // 重置重试计数
+      } else {
+        throw new Error(
+          `服务器响应错误: ${response.status} ${response.statusText}`
+        );
       }
     } catch (error) {
       console.error('获取会话列表失败:', error);
+      const errorMessage = error instanceof Error ? error.message : '未知错误';
+      setError(`加载消息失败: ${errorMessage}`);
+
+      if (!retry && retryCount < 3) {
+        // 自动重试机制
+        setRetryCount((prev) => prev + 1);
+        setTimeout(
+          () => {
+            fetchConversations(true);
+          },
+          2000 * retryCount + 1000
+        ); // 递增延迟重试
+      }
     } finally {
       setLoading(false);
     }
@@ -242,6 +266,12 @@ export function MessageCenterMain() {
     router.push('/dashboard/messages/settings');
   };
 
+  // 手动重试
+  const handleRetry = () => {
+    setRetryCount(0);
+    fetchConversations();
+  };
+
   return (
     <div className='bg-background flex h-full flex-col overflow-hidden'>
       {/* 顶部状态栏 */}
@@ -321,11 +351,54 @@ export function MessageCenterMain() {
 
             {/* 会话列表 */}
             <ScrollArea className='min-h-0 flex-1'>
-              <ConversationList
-                conversations={filteredConversations}
-                selectedConversation={selectedConversation}
-                onConversationClick={handleConversationClick}
-              />
+              {error ? (
+                <div className='flex flex-col items-center justify-center space-y-4 p-6'>
+                  <AlertCircle className='h-12 w-12 text-red-500' />
+                  <div className='space-y-2 text-center'>
+                    <h3 className='font-medium text-red-700'>加载失败</h3>
+                    <p className='text-muted-foreground text-sm'>{error}</p>
+                    {retryCount > 0 && (
+                      <p className='text-muted-foreground text-xs'>
+                        已重试 {retryCount} 次
+                      </p>
+                    )}
+                  </div>
+                  <Button
+                    onClick={handleRetry}
+                    variant='outline'
+                    size='sm'
+                    disabled={loading}
+                    className='mt-2'
+                  >
+                    {loading ? (
+                      <RefreshCw className='mr-2 h-4 w-4 animate-spin' />
+                    ) : (
+                      <RefreshCw className='mr-2 h-4 w-4' />
+                    )}
+                    重试
+                  </Button>
+                </div>
+              ) : loading ? (
+                <div className='flex flex-col items-center justify-center space-y-4 p-6'>
+                  <RefreshCw className='text-primary h-8 w-8 animate-spin' />
+                  <div className='space-y-1 text-center'>
+                    <p className='text-muted-foreground text-sm'>
+                      正在加载消息...
+                    </p>
+                    {retryCount > 0 && (
+                      <p className='text-muted-foreground text-xs'>
+                        重试中... ({retryCount}/3)
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <ConversationList
+                  conversations={filteredConversations}
+                  selectedConversation={selectedConversation}
+                  onConversationClick={handleConversationClick}
+                />
+              )}
             </ScrollArea>
 
             {/* 快速操作 */}

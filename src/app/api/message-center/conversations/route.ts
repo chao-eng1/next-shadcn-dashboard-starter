@@ -201,44 +201,64 @@ export async function GET(request: NextRequest) {
 
     // 3. 获取系统消息（虚拟会话）
     if (!type || type === 'system') {
-      const unreadSystemMessages = await prisma.userMessage.count({
-        where: {
-          userId: user.id,
-          isRead: false
-        }
-      });
-
-      const latestSystemMessage = await prisma.userMessage.findFirst({
-        where: {
-          userId: user.id
-        },
-        include: {
-          message: true
-        },
-        orderBy: {
-          message: {
-            createdAt: 'desc'
+      try {
+        const unreadSystemMessages = await prisma.userMessage.count({
+          where: {
+            userId: user.id,
+            isRead: false
           }
-        }
-      });
+        });
 
-      if (latestSystemMessage || unreadSystemMessages > 0) {
+        const latestSystemMessage = await prisma.userMessage.findFirst({
+          where: {
+            userId: user.id
+          },
+          include: {
+            message: true
+          },
+          orderBy: {
+            message: {
+              createdAt: 'desc'
+            }
+          }
+        });
+
+        if (latestSystemMessage || unreadSystemMessages > 0) {
+          conversations.push({
+            id: 'system-messages',
+            type: 'system' as const,
+            name: '系统通知',
+            avatar: undefined,
+            lastMessage: latestSystemMessage
+              ? {
+                  content: latestSystemMessage.message.content,
+                  timestamp: latestSystemMessage.message.createdAt
+                }
+              : undefined,
+            unreadCount: unreadSystemMessages,
+            isPinned: false,
+            isMuted: false,
+            priority: 'important' as const,
+            lastActivity: latestSystemMessage?.message.createdAt || new Date()
+          });
+        }
+      } catch (systemError) {
+        console.error('Failed to load system messages:', systemError);
+        // 即使系统消息加载失败，也要添加一个错误提示的虚拟会话
         conversations.push({
-          id: 'system-messages',
+          id: 'system-messages-error',
           type: 'system' as const,
-          name: '系统通知',
+          name: '系统通知 (加载失败)',
           avatar: undefined,
-          lastMessage: latestSystemMessage
-            ? {
-                content: latestSystemMessage.message.content,
-                timestamp: latestSystemMessage.message.createdAt
-              }
-            : undefined,
-          unreadCount: unreadSystemMessages,
+          lastMessage: {
+            content: '系统通知加载失败，请稍后重试',
+            timestamp: new Date()
+          },
+          unreadCount: 0,
           isPinned: false,
           isMuted: false,
           priority: 'important' as const,
-          lastActivity: latestSystemMessage?.message.createdAt || new Date()
+          lastActivity: new Date()
         });
       }
     }

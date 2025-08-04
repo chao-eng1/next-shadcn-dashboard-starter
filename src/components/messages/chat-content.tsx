@@ -1,9 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -22,19 +20,17 @@ import {
   Archive,
   Bell,
   BellOff,
-  UserCheck,
   UserX,
-  Shield,
   MessageSquare,
   Users,
   Briefcase,
   Clock
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { MessageBubble, Message, MessageUser } from './message-bubble';
+import { MessageBubble, Message } from './message-bubble';
 import { MessageInput } from './message-input';
-import { format } from 'date-fns';
-import { zhCN } from 'date-fns/locale/zh-CN';
+import { SystemNotificationError } from './system-notification-error';
+import { SystemMessageList } from './system-message-list';
+
 import { useAuth } from '@/hooks/use-auth';
 import { getWebSocketService } from '@/lib/websocket-service';
 import { toast } from 'sonner';
@@ -74,6 +70,7 @@ export function ChatContent({ conversation }: ChatContentProps) {
   const [replyTo, setReplyTo] = useState<Message | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const wsService = getWebSocketService();
@@ -83,7 +80,53 @@ export function ChatContent({ conversation }: ChatContentProps) {
     if (!user) return;
 
     setIsLoading(true);
+    setLoadError(null);
+
     try {
+      // 特殊处理系统消息
+      if (
+        conversationId === 'system-messages' ||
+        conversationId === 'system-messages-error'
+      ) {
+        const response = await fetch('/api/user-messages');
+        if (!response.ok) {
+          throw new Error(`系统消息加载失败: ${response.statusText}`);
+        }
+        const data = await response.json();
+
+        // 验证数据结构
+        if (!data.data || !Array.isArray(data.data.messages)) {
+          console.error('Invalid data structure:', data);
+          throw new Error('系统消息数据格式错误');
+        }
+
+        const formattedMessages: Message[] = data.data.messages
+          .map((userMsg: any) => {
+            if (!userMsg.message) {
+              console.warn('Invalid message structure:', userMsg);
+              return null;
+            }
+
+            return {
+              id: userMsg.id,
+              content: userMsg.message.content,
+              sender: {
+                id: userMsg.message.sender?.id || 'system',
+                name: userMsg.message.sender?.name || '系统',
+                avatar: userMsg.message.sender?.image
+              },
+              timestamp: new Date(userMsg.message.createdAt),
+              type: 'system',
+              status: 'delivered' as const,
+              replyTo: undefined
+            };
+          })
+          .filter(Boolean); // 过滤掉null值
+        setMessages(formattedMessages);
+        return;
+      }
+
+      // 普通会话消息
       const response = await fetch(
         `/api/conversations/${conversationId}/messages`
       );
@@ -124,12 +167,13 @@ export function ChatContent({ conversation }: ChatContentProps) {
         );
         setMessages(formattedMessages);
       } else {
-        console.error('Failed to load messages:', response.statusText);
-        toast.error('加载消息失败');
+        throw new Error(`消息加载失败: ${response.statusText}`);
       }
     } catch (error) {
       console.error('Error loading messages:', error);
-      toast.error('加载消息失败');
+      const errorMessage = error instanceof Error ? error.message : '未知错误';
+      setLoadError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -267,6 +311,13 @@ export function ChatContent({ conversation }: ChatContentProps) {
     scrollToBottom();
   }, [messages]);
 
+  // 重试加载消息
+  const handleRetryLoad = () => {
+    if (conversation) {
+      loadMessages(conversation.id);
+    }
+  };
+
   // 发送消息
   const handleSendMessage = async (
     content: string,
@@ -385,6 +436,15 @@ export function ChatContent({ conversation }: ChatContentProps) {
     );
   }
 
+  // 如果是系统消息会话，显示专门的系统消息界面
+  if (conversation.type === 'system') {
+    return (
+      <div className='bg-background flex h-full flex-col'>
+        <SystemMessageList onRefresh={handleRetryLoad} isLoading={isLoading} />
+      </div>
+    );
+  }
+
   return (
     <div className='bg-background flex h-full flex-col'>
       {/* 聊天头部 */}
@@ -489,6 +549,15 @@ export function ChatContent({ conversation }: ChatContentProps) {
                 <div className='border-primary h-4 w-4 animate-spin rounded-full border-2 border-t-transparent' />
                 <span>加载消息中...</span>
               </div>
+            </div>
+          ) : loadError && conversation?.type === 'system' ? (
+            <div className='flex items-center justify-center py-8'>
+              <SystemNotificationError
+                error={loadError}
+                onRetry={handleRetryLoad}
+                isRetrying={isLoading}
+                isConnected={wsService?.isConnected || false}
+              />
             </div>
           ) : (
             <>

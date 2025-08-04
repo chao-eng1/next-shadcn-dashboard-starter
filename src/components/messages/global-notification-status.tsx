@@ -14,6 +14,8 @@ import { cn } from '@/lib/utils';
 interface GlobalNotificationStatusProps {
   isConnected: boolean;
   className?: string;
+  errorMessage?: string;
+  lastError?: Date;
 }
 
 /**
@@ -22,7 +24,9 @@ interface GlobalNotificationStatusProps {
  */
 export function GlobalNotificationStatus({
   isConnected,
-  className
+  className,
+  errorMessage,
+  lastError
 }: GlobalNotificationStatusProps) {
   return (
     <TooltipProvider>
@@ -53,11 +57,21 @@ export function GlobalNotificationStatus({
           </div>
         </TooltipTrigger>
         <TooltipContent>
-          <p>
-            {isConnected
-              ? '实时通知系统已连接，您将收到最新消息通知'
-              : '实时通知系统连接中断，可能无法及时收到新消息'}
-          </p>
+          <div className='space-y-1'>
+            <p>
+              {isConnected
+                ? '实时通知系统已连接，您将收到最新消息通知'
+                : '实时通知系统连接中断，可能无法及时收到新消息'}
+            </p>
+            {!isConnected && errorMessage && (
+              <p className='text-xs text-red-400'>错误: {errorMessage}</p>
+            )}
+            {!isConnected && lastError && (
+              <p className='text-muted-foreground text-xs'>
+                最后错误时间: {lastError.toLocaleTimeString()}
+              </p>
+            )}
+          </div>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
