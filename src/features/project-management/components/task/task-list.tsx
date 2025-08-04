@@ -166,7 +166,6 @@ export function TaskList({ projectId, userId, sprints }: TaskListProps) {
       }
 
       const data: ApiResponse = await response.json();
-      debugger;
       if (data.success) {
         setTasks(data.data.tasks);
         setTotal(data.data.pagination.total);

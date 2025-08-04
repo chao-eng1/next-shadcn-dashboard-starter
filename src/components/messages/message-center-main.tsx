@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
-import { ConversationList } from './conversation-list';
+import { ConversationList } from './conversation-list-simple';
 import { ChatContent } from './chat-content';
 import { GlobalNotificationStatus } from './global-notification-status';
 import { NewPrivateChatDialog } from './new-private-chat-dialog';
@@ -86,53 +86,57 @@ export function MessageCenterMain() {
     return () => disconnect();
   }, [connect, disconnect]);
 
-  // 获取会话列表
-  const fetchConversations = async (retry = false) => {
-    try {
-      setLoading(true);
-      setError(null);
+  // 获取会话列表 - 使用 useCallback 优化性能
+  const fetchConversations = useCallback(
+    async (retry = false) => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      const response = await fetch('/api/message-center/conversations');
-      if (response.ok) {
-        const data = await response.json();
-        const formattedConversations = data.data.map((conv: any) => ({
-          ...conv,
-          lastMessage: conv.lastMessage
-            ? {
-                ...conv.lastMessage,
-                timestamp: new Date(conv.lastMessage.timestamp)
-              }
-            : undefined,
-          lastActivity: new Date(conv.lastActivity),
-          isPinned: false, // TODO: 实现置顶功能
-          isMuted: false // TODO: 实现免打扰功能
-        }));
-        setConversations(formattedConversations);
-        setRetryCount(0); // 重置重试计数
-      } else {
-        throw new Error(
-          `服务器响应错误: ${response.status} ${response.statusText}`
-        );
-      }
-    } catch (error) {
-      console.error('获取会话列表失败:', error);
-      const errorMessage = error instanceof Error ? error.message : '未知错误';
-      setError(`加载消息失败: ${errorMessage}`);
+        const response = await fetch('/api/message-center/conversations');
+        if (response.ok) {
+          const data = await response.json();
+          const formattedConversations = data.data.map((conv: any) => ({
+            ...conv,
+            lastMessage: conv.lastMessage
+              ? {
+                  ...conv.lastMessage,
+                  timestamp: new Date(conv.lastMessage.timestamp)
+                }
+              : undefined,
+            lastActivity: new Date(conv.lastActivity),
+            isPinned: false, // TODO: 实现置顶功能
+            isMuted: false // TODO: 实现免打扰功能
+          }));
+          setConversations(formattedConversations);
+          setRetryCount(0); // 重置重试计数
+        } else {
+          throw new Error(
+            `服务器响应错误: ${response.status} ${response.statusText}`
+          );
+        }
+      } catch (error) {
+        console.error('获取会话列表失败:', error);
+        const errorMessage =
+          error instanceof Error ? error.message : '未知错误';
+        setError(`加载消息失败: ${errorMessage}`);
 
-      if (!retry && retryCount < 3) {
-        // 自动重试机制
-        setRetryCount((prev) => prev + 1);
-        setTimeout(
-          () => {
-            fetchConversations(true);
-          },
-          2000 * retryCount + 1000
-        ); // 递增延迟重试
+        if (!retry && retryCount < 3) {
+          // 自动重试机制
+          setRetryCount((prev) => prev + 1);
+          setTimeout(
+            () => {
+              fetchConversations(true);
+            },
+            2000 * retryCount + 1000
+          ); // 递增延迟重试
+        }
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [retryCount]
+  );
 
   useEffect(() => {
     fetchConversations();
@@ -189,10 +193,8 @@ export function MessageCenterMain() {
       // 刷新全局未读计数
       fetchUnreadCount();
 
-      // 延迟一点时间后重新获取会话列表，确保服务器端数据已更新
-      setTimeout(() => {
-        fetchConversations();
-      }, 1000);
+      // 移除自动重新获取会话列表的逻辑，避免不必要的重新渲染
+      // 前面的状态更新已经足够反映未读计数变化
     };
 
     const handleRefreshConversations = () => {
@@ -237,40 +239,43 @@ export function MessageCenterMain() {
     unreadCount?.total ||
     conversations.reduce((total, conv) => total + conv.unreadCount, 0);
 
-  // 过滤会话
-  const filteredConversations = conversations.filter((conv) => {
-    const matchesSearch =
-      !searchQuery ||
-      conv.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conv.lastMessage?.content
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
+  // 过滤会话 - 使用 useMemo 优化性能
+  const filteredConversations = useMemo(() => {
+    return conversations.filter((conv) => {
+      const matchesSearch =
+        !searchQuery ||
+        conv.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        conv.lastMessage?.content
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
 
-    const matchesFilter = filterType === 'all' || conv.type === filterType;
+      const matchesFilter = filterType === 'all' || conv.type === filterType;
 
-    return matchesSearch && matchesFilter;
-  });
+      return matchesSearch && matchesFilter;
+    });
+  }, [conversations, searchQuery, filterType]);
 
-  // 处理会话点击
-  const handleConversationClick = (conversation: Conversation) => {
+  // 处理会话点击 - 使用 useCallback 优化性能
+  const handleConversationClick = useCallback((conversation: Conversation) => {
+    debugger;
     setSelectedConversation(conversation);
     // 不再跳转页面，直接在右侧显示聊天内容
-  };
+  }, []);
 
-  // 快速操作
-  const handleNewPrivateChat = () => {
+  // 快速操作 - 使用 useCallback 优化性能
+  const handleNewPrivateChat = useCallback(() => {
     setShowNewChatDialog(true);
-  };
+  }, []);
 
-  const handleMessageSettings = () => {
+  const handleMessageSettings = useCallback(() => {
     router.push('/dashboard/messages/settings');
-  };
+  }, [router]);
 
-  // 手动重试
-  const handleRetry = () => {
+  // 手动重试 - 使用 useCallback 优化性能
+  const handleRetry = useCallback(() => {
     setRetryCount(0);
     fetchConversations();
-  };
+  }, [fetchConversations]);
 
   return (
     <div className='bg-background flex h-full flex-col overflow-hidden'>

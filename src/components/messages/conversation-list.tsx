@@ -1,55 +1,10 @@
 'use client';
 
-import React from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import {
-  MessageSquare,
-  Users,
-  Bell,
-  Briefcase,
-  Pin,
-  VolumeX,
-  Archive,
-  MoreHorizontal,
-  Circle
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { formatDistanceToNow } from 'date-fns';
-import { zhCN } from 'date-fns/locale/zh-CN';
+import React, { memo, useMemo } from 'react';
+import { ConversationItem, type Conversation } from './conversation-item';
 
-// 会话类型
-type ConversationType = 'private' | 'group' | 'system' | 'project';
-
-// 会话接口
-export interface Conversation {
-  id: string;
-  type: ConversationType;
-  name: string;
-  avatar?: string;
-  lastMessage?: {
-    content: string;
-    timestamp: Date;
-    sender?: {
-      id: string;
-      name: string;
-    };
-  };
-  unreadCount: number;
-  isOnline?: boolean;
-  isPinned: boolean;
-  isMuted: boolean;
-  priority?: 'low' | 'normal' | 'important' | 'urgent';
-  projectId?: string;
-  lastActivity: Date;
-}
+// 重新导出类型以保持兼容性
+export type { Conversation };
 
 interface ConversationListProps {
   conversations: Conversation[];
@@ -105,24 +60,26 @@ function getTypeTagColor(type: ConversationType) {
   }
 }
 
-export function ConversationList({
+const ConversationList = memo(function ConversationList({
   conversations,
   selectedConversation,
   onConversationClick
 }: ConversationListProps) {
-  // 排序会话：置顶 > 未读 > 最后活动时间
-  const sortedConversations = [...conversations].sort((a, b) => {
-    // 置顶的会话优先
-    if (a.isPinned && !b.isPinned) return -1;
-    if (!a.isPinned && b.isPinned) return 1;
+  // 排序会话：置顶 > 未读 > 最后活动时间 - 使用 useMemo 优化性能
+  const sortedConversations = useMemo(() => {
+    return [...conversations].sort((a, b) => {
+      // 置顶的会话优先
+      if (a.isPinned && !b.isPinned) return -1;
+      if (!a.isPinned && b.isPinned) return 1;
 
-    // 有未读消息的优先
-    if (a.unreadCount > 0 && b.unreadCount === 0) return -1;
-    if (a.unreadCount === 0 && b.unreadCount > 0) return 1;
+      // 有未读消息的优先
+      if (a.unreadCount > 0 && b.unreadCount === 0) return -1;
+      if (a.unreadCount === 0 && b.unreadCount > 0) return 1;
 
-    // 按最后活动时间排序
-    return b.lastActivity.getTime() - a.lastActivity.getTime();
-  });
+      // 按最后活动时间排序
+      return b.lastActivity.getTime() - a.lastActivity.getTime();
+    });
+  }, [conversations]);
 
   const handleConversationAction = (
     action: string,
@@ -323,4 +280,6 @@ export function ConversationList({
       })}
     </div>
   );
-}
+});
+
+export { ConversationList };

@@ -81,7 +81,6 @@ export function ChatContent({ conversation }: ChatContentProps) {
 
     setIsLoading(true);
     setLoadError(null);
-
     try {
       // 特殊处理系统消息
       if (
@@ -209,14 +208,9 @@ export function ChatContent({ conversation }: ChatContentProps) {
         });
         window.dispatchEvent(readEvent);
 
-        // 立即刷新未读计数和会话列表
+        // 只刷新未读计数，不需要重新获取整个会话列表
         const refreshEvent = new CustomEvent('refreshUnreadCount');
         window.dispatchEvent(refreshEvent);
-
-        const refreshConversationsEvent = new CustomEvent(
-          'refreshConversations'
-        );
-        window.dispatchEvent(refreshConversationsEvent);
       } catch (error) {
         console.error('Failed to mark conversation as read:', error);
       }
