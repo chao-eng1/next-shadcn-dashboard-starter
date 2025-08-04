@@ -1,5 +1,5 @@
 // Overview components
-export { OverViewPage } from './components/overview';
+export { default as OverViewPage } from './components/overview';
 export { ProjectManagementOverview } from './components/project-management-overview';
 
 // Project management overview components
