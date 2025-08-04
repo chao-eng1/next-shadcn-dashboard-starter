@@ -9,8 +9,10 @@ import React, {
 } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useUnreadMessages } from '@/hooks/use-unread-messages';
+import { useMessagePolling } from '@/hooks/use-message-polling';
 import { toast } from 'sonner';
 import { MessageNotificationDialog } from './message-notification-dialog';
+import { getWebSocketService } from '@/lib/websocket-service';
 
 interface Message {
   id: string;
@@ -31,6 +33,8 @@ interface RealtimeContextType {
   lastMessage: Message | null;
   clearNewMessages: () => void;
   refreshMessages: () => void;
+  isPolling: boolean;
+  lastPolled: Date | null;
 }
 
 const RealtimeContext = createContext<RealtimeContextType | undefined>(
@@ -50,6 +54,20 @@ export function RealtimeProvider({ children }: RealtimeProviderProps) {
   const { unreadCount, fetchUnreadCount } = useUnreadMessages();
 
   const [previousUnreadCount, setPreviousUnreadCount] = useState(0);
+
+  // 轮询未读消息检查
+  const { isPolling, lastPolled } = useMessagePolling(
+    async () => {
+      console.log('RealtimeProvider: Polling for new messages...');
+      await fetchUnreadCount();
+      await checkForNewMessages();
+    },
+    {
+      enabled: true,
+      interval: 20000, // 20秒轮询
+      pauseWhenHidden: true // 页面隐藏时暂停轮询
+    }
+  );
 
   // 检查新消息的函数
   const checkForNewMessages = async () => {
@@ -116,22 +134,113 @@ export function RealtimeProvider({ children }: RealtimeProviderProps) {
     }
   };
 
-  // 监听未读消息数量变化
+  // WebSocket连接管理
+  useEffect(() => {
+    if (!user?.id) {
+      setIsConnected(false);
+      return;
+    }
+
+    const wsService = getWebSocketService();
+
+    // 连接WebSocket
+    wsService
+      .connect(user.id)
+      .then(() => {
+        console.log('RealtimeProvider: WebSocket connected for user:', user.id);
+        setIsConnected(wsService.isConnected);
+
+        // 连接成功后，加入用户相关的房间
+        // 加入全局用户房间（接收系统消息等）
+        wsService.joinRoom('user', user.id);
+
+        // 这里可以加入用户参与的所有对话房间
+        // 为了简化，我们现在只加入一个通用的用户房间
+        console.log('RealtimeProvider: Joined user room for:', user.id);
+      })
+      .catch((error) => {
+        console.error('RealtimeProvider: WebSocket connection failed:', error);
+        setIsConnected(false);
+      });
+
+    // 监听连接状态变化
+    const handleConnectionChange = () => {
+      setIsConnected(wsService.isConnected);
+    };
+
+    // 监听新消息事件
+    const handleNewMessage = (data: any) => {
+      console.log('RealtimeProvider: Received new message event:', data);
+
+      // 检查是否在消息页面
+      const isOnMessagePage = window.location.pathname.includes('/messages');
+
+      if (!isOnMessagePage) {
+        // 增加未读计数
+        setNewMessageCount((prev) => prev + 1);
+
+        // 更新全局未读计数
+        fetchUnreadCount();
+
+        // 显示通知
+        const messageData = data.detail?.message || data;
+        if (messageData) {
+          setLastMessage({
+            id: messageData.id,
+            title:
+              messageData.title ||
+              messageData.content?.substring(0, 20) ||
+              '新消息',
+            content: messageData.content,
+            isGlobal: messageData.isGlobal || false,
+            createdAt:
+              messageData.timestamp ||
+              messageData.createdAt ||
+              new Date().toISOString(),
+            sender: {
+              id: messageData.sender?.id || messageData.senderId || '',
+              name:
+                messageData.sender?.name ||
+                messageData.senderName ||
+                '未知用户',
+              email: messageData.sender?.email || ''
+            }
+          });
+          setShowNotification(true);
+        }
+      }
+    };
+
+    // 监听WebSocket事件
+    wsService.on('connected', handleConnectionChange);
+    wsService.on('disconnected', handleConnectionChange);
+    wsService.on('message:receive', handleNewMessage);
+
+    // 监听全局自定义事件
+    window.addEventListener(
+      'unreadCountUpdate',
+      handleNewMessage as EventListener
+    );
+
+    return () => {
+      // 清理事件监听器
+      wsService.off('connected', handleConnectionChange);
+      wsService.off('disconnected', handleConnectionChange);
+      wsService.off('message:receive', handleNewMessage);
+      window.removeEventListener(
+        'unreadCountUpdate',
+        handleNewMessage as EventListener
+      );
+    };
+  }, [user?.id, fetchUnreadCount]);
+
+  // 监听未读消息数量变化（备用方案）
   useEffect(() => {
     if (!user) return;
 
     // 当未读数量变化时检查新消息
     checkForNewMessages();
   }, [user?.id, unreadCount]); // 依赖user.id和unreadCount变化
-
-  // 初始化连接状态
-  useEffect(() => {
-    if (user) {
-      setIsConnected(true);
-    } else {
-      setIsConnected(false);
-    }
-  }, [user]);
 
   const clearNewMessages = () => {
     setNewMessageCount(0);
@@ -160,7 +269,9 @@ export function RealtimeProvider({ children }: RealtimeProviderProps) {
         newMessageCount,
         lastMessage,
         clearNewMessages,
-        refreshMessages
+        refreshMessages,
+        isPolling,
+        lastPolled
       }}
     >
       {children}

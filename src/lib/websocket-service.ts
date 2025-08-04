@@ -887,6 +887,21 @@ export class WebSocketService {
     });
   }
 
+  // 加入房间（通用方法）
+  public joinRoom(type: string, roomId: string): void {
+    console.log('WebSocket: Joining room:', type, roomId);
+    if (this.socket && this.socket.connected) {
+      const roomName = `${type}:${roomId}`;
+      this.socket.emit('conversation:join', {
+        conversationId: roomId,
+        type: type
+      });
+      console.log('WebSocket: Sent join request for room:', roomName);
+    } else {
+      console.warn('WebSocket: Cannot join room - socket not connected');
+    }
+  }
+
   // 获取连接状态
   public get isConnected(): boolean {
     return this.socket?.connected ?? false;

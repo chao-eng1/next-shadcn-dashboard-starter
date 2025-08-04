@@ -6,9 +6,10 @@ import { useAuth } from './use-auth';
 interface RecentMessage {
   id: string;
   content: string;
-  messageType: string;
+  messageType: 'system' | 'project' | 'private';
   createdAt: string;
   preview: string;
+  source: string; // 消息来源描述
   sender: {
     id: string;
     name: string;
@@ -69,7 +70,10 @@ export function useRecentMessages(limit: number = 5): UseRecentMessagesReturn {
       const messagesData = await messagesResponse.json();
       const unreadData = await unreadResponse.json();
 
-      setMessages(messagesData.data.messages || []);
+      // console.log('useRecentMessages: API response data:', messagesData);
+      // console.log('useRecentMessages: Unread count data:', unreadData);
+
+      setMessages(messagesData.data?.messages || []);
       setUnreadCount(unreadData.data || null);
     } catch (err) {
       console.error('Error fetching recent messages:', err);
@@ -81,9 +85,31 @@ export function useRecentMessages(limit: number = 5): UseRecentMessagesReturn {
     }
   }, [user?.id, limit]); // 只依赖user.id和limit
 
+  // 初始加载
   useEffect(() => {
     fetchRecentMessages();
-  }, [user, limit]); // 只依赖user和limit，而不是fetchRecentMessages
+  }, [user, limit]);
+
+  // 轮询机制 - 每20秒检查一次未读消息
+  useEffect(() => {
+    if (!user) return;
+
+    console.log('useRecentMessages: Starting polling for user:', user.id);
+
+    // 立即执行一次
+    fetchRecentMessages();
+
+    // 设置轮询定时器
+    const pollInterval = setInterval(() => {
+      console.log('useRecentMessages: Polling for new messages...');
+      fetchRecentMessages();
+    }, 20000); // 20秒轮询一次
+
+    return () => {
+      console.log('useRecentMessages: Stopping polling');
+      clearInterval(pollInterval);
+    };
+  }, [user?.id, fetchRecentMessages]);
 
   return {
     messages,

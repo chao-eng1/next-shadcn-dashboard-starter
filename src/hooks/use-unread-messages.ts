@@ -94,6 +94,30 @@ export function useUnreadMessages() {
     }
   }, [user?.id]);
 
+  // 轮询机制 - 每20秒检查一次未读消息数量
+  useEffect(() => {
+    if (!user?.id) return;
+
+    console.log(
+      'useUnreadMessages: Starting polling for unread count, user:',
+      user.id
+    );
+
+    // 立即执行一次
+    fetchUnreadCountGlobal(user.id);
+
+    // 设置轮询定时器
+    const pollInterval = setInterval(() => {
+      console.log('useUnreadMessages: Polling for unread count...');
+      fetchUnreadCountGlobal(user.id);
+    }, 20000); // 20秒轮询一次
+
+    return () => {
+      console.log('useUnreadMessages: Stopping unread count polling');
+      clearInterval(pollInterval);
+    };
+  }, [user?.id]);
+
   // 监听刷新未读计数事件
   useEffect(() => {
     const handleRefreshUnreadCount = () => {

@@ -87,6 +87,39 @@ class SocketBroadcastService {
     );
   }
 
+  // 广播系统消息给特定用户
+  public broadcastUserMessage(data: {
+    userId: string;
+    message: any;
+    excludeUserId?: string;
+  }) {
+    if (!this.socket || !this.isConnected) {
+      console.warn(
+        '🟡 [Broadcast Service] Socket.io not connected, cannot broadcast user message'
+      );
+      return;
+    }
+
+    const roomName = `user:${data.userId}`;
+
+    console.log(
+      '🟡 [Broadcast Service] Broadcasting user message to room:',
+      roomName
+    );
+    console.log('🟡 [Broadcast Service] User message data:', data.message);
+
+    this.socket.emit('server:broadcast:message', {
+      room: roomName,
+      event: 'message:new',
+      data: data.message,
+      excludeUserId: data.excludeUserId
+    });
+
+    console.log(
+      `🟡 [Broadcast Service] Broadcasted user message to room: ${roomName}`
+    );
+  }
+
   // 广播消息已读状态
   public broadcastMessageRead(data: {
     conversationId: string;

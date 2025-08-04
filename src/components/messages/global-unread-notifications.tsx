@@ -58,16 +58,22 @@ export function GlobalUnreadNotifications({
     const handleUnreadCountUpdate = (event: CustomEvent) => {
       console.log(
         'Global notifications: Received unread count update:',
-        event.detail.conversationId
+        event.detail.conversationId || event.detail.id
       );
 
       const { message, isOnMessagePage, conversationId } = event.detail;
+
+      // 确保消息数据存在
+      if (!message) {
+        console.log('Global notifications: No message data in event');
+        return;
+      }
 
       // 如果不在消息页面，显示通知
       if (!isOnMessagePage) {
         console.log(
           'Showing notification for new message from:',
-          message.sender.name
+          message.sender?.name || message.senderName || '未知用户'
         );
 
         // 增加未读计数
@@ -77,9 +83,13 @@ export function GlobalUnreadNotifications({
         const newNotification: UnreadMessage = {
           id: message.id,
           content: message.content,
-          sender: message.sender,
-          timestamp: message.timestamp,
-          conversationName: message.conversationName
+          sender: {
+            id: message.sender?.id || message.senderId || '',
+            name: message.sender?.name || message.senderName || '未知用户',
+            avatar: message.sender?.avatar || message.senderImage
+          },
+          timestamp: message.timestamp || message.createdAt || new Date(),
+          conversationName: message.conversationName || '消息通知'
         };
 
         setNotifications((prev) => {
@@ -93,11 +103,16 @@ export function GlobalUnreadNotifications({
 
         // 显示浏览器原生通知
         if (notificationPermission === 'granted') {
+          const senderName =
+            message.sender?.name || message.senderName || '未知用户';
+          const conversationName = message.conversationName || '消息通知';
+
           const notification = new Notification(
-            `${message.sender.name} - ${message.conversationName}`,
+            `${senderName} - ${conversationName}`,
             {
               body: message.content,
-              icon: message.sender.avatar || '/favicon.ico',
+              icon:
+                message.sender?.avatar || message.senderImage || '/favicon.ico',
               tag: `message-${message.id}`,
               requireInteraction: false,
               silent: false
@@ -106,7 +121,9 @@ export function GlobalUnreadNotifications({
 
           notification.onclick = () => {
             window.focus();
-            router.push(`/dashboard/messages?conversation=${conversationId}`);
+            router.push(
+              `/dashboard/messages?conversation=${conversationId || message.conversationId}`
+            );
             notification.close();
           };
 
@@ -167,8 +184,13 @@ export function GlobalUnreadNotifications({
       }, 500);
     };
 
+    // 监听多种消息事件
     window.addEventListener(
       'unreadCountUpdate',
+      handleUnreadCountUpdate as EventListener
+    );
+    window.addEventListener(
+      'newMessage',
       handleUnreadCountUpdate as EventListener
     );
     window.addEventListener(
@@ -179,6 +201,10 @@ export function GlobalUnreadNotifications({
     return () => {
       window.removeEventListener(
         'unreadCountUpdate',
+        handleUnreadCountUpdate as EventListener
+      );
+      window.removeEventListener(
+        'newMessage',
         handleUnreadCountUpdate as EventListener
       );
       window.removeEventListener(

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Bell, User, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,8 +28,9 @@ export function MessageNotificationIcon({
   className
 }: MessageNotificationIconProps) {
   const router = useRouter();
-  const { unreadCount, loading } = useUnreadMessages();
+  const { unreadCount, loading, fetchUnreadCount } = useUnreadMessages();
   const { messages, loading: messagesLoading } = useRecentMessages(5);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const handleViewAll = () => {
     router.push('/dashboard/messages');
@@ -41,6 +42,35 @@ export function MessageNotificationIcon({
 
   const displayCount = unreadCount > 99 ? '99+' : unreadCount.toString();
   const hasUnread = unreadCount > 0;
+
+  // 监听实时消息事件
+  useEffect(() => {
+    const handleNewMessage = () => {
+      setIsAnimating(true);
+      fetchUnreadCount();
+
+      setTimeout(() => {
+        setIsAnimating(false);
+      }, 1000);
+    };
+
+    const handleUnreadCountUpdate = () => {
+      setIsAnimating(true);
+      fetchUnreadCount();
+
+      setTimeout(() => {
+        setIsAnimating(false);
+      }, 1000);
+    };
+
+    window.addEventListener('newMessage', handleNewMessage);
+    window.addEventListener('unreadCountUpdate', handleUnreadCountUpdate);
+
+    return () => {
+      window.removeEventListener('newMessage', handleNewMessage);
+      window.removeEventListener('unreadCountUpdate', handleUnreadCountUpdate);
+    };
+  }, [fetchUnreadCount]);
 
   return (
     <div className={cn('relative', className)}>
@@ -55,7 +85,8 @@ export function MessageNotificationIcon({
             <Bell
               className={cn(
                 'h-4 w-4 transition-all duration-200',
-                hasUnread && 'text-primary animate-pulse'
+                hasUnread && 'text-primary animate-pulse',
+                isAnimating && 'animate-bounce'
               )}
             />
 
@@ -63,7 +94,10 @@ export function MessageNotificationIcon({
             {hasUnread && (
               <Badge
                 variant='destructive'
-                className='border-background animate-in fade-in-0 zoom-in-50 absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full border-2 px-1 text-xs font-medium duration-200'
+                className={cn(
+                  'border-background animate-in fade-in-0 zoom-in-50 absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full border-2 px-1 text-xs font-medium duration-200',
+                  isAnimating && 'scale-110 animate-pulse'
+                )}
               >
                 {displayCount}
               </Badge>
@@ -124,6 +158,9 @@ export function MessageNotificationIcon({
                           })}
                         </div>
                       </div>
+                      <p className='text-muted-foreground mt-0.5 text-xs'>
+                        {(message as any).source || '消息'}
+                      </p>
                       <p className='text-muted-foreground mt-1 line-clamp-2 text-sm'>
                         {message.preview}
                       </p>

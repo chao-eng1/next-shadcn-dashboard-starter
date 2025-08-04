@@ -250,8 +250,41 @@ export async function POST(request: NextRequest) {
       console.log('No recipients found for message:', message.id);
     }
 
-    // 这里可以触发实时通知
-    // 在实际项目中，这里会通过WebSocket、SSE或推送服务发送实时通知
+    // 通过WebSocket发送实时通知给所有接收者
+    try {
+      const { getBroadcastService } = await import('@/lib/socket-broadcast');
+      const broadcastService = getBroadcastService();
+
+      // 为每个接收者发送个人消息通知
+      for (const userId of recipientUserIds) {
+        broadcastService.broadcastUserMessage({
+          userId: userId,
+          message: {
+            id: message.id,
+            title: message.title,
+            content: message.content,
+            isGlobal: message.isGlobal,
+            priority: message.priority,
+            senderId: currentUser.id,
+            senderName: currentUser.name,
+            senderImage: currentUser.image,
+            createdAt: message.createdAt.toISOString(),
+            conversationId: `system-${message.id}`,
+            conversationName: '系统消息'
+          },
+          excludeUserId: currentUser.id
+        });
+      }
+
+      console.log(
+        'System message broadcasted to:',
+        recipientUserIds.length,
+        'users'
+      );
+    } catch (broadcastError) {
+      console.error('Failed to broadcast system message:', broadcastError);
+    }
+
     console.log('Message sent to recipients:', recipientUserIds);
     console.log('Sender ID:', currentUser.id);
     console.log(
