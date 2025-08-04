@@ -249,11 +249,6 @@ export function MessageCenterMain() {
         <div className='flex items-center gap-3'>
           <MessageSquare className='text-primary h-6 w-6' />
           <h1 className='text-xl font-semibold'>消息中心</h1>
-          {totalUnreadCount > 0 && (
-            <Badge variant='destructive' className='ml-2'>
-              {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
-            </Badge>
-          )}
         </div>
 
         <div className='flex items-center gap-2'>

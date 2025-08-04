@@ -31,23 +31,54 @@ export function MessageNotificationIcon({
   const { unreadCount, loading, fetchUnreadCount } = useUnreadMessages();
   const { messages, loading: messagesLoading } = useRecentMessages(5);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isShaking, setIsShaking] = useState(false);
+  const [previousUnreadCount, setPreviousUnreadCount] = useState(0);
 
   const handleViewAll = () => {
+    // 用户查看消息时停止抖动
+    setIsShaking(false);
+    setIsAnimating(false);
     router.push('/dashboard/messages');
   };
 
   const handleMessageClick = (messageId: string) => {
+    // 用户点击消息时停止抖动
+    setIsShaking(false);
+    setIsAnimating(false);
     router.push(`/dashboard/messages?messageId=${messageId}`);
   };
 
   const displayCount = unreadCount > 99 ? '99+' : unreadCount.toString();
   const hasUnread = unreadCount > 0;
 
+  // 监听未读数量变化，触发抖动动画
+  useEffect(() => {
+    if (unreadCount > previousUnreadCount && previousUnreadCount > 0) {
+      // 有新消息时触发强烈抖动
+      setIsShaking(true);
+      setIsAnimating(true);
+
+      setTimeout(() => {
+        setIsShaking(false);
+      }, 5000); // 跳动5秒
+
+      setTimeout(() => {
+        setIsAnimating(false);
+      }, 1000);
+    }
+    setPreviousUnreadCount(unreadCount);
+  }, [unreadCount, previousUnreadCount]);
+
   // 监听实时消息事件
   useEffect(() => {
     const handleNewMessage = () => {
       setIsAnimating(true);
+      setIsShaking(true);
       fetchUnreadCount();
+
+      setTimeout(() => {
+        setIsShaking(false);
+      }, 5000);
 
       setTimeout(() => {
         setIsAnimating(false);
@@ -56,7 +87,12 @@ export function MessageNotificationIcon({
 
     const handleUnreadCountUpdate = () => {
       setIsAnimating(true);
+      setIsShaking(true);
       fetchUnreadCount();
+
+      setTimeout(() => {
+        setIsShaking(false);
+      }, 5000);
 
       setTimeout(() => {
         setIsAnimating(false);
@@ -74,18 +110,30 @@ export function MessageNotificationIcon({
 
   return (
     <div className={cn('relative', className)}>
-      <DropdownMenu>
+      <DropdownMenu
+        onOpenChange={(open) => {
+          if (open) {
+            // 下拉菜单打开时停止抖动
+            setIsShaking(false);
+            setIsAnimating(false);
+          }
+        }}
+      >
         <DropdownMenuTrigger asChild>
           <Button
             variant='ghost'
             size='icon'
-            className='hover:bg-accent hover:text-accent-foreground relative h-9 w-9 transition-colors duration-200'
+            className={cn(
+              'hover:bg-accent hover:text-accent-foreground relative h-9 w-9 transition-colors duration-200',
+              hasUnread && 'animate-gentle-bounce',
+              isShaking && 'animate-strong-bounce'
+            )}
             disabled={loading}
           >
             <Bell
               className={cn(
                 'h-4 w-4 transition-all duration-200',
-                hasUnread && 'text-primary animate-pulse',
+                hasUnread && 'text-primary',
                 isAnimating && 'animate-bounce'
               )}
             />
@@ -96,7 +144,8 @@ export function MessageNotificationIcon({
                 variant='destructive'
                 className={cn(
                   'border-background animate-in fade-in-0 zoom-in-50 absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full border-2 px-1 text-xs font-medium duration-200',
-                  isAnimating && 'scale-110 animate-pulse'
+                  isAnimating && 'scale-110 animate-pulse',
+                  isShaking && 'animate-bounce'
                 )}
               >
                 {displayCount}

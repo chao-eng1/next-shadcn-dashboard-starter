@@ -6,6 +6,83 @@
 
 @import './theme.css';
 
+/* 消息通知抖动动画 */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-2px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes gentle-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes strong-bounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  10% {
+    transform: translateY(-8px) scale(1.1);
+  }
+  20% {
+    transform: translateY(-4px) scale(1.05);
+  }
+  30% {
+    transform: translateY(-6px) scale(1.08);
+  }
+  40% {
+    transform: translateY(-2px) scale(1.03);
+  }
+  50% {
+    transform: translateY(-5px) scale(1.06);
+  }
+  60% {
+    transform: translateY(-3px) scale(1.04);
+  }
+  70% {
+    transform: translateY(-4px) scale(1.05);
+  }
+  80% {
+    transform: translateY(-2px) scale(1.02);
+  }
+  90% {
+    transform: translateY(-3px) scale(1.03);
+  }
+}
+
+.animate-shake {
+  animation: shake 0.6s ease-in-out;
+}
+
+.animate-gentle-bounce {
+  animation: gentle-bounce 1.5s ease-in-out infinite;
+}
+
+.animate-strong-bounce {
+  animation: strong-bounce 0.6s ease-in-out infinite;
+}
+
 /* Define language-specific fonts */
 :root {
   /* English fonts (Western languages) */

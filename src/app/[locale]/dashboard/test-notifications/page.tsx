@@ -85,8 +85,36 @@ export default function TestNotificationsPage() {
     const newMessageEvent = new CustomEvent('newMessage', messageEvent);
     window.dispatchEvent(newMessageEvent);
 
-    toast.success('测试消息已发送！');
+    toast.success('测试消息已发送！应该会看到铃铛晃动');
     setTestMessage('');
+  };
+
+  // 触发抖动动画的测试函数
+  const triggerShakeAnimation = () => {
+    const shakeEvent = new CustomEvent('newMessage', {
+      detail: {
+        conversationId: 'shake-test',
+        increment: 1,
+        isOnMessagePage: false,
+        message: {
+          id: `shake-${Date.now()}`,
+          title: '抖动测试',
+          content: '这是一个测试抖动动画的消息',
+          sender: {
+            id: 'shake-sender',
+            name: '抖动测试员',
+            avatar: '/favicon.ico'
+          },
+          timestamp: new Date(),
+          conversationName: '抖动测试',
+          isGlobal: false,
+          createdAt: new Date().toISOString()
+        }
+      }
+    });
+
+    window.dispatchEvent(shakeEvent);
+    toast.success('触发晃动动画！观察右上角铃铛图标');
   };
 
   const simulateRealTimeMessage = async () => {
@@ -240,6 +268,13 @@ export default function TestNotificationsPage() {
               >
                 发送API消息
               </Button>
+              <Button
+                onClick={triggerShakeAnimation}
+                className='w-full'
+                variant='secondary'
+              >
+                🔔 测试晃动动画
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -260,13 +295,18 @@ export default function TestNotificationsPage() {
           <p>
             • <strong>轮询机制</strong>: 每20秒自动检查未读消息，页面隐藏时暂停
           </p>
+          <p>
+            • <strong>晃动动画</strong>:
+            有未读消息时持续轻柔晃动，新消息时强烈抖动2秒
+          </p>
           <p>• 在此页面发送测试消息后，应该能看到:</p>
           <ul className='ml-4 list-disc space-y-1'>
-            <li>右上角铃铛图标会显示动画并更新未读数量</li>
+            <li>右上角铃铛图标会显示晃动动画并更新未读数量</li>
             <li>收到浏览器原生通知（需要授权）</li>
             <li>显示toast通知</li>
             <li>全局未读消息计数更新</li>
             <li>轮询状态实时更新，显示上次检查时间</li>
+            <li>点击铃铛或查看消息后晃动停止</li>
           </ul>
           <p>• 切换到其他页面（如首页、项目管理等）也应该能收到同样的通知</p>
           <p>
