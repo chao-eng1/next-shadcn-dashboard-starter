@@ -46,8 +46,10 @@ import * as React from 'react';
 import { Icons } from '../icons';
 import { OrgSwitcher } from '../org-switcher';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { getApiUrl } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import { useUnreadMessages } from '@/hooks/use-unread-messages';
 
 export const company = {
   name: 'Acme Inc',
@@ -104,6 +106,7 @@ export default function AppSidebar() {
   const { isOpen } = useMediaQuery();
   const router = useRouter();
   const t = useTranslations();
+  const { unreadCount } = useUnreadMessages();
 
   // Helper function to check if a path is active, ignoring the locale prefix
   const isPathActive = (itemUrl: string, currentPath: string): boolean => {
@@ -271,6 +274,16 @@ export default function AppSidebar() {
                       <Link href={item.url} className='relative'>
                         {IconComponent && <IconComponent />}
                         <span>{t(item.title)}</span>
+                        {/* 为消息中心添加未读计数 */}
+                        {item.url === '/dashboard/messages' &&
+                          unreadCount > 0 && (
+                            <Badge
+                              variant='destructive'
+                              className='ml-auto h-5 min-w-5 px-1.5 text-xs'
+                            >
+                              {unreadCount > 99 ? '99+' : unreadCount}
+                            </Badge>
+                          )}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

@@ -190,8 +190,7 @@ export class WebSocketService {
 
     // 监听消息相关事件
     this.socket.on('message:new', (data: any) => {
-      debugger; // 🔴 调试断点：Socket.io接收到message:new事件
-      console.log('🔴 [WebSocket] Received message:new event:', data);
+      console.log('WebSocket: Received new message event');
       this.handleMessageReceive(data);
     });
 
@@ -210,8 +209,8 @@ export class WebSocketService {
     // 监听会话相关事件
     this.socket.on('conversation:joined', (data: any) => {
       console.log(
-        '🔴 [WebSocket] Received conversation:joined confirmation:',
-        data
+        'WebSocket: Conversation joined confirmation:',
+        data.conversationId
       );
       this.emit('conversation:joined', data);
     });
@@ -334,12 +333,8 @@ export class WebSocketService {
     store.setConnectionStatus('connected');
     store.resetReconnectAttempts();
 
-    console.log('🔴 [WebSocket] Socket.io connected successfully');
-    console.log('🔴 [WebSocket] Socket ID:', this.socket?.id);
-    console.log(
-      '🔴 [WebSocket] Socket connected status:',
-      this.socket?.connected
-    );
+    console.log('WebSocket connected successfully, ID:', this.socket?.id);
+    console.log('Socket connected status:', this.socket?.connected);
 
     // 开始心跳
     this.startHeartbeat();
@@ -354,7 +349,7 @@ export class WebSocketService {
     const selectedConversationId = store.selectedConversationId;
     if (selectedConversationId) {
       console.log(
-        '🔴 [WebSocket] Auto-joining selected conversation:',
+        'WebSocket: Auto-joining selected conversation:',
         selectedConversationId
       );
       this.joinConversation(selectedConversationId);
@@ -569,11 +564,11 @@ export class WebSocketService {
 
   // 消息处理方法
   private handleMessageReceive(data: any): void {
-    debugger; // 🔴 调试断点：WebSocket接收到消息
-    console.log('🔴 [WebSocket] handleMessageReceive - Raw data:', data);
-    console.log('🔴 [WebSocket] Data type:', typeof data);
-    console.log('🔴 [WebSocket] Data keys:', Object.keys(data || {}));
+    console.log('WebSocket: Processing received message:', data.id);
     const store = useMessageStore.getState();
+
+    // 检查当前页面是否在消息中心
+    const isOnMessagePage = window.location.pathname.includes('/messages');
 
     // 转换服务端消息格式为前端Message格式
     const message: Message = {
@@ -603,10 +598,10 @@ export class WebSocketService {
         : undefined
     };
 
-    console.log('🔴 [WebSocket] Formatted message for frontend:', message);
+    console.log(
+      'WebSocket: Message formatted for frontend, dispatching events'
+    );
     store.addMessage(message);
-
-    console.log('🔴 [WebSocket] About to dispatch custom event');
     // 分发自定义事件给chat-content组件
     const customEvent = new CustomEvent('newMessage', {
       detail: {
@@ -614,15 +609,34 @@ export class WebSocketService {
         messages: [message]
       }
     });
-    debugger; // 🔴 调试断点：准备分发自定义事件到前端组件
-    console.log(
-      '🔴 [WebSocket] Dispatching newMessage event:',
-      customEvent.detail
-    );
+    console.log('WebSocket: Dispatching newMessage event to frontend');
     window.dispatchEvent(customEvent);
 
-    // 如果不是当前选中的会话，显示通知
-    if (message.conversationId !== store.selectedConversationId) {
+    // 分发未读计数更新事件
+    const unreadCountEvent = new CustomEvent('unreadCountUpdate', {
+      detail: {
+        conversationId: message.conversationId,
+        increment: 1,
+        isOnMessagePage,
+        message: {
+          id: message.id,
+          content: message.content,
+          sender: message.sender,
+          timestamp: message.timestamp,
+          conversationName:
+            store.conversations.find((c) => c.id === message.conversationId)
+              ?.name || '未知会话'
+        }
+      }
+    });
+    console.log('WebSocket: Dispatching unread count update event');
+    window.dispatchEvent(unreadCountEvent);
+
+    // 如果不在消息页面或不是当前选中的会话，显示通知
+    if (
+      !isOnMessagePage ||
+      message.conversationId !== store.selectedConversationId
+    ) {
       this.showNotification(message);
     }
   }
@@ -783,20 +797,18 @@ export class WebSocketService {
     type: string = 'private'
   ): void {
     console.log(
-      '🔴 [WebSocket] Joining conversation:',
+      'WebSocket: Joining conversation room:',
       conversationId,
       'type:',
       type
     );
-    console.log('🔴 [WebSocket] Socket connected:', this.socket?.connected);
-    console.log('🔴 [WebSocket] Socket ID:', this.socket?.id);
 
     if (this.socket && this.socket.connected) {
       this.socket.emit('conversation:join', { conversationId, type });
-      console.log('🔴 [WebSocket] Sent conversation:join event');
+      console.log('WebSocket: Sent conversation:join event');
     } else {
       console.warn(
-        '🔴 [WebSocket] Cannot join conversation - socket not connected'
+        'WebSocket: Cannot join conversation - socket not connected'
       );
     }
   }
@@ -806,7 +818,7 @@ export class WebSocketService {
     type: string = 'private'
   ): void {
     console.log(
-      '🔴 [WebSocket] Leaving conversation:',
+      'WebSocket: Leaving conversation:',
       conversationId,
       'type:',
       type
@@ -814,10 +826,10 @@ export class WebSocketService {
 
     if (this.socket && this.socket.connected) {
       this.socket.emit('conversation:leave', { conversationId, type });
-      console.log('🔴 [WebSocket] Sent conversation:leave event');
+      console.log('WebSocket: Sent conversation:leave event');
     } else {
       console.warn(
-        '🔴 [WebSocket] Cannot leave conversation - socket not connected'
+        'WebSocket: Cannot leave conversation - socket not connected'
       );
     }
   }

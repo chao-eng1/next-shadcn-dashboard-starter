@@ -65,6 +65,7 @@ export async function GET(request: NextRequest) {
               messages: {
                 where: {
                   isDeleted: false,
+                  senderId: { not: user.id }, // 排除自己发送的消息
                   readBy: {
                     none: {
                       userId: user.id

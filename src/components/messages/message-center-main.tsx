@@ -33,6 +33,7 @@ import { GlobalNotificationStatus } from './global-notification-status';
 import { NewPrivateChatDialog } from './new-private-chat-dialog';
 import { useRecentMessages } from '@/hooks/use-recent-messages';
 import { useMessageCenter } from '@/hooks/use-message-center';
+import { useUnreadMessages } from '@/hooks/use-unread-messages';
 
 // 会话类型
 type ConversationType = 'private' | 'group' | 'system' | 'project';
@@ -71,6 +72,8 @@ export function MessageCenterMain() {
   const [loading, setLoading] = useState(true);
 
   const { unreadCount } = useRecentMessages();
+  const { unreadCount: globalUnreadCount, fetchUnreadCount } =
+    useUnreadMessages();
   const { isConnected, connect, disconnect } = useMessageCenter({});
 
   // WebSocket连接管理
@@ -111,8 +114,102 @@ export function MessageCenterMain() {
     fetchConversations();
   }, []);
 
-  // 计算未读消息总数
+  // 监听未读计数更新事件
+  useEffect(() => {
+    const handleUnreadCountUpdate = (event: CustomEvent) => {
+      console.log(
+        'Message center: Received unread count update for conversation:',
+        event.detail.conversationId
+      );
+
+      const { conversationId, increment } = event.detail;
+
+      // 更新对应会话的未读计数
+      setConversations((prev) =>
+        prev.map((conv) => {
+          if (conv.id === conversationId) {
+            return {
+              ...conv,
+              unreadCount: conv.unreadCount + increment
+            };
+          }
+          return conv;
+        })
+      );
+
+      // 刷新全局未读计数
+      fetchUnreadCount();
+    };
+
+    const handleConversationRead = (event: CustomEvent) => {
+      console.log(
+        'Message center: Conversation marked as read:',
+        event.detail.conversationId
+      );
+
+      const { conversationId } = event.detail;
+
+      // 立即清除对应会话的未读计数（UI优化）
+      setConversations((prev) =>
+        prev.map((conv) => {
+          if (conv.id === conversationId) {
+            return {
+              ...conv,
+              unreadCount: 0
+            };
+          }
+          return conv;
+        })
+      );
+
+      // 刷新全局未读计数
+      fetchUnreadCount();
+
+      // 延迟一点时间后重新获取会话列表，确保服务器端数据已更新
+      setTimeout(() => {
+        fetchConversations();
+      }, 1000);
+    };
+
+    const handleRefreshConversations = () => {
+      console.log(
+        'Message center: Refreshing conversations due to external trigger'
+      );
+      fetchConversations();
+    };
+
+    window.addEventListener(
+      'unreadCountUpdate',
+      handleUnreadCountUpdate as EventListener
+    );
+    window.addEventListener(
+      'conversationRead',
+      handleConversationRead as EventListener
+    );
+    window.addEventListener(
+      'refreshConversations',
+      handleRefreshConversations as EventListener
+    );
+
+    return () => {
+      window.removeEventListener(
+        'unreadCountUpdate',
+        handleUnreadCountUpdate as EventListener
+      );
+      window.removeEventListener(
+        'conversationRead',
+        handleConversationRead as EventListener
+      );
+      window.removeEventListener(
+        'refreshConversations',
+        handleRefreshConversations as EventListener
+      );
+    };
+  }, [fetchUnreadCount]);
+
+  // 计算未读消息总数 - 优先使用全局未读计数
   const totalUnreadCount =
+    globalUnreadCount ||
     unreadCount?.total ||
     conversations.reduce((total, conv) => total + conv.unreadCount, 0);
 

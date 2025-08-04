@@ -4,6 +4,7 @@ import { ActiveThemeProvider } from '../active-theme';
 import { AuthProvider } from '../auth-provider';
 import { RBACProvider } from '@/features/system-management/rbac-context';
 import { RealtimeProvider } from '../realtime/realtime-provider';
+import { GlobalUnreadNotifications } from '../messages/global-unread-notifications';
 
 export default function Providers({
   activeThemeValue,
@@ -16,7 +17,10 @@ export default function Providers({
     <ActiveThemeProvider initialTheme={activeThemeValue}>
       <AuthProvider>
         <RBACProvider>
-          <RealtimeProvider>{children}</RealtimeProvider>
+          <RealtimeProvider>
+            {children}
+            <GlobalUnreadNotifications />
+          </RealtimeProvider>
         </RBACProvider>
       </AuthProvider>
     </ActiveThemeProvider>

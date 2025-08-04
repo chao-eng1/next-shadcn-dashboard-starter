@@ -16,9 +16,12 @@ const notifySubscribers = (count: number, loading: boolean) => {
   subscribers.forEach((callback) => callback(count, loading));
 };
 
-const fetchUnreadCountGlobal = async (userId: string) => {
+const fetchUnreadCountGlobal = async (
+  userId: string,
+  force: boolean = false
+) => {
   const now = Date.now();
-  if (now - lastFetchTime < FETCH_COOLDOWN) {
+  if (!force && now - lastFetchTime < FETCH_COOLDOWN) {
     return; // 在冷却时间内，不重复请求
   }
 
@@ -26,10 +29,10 @@ const fetchUnreadCountGlobal = async (userId: string) => {
   notifySubscribers(globalUnreadCount, true);
 
   try {
-    const response = await fetch('/api/user-messages/unread-count');
+    const response = await fetch('/api/message-center/unread-count');
     if (response.ok) {
       const data = await response.json();
-      notifySubscribers(data.data.unreadCount || 0, false);
+      notifySubscribers(data.data.total || 0, false);
     }
   } catch (error) {
     console.error('Error fetching unread count:', error);
@@ -89,6 +92,27 @@ export function useUnreadMessages() {
       // 只在用户ID变化时获取一次
       fetchUnreadCountGlobal(user.id);
     }
+  }, [user?.id]);
+
+  // 监听刷新未读计数事件
+  useEffect(() => {
+    const handleRefreshUnreadCount = () => {
+      if (user?.id) {
+        console.log(
+          'useUnreadMessages: Refreshing unread count due to external trigger'
+        );
+        fetchUnreadCountGlobal(user.id, true); // 强制刷新，忽略冷却时间
+      }
+    };
+
+    window.addEventListener('refreshUnreadCount', handleRefreshUnreadCount);
+
+    return () => {
+      window.removeEventListener(
+        'refreshUnreadCount',
+        handleRefreshUnreadCount
+      );
+    };
   }, [user?.id]);
 
   return {

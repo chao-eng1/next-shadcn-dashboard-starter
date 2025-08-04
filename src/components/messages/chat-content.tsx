@@ -141,42 +141,67 @@ export function ChatContent({ conversation }: ChatContentProps) {
       return;
     }
 
-    console.log('🔵 [Chat Content] Conversation changed:', conversation.id);
-    console.log('🔵 [Chat Content] User ID:', user?.id);
+    console.log('Chat content: Conversation changed to', conversation.id);
 
     // 加载消息
     loadMessages(conversation.id);
 
+    // 标记会话为已读
+    const markConversationAsRead = async () => {
+      try {
+        await fetch(`/api/conversations/${conversation.id}/read`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log('Marked conversation as read:', conversation.id);
+
+        // 分发已读事件
+        const readEvent = new CustomEvent('conversationRead', {
+          detail: {
+            conversationId: conversation.id
+          }
+        });
+        window.dispatchEvent(readEvent);
+
+        // 立即刷新未读计数和会话列表
+        const refreshEvent = new CustomEvent('refreshUnreadCount');
+        window.dispatchEvent(refreshEvent);
+
+        const refreshConversationsEvent = new CustomEvent(
+          'refreshConversations'
+        );
+        window.dispatchEvent(refreshConversationsEvent);
+      } catch (error) {
+        console.error('Failed to mark conversation as read:', error);
+      }
+    };
+
+    markConversationAsRead();
+
     // 加入WebSocket房间
     if (wsService && user) {
-      console.log('🔵 [Chat Content] Connecting to WebSocket...');
+      console.log('Connecting to WebSocket for conversation:', conversation.id);
       wsService
         .connect(user.id)
         .then(() => {
-          console.log(
-            '🔵 [Chat Content] WebSocket connected, joining room:',
-            conversation.type,
-            conversation.id
-          );
+          console.log('WebSocket connected, joining room:', conversation.id);
           wsService.joinConversation(conversation.id, conversation.type);
         })
         .catch((error) => {
-          console.error(
-            '🔵 [Chat Content] WebSocket connection failed:',
-            error
-          );
+          console.error('WebSocket connection failed:', error);
         });
     }
 
     // 简化的消息监听 - 只监听自定义事件
     const handleNewMessage = (event: CustomEvent) => {
-      debugger; // 🔴 调试断点：前端组件接收到newMessage事件
-      console.log('🔵 [Chat Content] Received newMessage event:', event.detail);
+      console.log(
+        'Received new message event for conversation:',
+        event.detail.conversationId
+      );
       if (event.detail.conversationId === conversation.id) {
-        console.log(
-          '🔵 [Chat Content] Message is for current conversation:',
-          conversation.id
-        );
+        console.log('Message is for current conversation:', conversation.id);
         const newMessages = event.detail.messages.map((msg: any) => ({
           id: msg.id,
           content: msg.content,
@@ -196,21 +221,15 @@ export function ChatContent({ conversation }: ChatContentProps) {
           replyTo: msg.replyTo
         }));
 
-        console.log(
-          '🔵 [Chat Content] Adding new messages to state:',
-          newMessages
-        );
+        console.log('Adding new messages to state:', newMessages.length);
         setMessages((prev) => {
           const updated = [...prev, ...newMessages];
-          console.log(
-            '🔵 [Chat Content] Updated messages count:',
-            updated.length
-          );
+          console.log('Updated messages count:', updated.length);
           return updated;
         });
       } else {
         console.log(
-          '🔵 [Chat Content] Message not for current conversation:',
+          'Message not for current conversation:',
           event.detail.conversationId,
           'current:',
           conversation.id
@@ -224,9 +243,10 @@ export function ChatContent({ conversation }: ChatContentProps) {
       // 离开WebSocket房间
       if (wsService && user) {
         console.log(
-          '🔵 [Chat Content] Leaving WebSocket room:',
-          conversation.type,
-          conversation.id
+          'Leaving WebSocket room:',
+          conversation.id,
+          'type:',
+          conversation.type
         );
         wsService.leaveConversation(conversation.id, conversation.type);
       }
