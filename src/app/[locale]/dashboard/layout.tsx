@@ -1,6 +1,7 @@
 import KBar from '@/components/kbar';
 import AppSidebar from '@/components/layout/app-sidebar';
 import Header from '@/components/layout/header';
+import { ChatInterface } from '@/components/chat';
 
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import type { Metadata } from 'next';
@@ -29,6 +30,8 @@ export default async function DashboardLayout({
           {children}
           {/* page main content ends */}
         </SidebarInset>
+        {/* AI对话浮动组件 */}
+        <ChatInterface />
       </SidebarProvider>
     </KBar>
   );

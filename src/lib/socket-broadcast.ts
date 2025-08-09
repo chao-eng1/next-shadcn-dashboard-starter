@@ -12,11 +12,11 @@ class SocketBroadcastService {
   private async connect() {
     try {
       const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001';
-      console.log('🟡 [Broadcast Service] Attempting to connect to:', wsUrl);
+      // Log connection attempt
 
       // 获取服务端认证token
       const token = await this.getServerToken();
-      console.log('🟡 [Broadcast Service] Using token:', token);
+      // Using authentication token
 
       this.socket = ioClient(wsUrl, {
         auth: {
@@ -28,20 +28,20 @@ class SocketBroadcastService {
 
       this.socket.on('connect', () => {
         this.isConnected = true;
-        console.log('🟡 [Broadcast Service] Connected successfully');
+        // Connected successfully
       });
 
       this.socket.on('disconnect', () => {
         this.isConnected = false;
-        console.log('🟡 [Broadcast Service] Disconnected');
+        // Disconnected
       });
 
-      this.socket.on('connect_error', (error) => {
-        console.error('🟡 [Broadcast Service] Connection error:', error);
+      this.socket.on('connect_error', () => {
+        // Connection error occurred
         this.isConnected = false;
       });
     } catch (error) {
-      console.error('🟡 [Broadcast Service] Failed to connect:', error);
+      // Failed to connect
       this.isConnected = false;
     }
   }
@@ -60,20 +60,13 @@ class SocketBroadcastService {
     excludeUserId?: string;
   }) {
     if (!this.socket || !this.isConnected) {
-      console.warn(
-        '🟡 [Broadcast Service] Socket.io not connected, cannot broadcast message'
-      );
+      // Socket.io not connected, cannot broadcast message
       return;
     }
 
     const roomName = `${data.type}:${data.conversationId}`;
 
-    console.log(
-      '🟡 [Broadcast Service] Broadcasting message to room:',
-      roomName
-    );
-    console.log('🟡 [Broadcast Service] Message data:', data.message);
-    console.log('🟡 [Broadcast Service] Exclude user:', data.excludeUserId);
+    // Broadcasting message to room
 
     this.socket.emit('server:broadcast:message', {
       room: roomName,
@@ -82,9 +75,7 @@ class SocketBroadcastService {
       excludeUserId: data.excludeUserId
     });
 
-    console.log(
-      `🟡 [Broadcast Service] Broadcasted message to room: ${roomName}`
-    );
+    // Message broadcasted successfully
   }
 
   // 广播系统消息给特定用户
@@ -94,19 +85,13 @@ class SocketBroadcastService {
     excludeUserId?: string;
   }) {
     if (!this.socket || !this.isConnected) {
-      console.warn(
-        '🟡 [Broadcast Service] Socket.io not connected, cannot broadcast user message'
-      );
+      // Socket.io not connected, cannot broadcast user message
       return;
     }
 
     const roomName = `user:${data.userId}`;
 
-    console.log(
-      '🟡 [Broadcast Service] Broadcasting user message to room:',
-      roomName
-    );
-    console.log('🟡 [Broadcast Service] User message data:', data.message);
+    // Broadcasting user message to room
 
     this.socket.emit('server:broadcast:message', {
       room: roomName,
@@ -115,9 +100,7 @@ class SocketBroadcastService {
       excludeUserId: data.excludeUserId
     });
 
-    console.log(
-      `🟡 [Broadcast Service] Broadcasted user message to room: ${roomName}`
-    );
+    // User message broadcasted successfully
   }
 
   // 广播消息已读状态
@@ -129,7 +112,7 @@ class SocketBroadcastService {
     excludeUserId?: string;
   }) {
     if (!this.socket || !this.isConnected) {
-      console.warn('Socket.io not connected, cannot broadcast read status');
+      // Socket.io not connected, cannot broadcast read status
       return;
     }
 
@@ -155,7 +138,7 @@ class SocketBroadcastService {
     targetUsers?: string[];
   }) {
     if (!this.socket || !this.isConnected) {
-      console.warn('Socket.io not connected, cannot broadcast notification');
+      // Socket.io not connected, cannot broadcast notification
       return;
     }
 
@@ -165,9 +148,7 @@ class SocketBroadcastService {
       targetUsers: data.targetUsers
     });
 
-    console.log(
-      `Broadcasted project notification for project: ${data.projectId}`
-    );
+    // Project notification broadcasted successfully
   }
 
   // 广播用户状态变化
@@ -177,7 +158,7 @@ class SocketBroadcastService {
     projectIds?: string[];
   }) {
     if (!this.socket || !this.isConnected) {
-      console.warn('Socket.io not connected, cannot broadcast user status');
+      // Socket.io not connected, cannot broadcast user status
       return;
     }
 

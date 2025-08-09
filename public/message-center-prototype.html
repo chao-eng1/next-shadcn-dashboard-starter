@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消息中心原型 - 项目管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            background: white;
+            min-height: calc(100vh - 40px);
+            display: flex;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 320px;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .user-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #bdc3c7;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #27ae60;
+        }
+
+        /* 会话列表 */
+        .conversation-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .conversation-item {
+            padding: 15px 20px;
+            margin: 5px 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .conversation-item:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(5px);
+        }
+
+        .conversation-item.active {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+
+        .conversation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .conversation-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .conversation-time {
+            font-size: 12px;
+            color: #95a5a6;
+        }
+
+        .conversation-preview {
+            font-size: 13px;
+            color: #bdc3c7;
+            line-height: 1.4;
+        }
+
+        .unread-badge {
+            background: #e74c3c;
+            color: white;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 11px;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        /* 主聊天区域 */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #ecf0f1;
+            background: white;
+        }
+
+        .chat-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .chat-subtitle {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+            border: 2px solid white;
+        }
+
+        .message-author {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .message-time {
+            color: #95a5a6;
+            font-size: 12px;
+        }
+
+        .message-content {
+            background: white;
+            padding: 14px 18px;
+            border-radius: 18px 18px 18px 6px;
+            margin-left: 46px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            position: relative;
+            max-width: 70%;
+        }
+
+        .message.own .message-content {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            margin-left: 0;
+            margin-right: 46px;
+            border-radius: 18px 18px 6px 18px;
+            margin-left: auto;
+        }
+
+        .message.system .message-content {
+            background: #f39c12;
+            color: white;
+            text-align: center;
+            margin: 0;
+            border-radius: 20px;
+        }
+
+        /* 消息输入区域 */
+        .chat-input {
+            padding: 20px;
+            border-top: 1px solid #ecf0f1;
+            background: white;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            border: 2px solid #e1e8ed;
+            border-radius: 25px;
+            padding: 12px 20px;
+            resize: none;
+            max-height: 120px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #3498db;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .send-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        /* 右侧信息面板 */
+        .info-panel {
+            width: 280px;
+            background: white;
+            border-left: 1px solid #ecf0f1;
+            padding: 20px;
+        }
+
+        .panel-section {
+            margin-bottom: 30px;
+        }
+
+        .panel-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .member-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .member-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .member-item:hover {
+            background: #f8f9fa;
+        }
+
+        .member-name {
+            font-size: 14px;
+        }
+
+        .member-role {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        /* 通知设置 */
+        .notification-settings {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .toggle {
+            width: 40px;
+            height: 20px;
+            background: #ddd;
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle.active {
+            background: #3498db;
+        }
+
+        .toggle::after {
+            content: '';
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+
+        .toggle.active::after {
+            transform: translateX(20px);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: 200px;
+            }
+            
+            .info-panel {
+                display: none;
+            }
+        }
+
+        /* 消息类型标签 */
+        .message-type {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .type-project {
+            background: #e8f5e8;
+            color: #27ae60;
+        }
+
+        .type-system {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .type-private {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .type-notification {
+            background: #fce4ec;
+            color: #c2185b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 左侧会话列表 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>💬 消息中心</h2>
+                <div class="user-status">
+                    <div class="status-dot"></div>
+                    <span>在线</span>
+                </div>
+            </div>
+            
+            <div class="conversation-list">
+                <div class="conversation-item active">
+                    <div class="conversation-header">
+                        <div class="conversation-name">
+                            <span class="message-type type-project">项目</span>
+                            项目管理系统开发组
+                        </div>
+                        <div class="conversation-time">14:30</div>
+                    </div>
+                    <div class="conversation-preview">张三: 今天的需求评审会议安排在下午3点</div>
+                </div>
+                
+                <div class="conversation-item">
+                    <div class="conversation-header">
+                        <div class="conversation-name">
+                            <span class="message-type type-private">私聊</span>
+                            李四
+                        </div>
+                        <div class="conversation-time">13:45</div>
+                    </div>
+                    <div class="conversation-preview">关于数据库设计的问题，我们需要讨论一下</div>
+                </div>
+                
+                <div class="conversation-item">
+                    <div class="conversation-header">
+                        <div class="conversation-name">
+                            <span class="message-type type-system">系统</span>
+                            系统通知
+                        </div>
+                        <div class="conversation-time">12:00</div>
+                        <div class="unread-badge">3</div>
+                    </div>
+                    <div class="conversation-preview">您有新的任务分配通知</div>
+                </div>
+                
+                <div class="conversation-item">
+                    <div class="conversation-header">
+                        <div class="conversation-name">
+                            <span class="message-type type-notification">通知</span>
+                            项目进度提醒
+                        </div>
+                        <div class="conversation-time">11:30</div>
+                        <div class="unread-badge">1</div>
+                    </div>
+                    <div class="conversation-preview">项目里程碑即将到期，请及时完成相关任务</div>
+                </div>
+                
+                <div class="conversation-item">
+                    <div class="conversation-header">
+                        <div class="conversation-name">
+                            <span class="message-type type-project">项目</span>
+                            UI设计讨论组
+                        </div>
+                        <div class="conversation-time">昨天</div>
+                    </div>
+                    <div class="conversation-preview">王五: 新的设计稿已经上传到Figma</div>
+                </div>
+                
+                <div class="conversation-item">
+                    <div class="conversation-header">
+                        <div class="conversation-name">
+                            <span class="message-type type-private">私聊</span>
+                            赵六
+                        </div>
+                        <div class="conversation-time">昨天</div>
+                    </div>
+                    <div class="conversation-preview">代码review的反馈已经整理好了</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 主聊天区域 -->
+        <div class="chat-area">
+            <div class="chat-header">
+                <div class="chat-title">项目管理系统开发组</div>
+                <div class="chat-subtitle">6名成员在线 • 项目群聊</div>
+            </div>
+            
+            <div class="chat-messages">
+                <div class="message system">
+                    <div class="message-content">
+                        🎉 张三 加入了群聊
+                    </div>
+                </div>
+                
+                <div class="message">
+                    <div class="message-header">
+                        <div class="avatar" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">张</div>
+                        <div class="message-author">张三</div>
+                        <div class="message-time">09:30</div>
+                    </div>
+                    <div class="message-content">
+                        早上好大家！☀️ 今天是个好日子，我们的项目进展很顺利 🚀
+                    </div>
+                </div>
+                
+                <div class="message">
+                    <div class="message-header">
+                        <div class="avatar" style="background: linear-gradient(135deg, #27ae60, #229954);">李</div>
+                        <div class="message-author">李四</div>
+                        <div class="message-time">09:32</div>
+                    </div>
+                    <div class="message-content">
+                        是的！昨天的用户调研结果很不错 📊<br>
+                        <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin-top: 8px; border-left: 3px solid #3498db;">
+                            📋 <strong>调研摘要</strong><br>
+                            • 用户满意度: 85%<br>
+                            • 功能完整度: 92%<br>
+                            • 界面友好度: 88%
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="message">
+                    <div class="message-header">
+                        <div class="avatar" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">王</div>
+                        <div class="message-author">王五</div>
+                        <div class="message-time">10:15</div>
+                    </div>
+                    <div class="message-content">
+                        我刚完成了新版本的UI设计 🎨<br>
+                        <div style="background: #e8f5e8; padding: 12px; border-radius: 12px; margin-top: 8px; text-align: center;">
+                            📎 <strong>设计文件.figma</strong><br>
+                            <small style="color: #666;">2.3 MB • 刚刚上传</small><br>
+                            <button style="background: #27ae60; color: white; border: none; padding: 6px 12px; border-radius: 6px; margin-top: 6px; cursor: pointer;">📥 下载</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="message own">
+                    <div class="message-header">
+                        <div class="message-author">我</div>
+                        <div class="message-time">10:18</div>
+                        <div class="avatar">我</div>
+                    </div>
+                    <div class="message-content">
+                        太棒了！@王五 设计看起来很棒 👏<br>
+                        我这边的后端API也基本完成了，准备开始联调
+                    </div>
+                </div>
+                
+                <div class="message">
+                    <div class="message-header">
+                        <div class="avatar" style="background: linear-gradient(135deg, #f39c12, #e67e22);">赵</div>
+                        <div class="message-author">赵六</div>
+                        <div class="message-time">11:45</div>
+                    </div>
+                    <div class="message-content">
+                        前端这边也准备好了！🎯<br>
+                        顺便分享一下今天的代码提交统计：
+                        <div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin-top: 8px;">
+                            📈 <strong>今日提交</strong><br>
+                            • 新增功能: 5个<br>
+                            • Bug修复: 3个<br>
+                            • 代码优化: 2个
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="message">
+                    <div class="message-header">
+                        <div class="avatar" style="background: linear-gradient(135deg, #1abc9c, #16a085);">钱</div>
+                        <div class="message-author">钱七</div>
+                        <div class="message-time">13:20</div>
+                    </div>
+                    <div class="message-content">
+                        测试报告出来了！🧪 整体质量很高<br>
+                        <div style="background: #d4edda; padding: 12px; border-radius: 12px; margin-top: 8px; border: 1px solid #c3e6cb;">
+                            ✅ <strong>测试通过率: 96.5%</strong><br>
+                            🐛 发现问题: 2个轻微bug<br>
+                            ⚡ 性能测试: 优秀<br>
+                            🔒 安全测试: 通过
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="message">
+                    <div class="message-header">
+                        <div class="avatar" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">张</div>
+                        <div class="message-author">张三</div>
+                        <div class="message-time">14:25</div>
+                    </div>
+                    <div class="message-content">
+                        太好了！大家辛苦了 💪<br>
+                        下午3点我们开需求评审会议，请大家准时参加。会议室在A座301 🏢
+                    </div>
+                </div>
+                
+                <div class="message">
+                    <div class="message-header">
+                        <div class="avatar" style="background: linear-gradient(135deg, #27ae60, #229954);">李</div>
+                        <div class="message-author">李四</div>
+                        <div class="message-time">14:26</div>
+                    </div>
+                    <div class="message-content">
+                        收到！我会准时参加的 ✋ 需要准备什么材料吗？
+                    </div>
+                </div>
+                
+                <div class="message own">
+                    <div class="message-header">
+                        <div class="message-author">我</div>
+                        <div class="message-time">14:28</div>
+                        <div class="avatar">我</div>
+                    </div>
+                    <div class="message-content">
+                        好的，我也会参加 👍 @张三 需要我准备数据库设计文档吗？
+                    </div>
+                </div>
+                
+                <div class="message">
+                    <div class="message-header">
+                        <div class="avatar" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">张</div>
+                        <div class="message-author">张三</div>
+                        <div class="message-time">14:30</div>
+                    </div>
+                    <div class="message-content">
+                        @李四 请准备用户故事文档 📝<br>
+                        @我 数据库设计文档也带上，我们一起讨论 🗃️<br><br>
+                        另外，会议议程我已经发到邮箱了 📧
+                    </div>
+                </div>
+                
+                <div class="message">
+                    <div class="message-header">
+                        <div class="avatar" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">王</div>
+                        <div class="message-author">王五</div>
+                        <div class="message-time">14:32</div>
+                    </div>
+                    <div class="message-content">
+                        我会带上最新的原型图 🖼️ 顺便问一下，需要演示交互效果吗？
+                    </div>
+                </div>
+                
+                <div class="message system">
+                    <div class="message-content">
+                        💡 提醒：距离会议开始还有25分钟
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-input">
+                <div class="input-container">
+                    <textarea class="message-input" placeholder="输入消息..." rows="1"></textarea>
+                    <button class="send-button">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右侧信息面板 -->
+        <div class="info-panel">
+            <div class="panel-section">
+                <div class="panel-title">👥 群组成员 (6)</div>
+                <div class="member-list">
+                    <div class="member-item">
+                        <div class="avatar">张</div>
+                        <div>
+                            <div class="member-name">张三</div>
+                            <div class="member-role">项目经理</div>
+                        </div>
+                    </div>
+                    <div class="member-item">
+                        <div class="avatar">李</div>
+                        <div>
+                            <div class="member-name">李四</div>
+                            <div class="member-role">产品经理</div>
+                        </div>
+                    </div>
+                    <div class="member-item">
+                        <div class="avatar">王</div>
+                        <div>
+                            <div class="member-name">王五</div>
+                            <div class="member-role">UI设计师</div>
+                        </div>
+                    </div>
+                    <div class="member-item">
+                        <div class="avatar">赵</div>
+                        <div>
+                            <div class="member-name">赵六</div>
+                            <div class="member-role">前端开发</div>
+                        </div>
+                    </div>
+                    <div class="member-item">
+                        <div class="avatar">我</div>
+                        <div>
+                            <div class="member-name">我</div>
+                            <div class="member-role">后端开发</div>
+                        </div>
+                    </div>
+                    <div class="member-item">
+                        <div class="avatar">钱</div>
+                        <div>
+                            <div class="member-name">钱七</div>
+                            <div class="member-role">测试工程师</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel-section">
+                <div class="panel-title">🔔 通知设置</div>
+                <div class="notification-settings">
+                    <div class="setting-item">
+                        <span>消息通知</span>
+                        <div class="toggle active"></div>
+                    </div>
+                    <div class="setting-item">
+                        <span>声音提醒</span>
+                        <div class="toggle active"></div>
+                    </div>
+                    <div class="setting-item">
+                        <span>桌面通知</span>
+                        <div class="toggle"></div>
+                    </div>
+                    <div class="setting-item">
+                        <span>项目通知</span>
+                        <div class="toggle active"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel-section">
+                <div class="panel-title">📊 消息统计</div>
+                <div style="font-size: 14px; color: #7f8c8d; line-height: 1.6;">
+                    <div>今日消息: 23条</div>
+                    <div>未读消息: 4条</div>
+                    <div>项目通知: 2条</div>
+                    <div>系统消息: 3条</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 简单的交互功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 会话切换
+            const conversationItems = document.querySelectorAll('.conversation-item');
+            conversationItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    conversationItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 更新聊天标题
+                    const name = this.querySelector('.conversation-name').textContent.trim();
+                    document.querySelector('.chat-title').textContent = name;
+                });
+            });
+            
+            // 通知开关切换
+            const toggles = document.querySelectorAll('.toggle');
+            toggles.forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                });
+            });
+            
+            // 消息发送
+            const messageInput = document.querySelector('.message-input');
+            const sendButton = document.querySelector('.send-button');
+            
+            function sendMessage() {
+                const text = messageInput.value.trim();
+                if (text) {
+                    // 这里可以添加发送消息的逻辑
+                    console.log('发送消息:', text);
+                    messageInput.value = '';
+                }
+            }
+            
+            sendButton.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            // 自动调整输入框高度
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px';
+            });
+        });
+    </script>
+</body>
+</html>

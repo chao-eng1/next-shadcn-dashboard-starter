@@ -21,3 +21,8 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
+function a(a, b) {
+  return a - b > 0 ? 'a large' : 'b large';
+}
+console.log(a(2, 1));

@@ -83,7 +83,7 @@ const UserAvatarProfile = ({
   // Use user data from auth context
   const displayName = user?.name || 'User';
   const email = user?.email || '';
-  const avatarUrl = user?.image || '/placeholder-avatar.jpg';
+  const avatarUrl = user?.image || '';
 
   return (
     <div className='flex items-center gap-3'>

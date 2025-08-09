@@ -1,82 +1,55 @@
-import { create } from 'zustand';
-import { getApiUrl } from '@/lib/utils';
-
-// Define types based on Prisma schema
-interface Permission {
-  id: string;
-  name: string;
-  description?: string | null;
-}
-
-interface Role {
-  id: string;
-  name: string;
-  description?: string | null;
-  permissions: RolePermission[];
-}
-
-interface RolePermission {
-  id: string;
-  permissionId: string;
-  permission: Permission;
-}
-
-interface UserRole {
-  id: string;
-  roleId: string;
-  role: Role;
-}
+import { useState, useEffect } from 'react';
 
 interface User {
   id: string;
+  name: string;
   email: string;
-  name?: string;
-  image?: string | null;
-  roles?: UserRole[];
+  token?: string;
 }
 
-interface AuthState {
-  user: User | null;
-  isLoading: boolean;
-  setUser: (user: User | null) => void;
-  setLoading: (isLoading: boolean) => void;
-  logout: () => Promise<void>;
-  hasPermission: (permission: string) => boolean;
-  hasRole: (role: string) => boolean;
-}
+export const useAuth = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-export const useAuth = create<AuthState>((set, get) => ({
-  user: null,
-  isLoading: true,
-  setUser: (user) => {
-    console.log('Setting user in auth store:', user?.email);
-    set({ user });
-  },
-  setLoading: (isLoading) => set({ isLoading }),
-  logout: async () => {
-    try {
-      await fetch(getApiUrl('/api/auth/logout'), { method: 'POST' });
-      set({ user: null });
-    } catch (error) {
-      console.error('Failed to logout:', error);
-    }
-  },
+  useEffect(() => {
+    // 模拟用户认证状态
+    const mockUser: User = {
+      id: '1',
+      name: 'Demo User',
+      email: 'demo@example.com',
+      token: 'demo-token-123'
+    };
 
-  hasPermission: (permission: string) => {
-    const { user } = get();
-    if (!user || !user.roles) return false;
+    setUser(mockUser);
+    setLoading(false);
+  }, []);
 
-    return user.roles.some((userRole) =>
-      userRole.role.permissions.some(
-        (rolePermission) => rolePermission.permission.name === permission
-      )
-    );
-  },
+  const login = async (email: string, password: string) => {
+    setLoading(true);
+    // 模拟登录
+    setTimeout(() => {
+      const mockUser: User = {
+        id: '1',
+        name: 'Demo User',
+        email,
+        token: 'demo-token-123'
+      };
+      setUser(mockUser);
+      setLoading(false);
+    }, 1000);
+  };
 
-  hasRole: (roleName: string) => {
-    const { user } = get();
-    if (!user || !user.roles) return false;
+  const logout = () => {
+    setUser(null);
+  };
 
-    return user.roles.some((userRole) => userRole.role.name === roleName);
-  }
-}));
+  return {
+    user,
+    loading,
+    isAuthenticated: !!user,
+    login,
+    logout,
+    setUser,
+    setLoading
+  };
+};

@@ -340,7 +340,7 @@ export const useMessageStore = create<MessageStore>()(
   devtools(
     subscribeWithSelector(
       persist(
-        immer((set, get) => ({
+        immer((set) => ({
           ...initialState,
 
           // 会话管理
