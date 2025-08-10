@@ -53,7 +53,9 @@ export interface ChatState {
   // UI状态
   windowPosition: { x: number; y: number };
   windowSize: { width: number; height: number };
+  triggerPosition: { x: number; y: number };
   unreadCount: number;
+  isMaximized: boolean;
 
   // 设置
   settings: ChatSettings;
@@ -85,11 +87,17 @@ export interface ChatActions {
   // UI操作
   updateWindowPosition: (position: { x: number; y: number }) => void;
   updateWindowSize: (size: { width: number; height: number }) => void;
+  updateTriggerPosition: (position: { x: number; y: number }) => void;
   incrementUnreadCount: () => void;
   resetUnreadCount: () => void;
+  toggleMaximized: () => void;
 
   // 设置操作
   updateSettings: (settings: Partial<ChatSettings>) => void;
+
+  // 对话创建
+  createConversation: (title: string) => void;
+  setCurrentConversation: (id: string) => void;
 }
 
 export type ChatStore = ChatState & ChatActions;

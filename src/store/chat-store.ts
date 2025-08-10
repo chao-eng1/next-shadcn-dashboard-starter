@@ -45,11 +45,15 @@ export const useChatStore = create<ChatState & ChatActions>()(
         messages: {},
         windowPosition: getInitialWindowPosition(),
         windowSize: { width: 320, height: 450 },
-        triggerPosition: {
-          x: window.innerWidth - 80,
-          y: window.innerHeight - 80
-        },
+        triggerPosition:
+          typeof window !== 'undefined'
+            ? {
+                x: window.innerWidth - 80,
+                y: window.innerHeight - 80
+              }
+            : { x: 20, y: 20 },
         unreadCount: 0,
+        isMaximized: false,
         settings: initialSettings,
 
         // 基础操作
@@ -190,7 +194,6 @@ export const useChatStore = create<ChatState & ChatActions>()(
           }),
 
         // 新增缺少的方法
-        isMaximized: false,
         toggleMaximized: () =>
           set((state) => {
             state.isMaximized = !state.isMaximized;
