@@ -7,3 +7,4 @@ export { RequirementDetail } from './requirement-detail';
 export { RequirementComments } from './requirement-comments';
 export { RequirementHistory } from './requirement-history';
 export { RequirementRelations } from './requirement-relations';
+export { RequirementProgress } from './requirement-progress';
