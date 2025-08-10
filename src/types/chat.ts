@@ -176,8 +176,17 @@ export interface FloatingChatTriggerProps {
   onPositionChange?: (position: Position) => void;
 }
 
+export interface ChatInterfaceProps {
+  triggerPosition?: Position;
+  windowPosition?: Position;
+  windowSize?: Size;
+  enableMobile?: boolean;
+  enableWebSocket?: boolean;
+}
+
 export interface MobileChatInterfaceProps {
   onClose: () => void;
+  showSidebar?: boolean;
 }
 
 export interface VirtualMessageListProps {

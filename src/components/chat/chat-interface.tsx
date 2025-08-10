@@ -81,6 +81,11 @@ function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState(false);
 
   useEffect(() => {
+    // 检查是否在客户端环境
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     const media = window.matchMedia(query);
     if (media.matches !== matches) {
       setMatches(media.matches);
