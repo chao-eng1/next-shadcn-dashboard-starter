@@ -177,6 +177,13 @@ export class WebSocketService {
     } catch (error) {
       this.log('Failed to get auth token:', error);
     }
+
+    // 开发环境下的fallback：使用模拟token
+    if (process.env.NODE_ENV === 'development') {
+      this.log('Using development mock token');
+      return 'demo-token-123';
+    }
+
     return '';
   }
 

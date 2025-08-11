@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { WebSocketMessage, UseWebSocketChatOptions } from '@/types/chat';
 import { useChatStore } from '@/store/chat-store';
+import { getWebSocketService } from '@/lib/websocket-service';
 
 export const useWebSocketChat = (
   namespace: string = '/chat',
@@ -13,8 +14,7 @@ export const useWebSocketChat = (
     reconnectDelay = 1000
   } = options;
 
-  const [socket, setSocket] = useState<WebSocket | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [wsService] = useState(() => getWebSocketService());
   const [error, setError] = useState<string | null>(null);
   const reconnectCount = useRef(0);
   const { user } = useAuth();
@@ -23,54 +23,50 @@ export const useWebSocketChat = (
   useEffect(() => {
     if (!autoConnect || !user) return;
 
-    const connect = () => {
+    const connect = async () => {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const wsUrl = `ws://localhost:3001${namespace}?token=${encodeURIComponent(user.token || '')}`;
-        const newSocket = new WebSocket(wsUrl);
+        // 使用WebSocketService连接
+        await wsService.connect(user.id);
+        setConnected(true);
+        setError(null);
+        reconnectCount.current = 0;
 
-        newSocket.onopen = () => {
-          setConnected(true);
-          setError(null);
-          reconnectCount.current = 0;
-        };
-
-        newSocket.onmessage = (event) => {
+        // 监听消息事件
+        wsService.on('message:receive', (data) => {
           try {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const message: WebSocketMessage = JSON.parse(event.data);
+            const message = {
+              id: data.id || Date.now().toString(),
+              content: data.content,
+              role: data.role || 'assistant',
+              timestamp: new Date(data.timestamp || Date.now()),
+              conversationId: data.conversationId,
+              status: 'delivered' as const
+            };
 
-            switch (message.type) {
-              case 'message':
-                if (message.data.conversationId && message.data.content) {
-                  addMessage(message.data.conversationId, {
-                    id:
-                      message.data.messageId ||
-                      Math.random().toString(36).substr(2, 9),
-                    content: message.data.content,
-                    role: 'assistant',
-                    timestamp: new Date(message.data.timestamp || Date.now()),
-                    conversationId: message.data.conversationId,
-                    status: 'delivered'
-                  });
-                }
-                break;
-
-              case 'typing':
-                setTyping(true);
-                setTimeout(() => setTyping(false), 3000);
-                break;
-
-              case 'error':
-                setError(message.data.content || 'Unknown error');
-                break;
-
-              default:
+            if (data.conversationId) {
+              addMessage(data.conversationId, message);
             }
-          } catch (error) {}
-        };
+          } catch (error) {
+            console.error('Error processing message:', error);
+          }
+        });
 
-        newSocket.onclose = (event) => {
+        // 监听输入状态
+        wsService.on('typing:start', () => {
+          setTyping(true);
+        });
+
+        wsService.on('typing:stop', () => {
+          setTyping(false);
+        });
+
+        // 监听错误事件
+        wsService.on('error', (errorData) => {
+          setError(errorData.message || 'Connection error');
+        });
+
+        // 监听连接状态
+        wsService.on('disconnect', () => {
           setConnected(false);
 
           // 自动重连
@@ -80,62 +76,69 @@ export const useWebSocketChat = (
               connect();
             }, reconnectDelay * reconnectCount.current);
           }
-        };
-
-        newSocket.onerror = (error) => {
-          setError('Connection error');
-        };
-
-        setSocket(newSocket);
+        });
       } catch (error) {
+        console.error('WebSocket connection failed:', error);
         setError('Failed to connect');
+        setConnected(false);
       }
     };
 
     connect();
 
     return () => {
-      if (socket) {
-        socket.close();
-      }
+      // 清理事件监听器
+      wsService.off('message:receive', () => {});
+      wsService.off('typing:start', () => {});
+      wsService.off('typing:stop', () => {});
+      wsService.off('error', () => {});
+      wsService.off('disconnect', () => {});
     };
-  }, [namespace, autoConnect, user, reconnectAttempts, reconnectDelay]);
+  }, [
+    namespace,
+    autoConnect,
+    user,
+    reconnectAttempts,
+    reconnectDelay,
+    wsService,
+    setConnected,
+    addMessage,
+    setTyping
+  ]);
 
   const sendMessage = (message: WebSocketMessage) => {
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify(message));
-      return true;
+    if (wsService.isConnected) {
+      try {
+        wsService.send(message.type as any, message.data);
+        return true;
+      } catch (error) {
+        console.error('Failed to send message:', error);
+        return false;
+      }
     } else {
       return false;
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const sendChatMessage = (conversationId: string, content: string) => {
-    return sendMessage({
-      type: 'message',
-      data: {
-        conversationId,
-        content,
-        messageType: 'text',
-        timestamp: new Date().toISOString()
-      }
-    });
+    if (wsService.isConnected) {
+      wsService.sendMessage(conversationId, content, 'text');
+      return true;
+    }
+    return false;
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const sendTypingIndicator = (conversationId: string) => {
-    return sendMessage({
-      type: 'typing',
-      data: {
-        conversationId
-      }
-    });
+    if (wsService.isConnected) {
+      wsService.sendTypingStatus(conversationId, true);
+      return true;
+    }
+    return false;
   };
 
   return {
-    socket,
-    isConnected: useChatStore((state) => state.isConnected),
+    socket: wsService,
+    isConnected: wsService.isConnected,
     error,
     sendMessage,
     sendChatMessage,

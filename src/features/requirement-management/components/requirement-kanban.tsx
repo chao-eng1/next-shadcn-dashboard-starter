@@ -207,12 +207,36 @@ export function RequirementKanban({
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
   const statusConfig = {
-    draft: { label: t('statuses.draft'), color: 'border-gray-200' },
-    review: { label: t('statuses.review'), color: 'border-yellow-200' },
-    approved: { label: t('statuses.approved'), color: 'border-purple-200' },
-    in_progress: { label: t('statuses.inProgress'), color: 'border-blue-200' },
-    completed: { label: t('statuses.completed'), color: 'border-green-200' },
-    rejected: { label: t('statuses.rejected'), color: 'border-red-200' }
+    draft: {
+      label: t('statuses.draft'),
+      color: 'border-gray-200',
+      icon: Clock
+    },
+    review: {
+      label: t('statuses.review'),
+      color: 'border-yellow-200',
+      icon: AlertCircle
+    },
+    approved: {
+      label: t('statuses.approved'),
+      color: 'border-purple-200',
+      icon: CheckCircle2
+    },
+    in_progress: {
+      label: t('statuses.inProgress'),
+      color: 'border-blue-200',
+      icon: Clock
+    },
+    completed: {
+      label: t('statuses.completed'),
+      color: 'border-green-200',
+      icon: CheckCircle2
+    },
+    rejected: {
+      label: t('statuses.rejected'),
+      color: 'border-red-200',
+      icon: AlertCircle
+    }
   };
 
   const priorityConfig = {
