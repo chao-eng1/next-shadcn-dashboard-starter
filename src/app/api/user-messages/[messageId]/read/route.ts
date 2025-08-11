@@ -10,7 +10,7 @@ import {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { messageId: string } }
+  { params }: { params: Promise<{ messageId: string }> }
 ) {
   try {
     const user = await getCurrentUser();
@@ -18,7 +18,7 @@ export async function POST(
       return apiUnauthorized('请先登录');
     }
 
-    const { messageId } = params;
+    const { messageId } = await params;
 
     // 查找用户消息记录
     const userMessage = await prisma.userMessage.findFirst({

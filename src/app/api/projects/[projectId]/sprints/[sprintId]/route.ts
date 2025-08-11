@@ -34,7 +34,7 @@ export async function GET(
     return apiUnauthorized();
   }
 
-  const { projectId, sprintId } = params;
+  const { projectId, sprintId } = await params;
 
   // 检查用户是否有查看项目的权限
   const hasPermission = await hasProjectPermission(
@@ -123,7 +123,7 @@ export async function PATCH(
     return apiUnauthorized();
   }
 
-  const { projectId, sprintId } = params;
+  const { projectId, sprintId } = await params;
 
   // 检查迭代是否存在
   const sprint = await prisma.sprint.findUnique({
@@ -226,7 +226,7 @@ export async function DELETE(
     return apiUnauthorized();
   }
 
-  const { projectId, sprintId } = params;
+  const { projectId, sprintId } = await params;
 
   // 检查迭代是否存在
   const sprint = await prisma.sprint.findUnique({

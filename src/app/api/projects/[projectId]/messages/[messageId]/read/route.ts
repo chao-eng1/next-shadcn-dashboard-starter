@@ -14,7 +14,7 @@ export async function POST(
       return NextResponse.json({ error: '未授权访问' }, { status: 401 });
     }
 
-    const { projectId, messageId } = params;
+    const { projectId, messageId } = await params;
 
     // 验证用户是否为项目成员
     const projectMember = await prisma.projectMember.findFirst({
@@ -99,7 +99,7 @@ export async function GET(
       return NextResponse.json({ error: '未授权访问' }, { status: 401 });
     }
 
-    const { projectId, messageId } = params;
+    const { projectId, messageId } = await params;
 
     // 验证用户是否为项目成员
     const projectMember = await prisma.projectMember.findFirst({

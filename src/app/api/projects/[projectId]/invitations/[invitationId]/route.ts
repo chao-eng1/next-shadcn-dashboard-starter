@@ -27,7 +27,7 @@ export async function GET(
     return apiUnauthorized();
   }
 
-  const { projectId, invitationId } = params;
+  const { projectId, invitationId } = await params;
 
   try {
     // 查询邀请
@@ -107,7 +107,7 @@ export async function PATCH(
     return apiUnauthorized();
   }
 
-  const { projectId, invitationId } = params;
+  const { projectId, invitationId } = await params;
 
   try {
     // 获取邀请
@@ -196,7 +196,7 @@ export async function DELETE(
     return apiUnauthorized();
   }
 
-  const { projectId, invitationId } = params;
+  const { projectId, invitationId } = await params;
 
   try {
     // 获取邀请

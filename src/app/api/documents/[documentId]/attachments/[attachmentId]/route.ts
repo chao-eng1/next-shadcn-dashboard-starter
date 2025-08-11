@@ -23,7 +23,7 @@ export async function GET(
     return apiUnauthorized();
   }
 
-  const { documentId, attachmentId } = params;
+  const { documentId, attachmentId } = await params;
 
   try {
     // 检查附件是否存在
@@ -92,7 +92,7 @@ export async function DELETE(
     return apiUnauthorized();
   }
 
-  const { documentId, attachmentId } = params;
+  const { documentId, attachmentId } = await params;
 
   try {
     // 检查附件是否存在

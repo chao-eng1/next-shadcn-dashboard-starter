@@ -36,7 +36,7 @@ export async function GET(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { projectId, conversationId } = params;
+    const { projectId, conversationId } = await params;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { searchParams } = new URL(request.url);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -153,7 +153,7 @@ export async function POST(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { projectId, conversationId } = params;
+    const { projectId, conversationId } = await params;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const body = await request.json();
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

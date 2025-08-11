@@ -29,7 +29,7 @@ export async function GET(
     return apiUnauthorized();
   }
 
-  const { projectId, taskId } = params;
+  const { projectId, taskId } = await params;
 
   // 检查用户是否有查看项目的权限
   const hasPermission = await hasProjectPermission(
@@ -98,7 +98,7 @@ export async function POST(
     return apiUnauthorized();
   }
 
-  const { projectId, taskId } = params;
+  const { projectId, taskId } = await params;
 
   // 检查用户是否有任务分配权限
   const hasPermission = await hasProjectPermission(
@@ -208,7 +208,7 @@ export async function DELETE(
     return apiUnauthorized();
   }
 
-  const { projectId, taskId } = params;
+  const { projectId, taskId } = await params;
   const { searchParams } = new URL(request.url);
   const memberId = searchParams.get('memberId');
 

@@ -29,7 +29,7 @@ export async function GET(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { projectId, requirementId } = params;
+    const { projectId, requirementId } = await params;
 
     // 检查用户是否有查看需求的权限
     const hasViewPermission = await canViewRequirements(projectId, user.id);
@@ -212,7 +212,7 @@ export async function PATCH(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { projectId, requirementId } = params;
+    const { projectId, requirementId } = await params;
 
     // 检查用户是否为项目成员
     const isMember = await isProjectMember(projectId, user.id);
@@ -439,7 +439,7 @@ export async function DELETE(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { projectId, requirementId } = params;
+    const { projectId, requirementId } = await params;
 
     // 检查用户是否为项目成员
     const isMember = await isProjectMember(projectId, user.id);

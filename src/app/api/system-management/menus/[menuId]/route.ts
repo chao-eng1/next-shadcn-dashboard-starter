@@ -9,9 +9,12 @@ interface Params {
 }
 
 // Get a specific menu by ID
-export async function GET(req: NextRequest, { params }: { params: Params }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<Params> }
+) {
   try {
-    const { menuId } = params;
+    const { menuId } = await params;
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 
@@ -78,9 +81,12 @@ export async function GET(req: NextRequest, { params }: { params: Params }) {
 }
 
 // Update a menu
-export async function PATCH(req: NextRequest, { params }: { params: Params }) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<Params> }
+) {
   try {
-    const { menuId } = params;
+    const { menuId } = await params;
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 
@@ -252,9 +258,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Params }) {
 }
 
 // Delete a menu
-export async function DELETE(req: NextRequest, { params }: { params: Params }) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<Params> }
+) {
   try {
-    const { menuId } = params;
+    const { menuId } = await params;
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 

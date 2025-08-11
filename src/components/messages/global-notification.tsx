@@ -271,12 +271,48 @@ export function GlobalNotification({
   };
 
   // 标记为已读
-  const markAsRead = (notificationId: string) => {
+  const markAsRead = async (notificationId: string) => {
+    // 先更新本地状态
+    const notification = notifications.find((n) => n.id === notificationId);
+    if (!notification) return;
+
     setNotifications((prev) =>
       prev.map((notif) =>
         notif.id === notificationId ? { ...notif, isRead: true } : notif
       )
     );
+
+    // 调用API更新数据库
+    try {
+      const response = await fetch('/api/message-center/mark-read', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          messageId: notificationId,
+          messageType:
+            notification.type === 'private'
+              ? 'private'
+              : notification.type === 'project'
+                ? 'project'
+                : 'system'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to mark notification as read');
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      // 如果API调用失败，回滚本地状态
+      setNotifications((prev) =>
+        prev.map((notif) =>
+          notif.id === notificationId ? { ...notif, isRead: false } : notif
+        )
+      );
+      toast.error('标记已读失败，请重试');
+    }
   };
 
   // 删除通知
@@ -287,11 +323,71 @@ export function GlobalNotification({
   };
 
   // 全部标记为已读
-  const markAllAsRead = () => {
+  const markAllAsRead = async () => {
+    const unreadNotifications = notifications.filter((n) => !n.isRead);
+    if (unreadNotifications.length === 0) {
+      toast.info('没有未读通知');
+      return;
+    }
+
+    // 先更新本地状态
     setNotifications((prev) =>
       prev.map((notif) => ({ ...notif, isRead: true }))
     );
-    toast.success('所有通知已标记为已读');
+
+    // 按类型分组通知
+    const notificationsByType = unreadNotifications.reduce(
+      (acc, notif) => {
+        const type =
+          notif.type === 'private'
+            ? 'private'
+            : notif.type === 'project'
+              ? 'project'
+              : 'system';
+        if (!acc[type]) acc[type] = [];
+        acc[type].push(notif.id);
+        return acc;
+      },
+      {} as Record<string, string[]>
+    );
+
+    // 批量调用API
+    try {
+      const promises = Object.entries(notificationsByType).map(
+        ([type, messageIds]) =>
+          fetch('/api/message-center/mark-read', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              messageIds,
+              messageType: type
+            })
+          })
+      );
+
+      const responses = await Promise.all(promises);
+      const failedResponses = responses.filter((r) => !r.ok);
+
+      if (failedResponses.length > 0) {
+        throw new Error('Some notifications failed to mark as read');
+      }
+
+      toast.success('所有通知已标记为已读');
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      // 如果API调用失败，回滚本地状态
+      setNotifications((prev) =>
+        prev.map((notif) => {
+          const originalNotif = unreadNotifications.find(
+            (n) => n.id === notif.id
+          );
+          return originalNotif ? { ...notif, isRead: false } : notif;
+        })
+      );
+      toast.error('批量标记已读失败，请重试');
+    }
   };
 
   // 清空所有通知
