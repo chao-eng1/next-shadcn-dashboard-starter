@@ -1,317 +1,345 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>项目管理系统 - Figma 原型测试</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 3rem;
-            color: white;
-        }
-        
-        .header h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-        
-        .prototype-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-bottom: 3rem;
-        }
-        
-        .prototype-card {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        
-        .prototype-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 48px rgba(0,0,0,0.15);
-        }
-        
-        .prototype-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            display: block;
-        }
-        
-        .prototype-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: #2d3748;
-        }
-        
-        .prototype-card p {
-            color: #4a5568;
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-        }
-        
-        .prototype-button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-        
-        .prototype-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-        
-        .figma-demo {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            margin-top: 2rem;
-        }
-        
-        .figma-demo h2 {
-            color: #2d3748;
-            margin-bottom: 1.5rem;
-            font-size: 2rem;
-        }
-        
-        .figma-features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-        
-        .figma-feature {
-            padding: 1.5rem;
-            background: #f7fafc;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-        }
-        
-        .figma-feature h4 {
-            color: #2d3748;
-            margin-bottom: 0.5rem;
-        }
-        
-        .figma-feature p {
-            color: #4a5568;
-            font-size: 0.9rem;
-        }
-        
-        .mockup-section {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            margin-top: 2rem;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        }
-        
-        .mockup-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-        
-        .mockup-item {
-            background: #f8f9fa;
-            border: 2px dashed #dee2e6;
-            border-radius: 8px;
-            padding: 2rem;
-            text-align: center;
-            color: #6c757d;
-            transition: all 0.3s ease;
-        }
-        
-        .mockup-item:hover {
-            border-color: #667eea;
-            background: #f0f4ff;
-            color: #667eea;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            background: #10b981;
-            color: white;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-left: 1rem;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 3rem;
+        color: white;
+      }
+
+      .header h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .header p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+      }
+
+      .prototype-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+      }
+
+      .prototype-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .prototype-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+      }
+
+      .prototype-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+      }
+
+      .prototype-card h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #2d3748;
+      }
+
+      .prototype-card p {
+        color: #4a5568;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+      }
+
+      .prototype-button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .prototype-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+
+      .figma-demo {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        margin-top: 2rem;
+      }
+
+      .figma-demo h2 {
+        color: #2d3748;
+        margin-bottom: 1.5rem;
+        font-size: 2rem;
+      }
+
+      .figma-features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+      }
+
+      .figma-feature {
+        padding: 1.5rem;
+        background: #f7fafc;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+      }
+
+      .figma-feature h4 {
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+      }
+
+      .figma-feature p {
+        color: #4a5568;
+        font-size: 0.9rem;
+      }
+
+      .mockup-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-top: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      }
+
+      .mockup-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+
+      .mockup-item {
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        color: #6c757d;
+        transition: all 0.3s ease;
+      }
+
+      .mockup-item:hover {
+        border-color: #667eea;
+        background: #f0f4ff;
+        color: #667eea;
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: #10b981;
+        color: white;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-left: 1rem;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="header">
-            <h1>🎨 Figma 原型测试</h1>
-            <p>项目管理系统设计原型演示 <span class="status-badge">测试版本</span></p>
+      <div class="header">
+        <h1>🎨 Figma 原型测试</h1>
+        <p>
+          项目管理系统设计原型演示 <span class="status-badge">测试版本</span>
+        </p>
+      </div>
+
+      <div class="prototype-grid">
+        <div class="prototype-card">
+          <span class="prototype-icon">📋</span>
+          <h3>任务管理界面</h3>
+          <p>
+            展示任务列表、看板视图、任务详情等核心功能界面设计。包含拖拽排序、状态切换、优先级标记等交互元素。
+          </p>
+          <a href="#" class="prototype-button" onclick="showMockup('tasks')"
+            >查看原型</a
+          >
         </div>
-        
-        <div class="prototype-grid">
-            <div class="prototype-card">
-                <span class="prototype-icon">📋</span>
-                <h3>任务管理界面</h3>
-                <p>展示任务列表、看板视图、任务详情等核心功能界面设计。包含拖拽排序、状态切换、优先级标记等交互元素。</p>
-                <a href="#" class="prototype-button" onclick="showMockup('tasks')">查看原型</a>
-            </div>
-            
-            <div class="prototype-card">
-                <span class="prototype-icon">👥</span>
-                <h3>团队协作界面</h3>
-                <p>团队成员管理、权限设置、实时协作等功能的界面设计。支持角色分配、消息通知、文件共享等。</p>
-                <a href="#" class="prototype-button" onclick="showMockup('team')">查看原型</a>
-            </div>
-            
-            <div class="prototype-card">
-                <span class="prototype-icon">📊</span>
-                <h3>数据分析界面</h3>
-                <p>项目进度统计、团队效率分析、可视化图表等数据展示界面。包含多种图表类型和筛选条件。</p>
-                <a href="#" class="prototype-button" onclick="showMockup('analytics')">查看原型</a>
-            </div>
-            
-            <div class="prototype-card">
-                <span class="prototype-icon">⚙️</span>
-                <h3>系统设置界面</h3>
-                <p>系统配置、用户偏好、主题切换等设置界面。支持个性化定制和系统管理功能。</p>
-                <a href="#" class="prototype-button" onclick="showMockup('settings')">查看原型</a>
-            </div>
+
+        <div class="prototype-card">
+          <span class="prototype-icon">👥</span>
+          <h3>团队协作界面</h3>
+          <p>
+            团队成员管理、权限设置、实时协作等功能的界面设计。支持角色分配、消息通知、文件共享等。
+          </p>
+          <a href="#" class="prototype-button" onclick="showMockup('team')"
+            >查看原型</a
+          >
         </div>
-        
-        <div class="figma-demo">
-            <h2>🔗 Figma MCP 集成功能</h2>
-            <p>本原型演示了如何使用 Figma MCP 工具来创建和管理设计原型，实现设计到开发的无缝衔接。</p>
-            
-            <div class="figma-features">
-                <div class="figma-feature">
-                    <h4>📥 设计文件获取</h4>
-                    <p>从 Figma 文件中提取设计数据，包括布局、样式、组件等信息</p>
-                </div>
-                
-                <div class="figma-feature">
-                    <h4>🖼️ 资源下载</h4>
-                    <p>批量下载设计中的图标、图片等资源，支持 SVG 和 PNG 格式</p>
-                </div>
-                
-                <div class="figma-feature">
-                    <h4>🔄 自动同步</h4>
-                    <p>设计更新时自动同步到开发环境，保持设计与代码的一致性</p>
-                </div>
-                
-                <div class="figma-feature">
-                    <h4>📋 组件生成</h4>
-                    <p>根据设计规范自动生成 React 组件和样式代码</p>
-                </div>
-            </div>
+
+        <div class="prototype-card">
+          <span class="prototype-icon">📊</span>
+          <h3>数据分析界面</h3>
+          <p>
+            项目进度统计、团队效率分析、可视化图表等数据展示界面。包含多种图表类型和筛选条件。
+          </p>
+          <a href="#" class="prototype-button" onclick="showMockup('analytics')"
+            >查看原型</a
+          >
         </div>
-        
-        <div class="mockup-section">
-            <h2>🎯 界面原型预览</h2>
-            <p>点击上方按钮查看不同模块的界面原型设计</p>
-            
-            <div id="mockup-container" class="mockup-grid">
-                <div class="mockup-item">
-                    <h4>主仪表板</h4>
-                    <p>项目概览和快速操作</p>
-                </div>
-                
-                <div class="mockup-item">
-                    <h4>侧边导航</h4>
-                    <p>模块导航和用户信息</p>
-                </div>
-                
-                <div class="mockup-item">
-                    <h4>内容区域</h4>
-                    <p>主要功能展示区域</p>
-                </div>
-                
-                <div class="mockup-item">
-                    <h4>操作面板</h4>
-                    <p>快速操作和设置选项</p>
-                </div>
-            </div>
+
+        <div class="prototype-card">
+          <span class="prototype-icon">⚙️</span>
+          <h3>系统设置界面</h3>
+          <p>
+            系统配置、用户偏好、主题切换等设置界面。支持个性化定制和系统管理功能。
+          </p>
+          <a href="#" class="prototype-button" onclick="showMockup('settings')"
+            >查看原型</a
+          >
         </div>
+      </div>
+
+      <div class="figma-demo">
+        <h2>🔗 Figma MCP 集成功能</h2>
+        <p>
+          本原型演示了如何使用 Figma MCP
+          工具来创建和管理设计原型，实现设计到开发的无缝衔接。
+        </p>
+
+        <div class="figma-features">
+          <div class="figma-feature">
+            <h4>📥 设计文件获取</h4>
+            <p>从 Figma 文件中提取设计数据，包括布局、样式、组件等信息</p>
+          </div>
+
+          <div class="figma-feature">
+            <h4>🖼️ 资源下载</h4>
+            <p>批量下载设计中的图标、图片等资源，支持 SVG 和 PNG 格式</p>
+          </div>
+
+          <div class="figma-feature">
+            <h4>🔄 自动同步</h4>
+            <p>设计更新时自动同步到开发环境，保持设计与代码的一致性</p>
+          </div>
+
+          <div class="figma-feature">
+            <h4>📋 组件生成</h4>
+            <p>根据设计规范自动生成 React 组件和样式代码</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mockup-section">
+        <h2>🎯 界面原型预览</h2>
+        <p>点击上方按钮查看不同模块的界面原型设计</p>
+
+        <div id="mockup-container" class="mockup-grid">
+          <div class="mockup-item">
+            <h4>主仪表板</h4>
+            <p>项目概览和快速操作</p>
+          </div>
+
+          <div class="mockup-item">
+            <h4>侧边导航</h4>
+            <p>模块导航和用户信息</p>
+          </div>
+
+          <div class="mockup-item">
+            <h4>内容区域</h4>
+            <p>主要功能展示区域</p>
+          </div>
+
+          <div class="mockup-item">
+            <h4>操作面板</h4>
+            <p>快速操作和设置选项</p>
+          </div>
+        </div>
+      </div>
     </div>
-    
+
     <script>
-        function showMockup(type) {
-            const container = document.getElementById('mockup-container');
-            const mockups = {
-                tasks: [
-                    { title: '任务列表', desc: '待办、进行中、已完成' },
-                    { title: '看板视图', desc: '拖拽式任务管理' },
-                    { title: '任务详情', desc: '描述、附件、评论' },
-                    { title: '筛选排序', desc: '多维度任务筛选' }
-                ],
-                team: [
-                    { title: '成员列表', desc: '团队成员管理' },
-                    { title: '权限设置', desc: '角色和权限配置' },
-                    { title: '协作空间', desc: '实时沟通和共享' },
-                    { title: '邀请管理', desc: '成员邀请和审批' }
-                ],
-                analytics: [
-                    { title: '进度图表', desc: '项目进度可视化' },
-                    { title: '效率统计', desc: '团队工作效率分析' },
-                    { title: '时间追踪', desc: '任务时间统计' },
-                    { title: '报表导出', desc: '数据报表生成' }
-                ],
-                settings: [
-                    { title: '个人设置', desc: '用户偏好配置' },
-                    { title: '主题切换', desc: '界面主题选择' },
-                    { title: '通知设置', desc: '消息通知配置' },
-                    { title: '系统管理', desc: '系统级别设置' }
-                ]
-            };
-            
-            const items = mockups[type] || mockups.tasks;
-            container.innerHTML = items.map(item => `
+      function showMockup(type) {
+        const container = document.getElementById('mockup-container');
+        const mockups = {
+          tasks: [
+            { title: '任务列表', desc: '待办、进行中、已完成' },
+            { title: '看板视图', desc: '拖拽式任务管理' },
+            { title: '任务详情', desc: '描述、附件、评论' },
+            { title: '筛选排序', desc: '多维度任务筛选' }
+          ],
+          team: [
+            { title: '成员列表', desc: '团队成员管理' },
+            { title: '权限设置', desc: '角色和权限配置' },
+            { title: '协作空间', desc: '实时沟通和共享' },
+            { title: '邀请管理', desc: '成员邀请和审批' }
+          ],
+          analytics: [
+            { title: '进度图表', desc: '项目进度可视化' },
+            { title: '效率统计', desc: '团队工作效率分析' },
+            { title: '时间追踪', desc: '任务时间统计' },
+            { title: '报表导出', desc: '数据报表生成' }
+          ],
+          settings: [
+            { title: '个人设置', desc: '用户偏好配置' },
+            { title: '主题切换', desc: '界面主题选择' },
+            { title: '通知设置', desc: '消息通知配置' },
+            { title: '系统管理', desc: '系统级别设置' }
+          ]
+        };
+
+        const items = mockups[type] || mockups.tasks;
+        container.innerHTML = items
+          .map(
+            (item) => `
                 <div class="mockup-item">
                     <h4>${item.title}</h4>
                     <p>${item.desc}</p>
                 </div>
-            `).join('');
-        }
-        
-        // 初始化显示任务管理原型
-        showMockup('tasks');
+            `
+          )
+          .join('');
+      }
+
+      // 初始化显示任务管理原型
+      showMockup('tasks');
     </script>
-</body>
+  </body>
 </html>

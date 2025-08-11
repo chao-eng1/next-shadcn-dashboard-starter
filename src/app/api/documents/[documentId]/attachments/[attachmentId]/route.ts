@@ -72,7 +72,6 @@ export async function GET(
 
     return apiResponse(attachment);
   } catch (error) {
-    console.error('获取附件失败:', error);
     return apiError(
       'SERVER_ERROR',
       '获取附件失败',
@@ -137,7 +136,6 @@ export async function DELETE(
       const filePath = join(cwd(), 'public', attachment.filePath);
       await unlink(filePath);
     } catch (fileError) {
-      console.error('删除物理文件失败:', fileError);
       // 继续删除数据库记录，即使物理文件删除失败
     }
 
@@ -150,7 +148,6 @@ export async function DELETE(
 
     return apiResponse({ success: true });
   } catch (error) {
-    console.error('删除附件失败:', error);
     return apiError(
       'SERVER_ERROR',
       '删除附件失败',

@@ -45,6 +45,11 @@ export default function RequirementsPage() {
     console.log('Filter changed:', newFilters);
   };
 
+  const handleClearFilters = () => {
+    setFilters({});
+    console.log('Filters cleared');
+  };
+
   return (
     <div className='flex-1 space-y-6 p-4 pt-6 md:p-8'>
       <div className='flex items-center justify-between'>
@@ -85,7 +90,11 @@ export default function RequirementsPage() {
               <CardDescription>{t('views.listDesc')}</CardDescription>
             </CardHeader>
             <CardContent className='space-y-6'>
-              <RequirementFilter onFilterChange={handleFilterChange} />
+              <RequirementFilter
+                filters={filters}
+                onFiltersChange={handleFilterChange}
+                onClearFilters={handleClearFilters}
+              />
               <RequirementList />
             </CardContent>
           </Card>

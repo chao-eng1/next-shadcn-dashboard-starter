@@ -13,34 +13,25 @@ import {
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Heading } from '@/components/ui/heading';
 import PageContainer from '@/components/layout/page-container';
 import { ProjectPermissionGate } from '@/components/project-permission-gate';
 import { RequirementList } from '@/features/requirement-management/components/requirement-list';
 import { RequirementKanban } from '@/features/requirement-management/components/requirement-kanban';
 import { RequirementTree } from '@/features/requirement-management/components/requirement-tree';
 
-import { format } from 'date-fns';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
 import { hasProjectPermission } from '@/lib/permissions';
 import {
   canViewRequirements,
-  canCreateRequirement,
-  canEditRequirement,
-  canDeleteRequirement
+  canCreateRequirement
 } from '@/features/requirement-management/utils/requirement-permissions';
 import {
   ArrowLeftIcon,
   PlusIcon,
   ListIcon,
   KanbanIcon,
-  TreePineIcon,
-  BarChart3Icon,
-  FilterIcon,
-  SearchIcon
+  TreePineIcon
 } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
@@ -80,6 +71,7 @@ export default async function RequirementsPage({
   const user = await getCurrentUser();
   const t = await getTranslations('requirements');
   const tc = await getTranslations('common');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const tnav = await getTranslations('navigation');
   const tproject = await getTranslations('projects');
 
@@ -90,9 +82,13 @@ export default async function RequirementsPage({
   const { projectId } = await params;
   const {
     view = 'list',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     status,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     priority,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     assignee,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     search
   } = await searchParams;
 
@@ -123,12 +119,14 @@ export default async function RequirementsPage({
 
   // 对于编辑和删除权限，我们需要在组件中针对具体需求进行检查
   // 这里先检查基础的项目权限
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const canEdit = await hasProjectPermission(
     projectId,
     'project.view',
     user.id
   );
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const canDelete = await hasProjectPermission(
     projectId,
     'project.view',

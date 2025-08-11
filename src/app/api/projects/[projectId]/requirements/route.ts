@@ -272,7 +272,6 @@ export async function GET(
       }
     });
   } catch (error) {
-    console.error('获取需求列表失败:', error);
     return apiError('获取需求列表失败');
   }
 }
@@ -341,6 +340,7 @@ export async function POST(
     }
 
     // 生成需求ID
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const requirementId = await generateRequirementId(projectId);
 
     // 创建需求
@@ -439,7 +439,6 @@ export async function POST(
 
     return apiResponse(requirement, { status: 201 });
   } catch (error) {
-    console.error('创建需求失败:', error);
     return apiError('创建需求失败');
   }
 }

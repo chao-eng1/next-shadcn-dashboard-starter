@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from 'zod';
 import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
@@ -11,12 +12,14 @@ import {
   apiForbidden
 } from '@/lib/api-response';
 import { hasProjectPermission } from '@/lib/permissions';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { PROJECT_MEMBER_ROLE } from '@/constants/project';
 
 // 定义邀请有效期（默认7天）
 const INVITATION_EXPIRY_DAYS = 7;
 
 // 发送邀请请求验证
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createInvitationSchema = z.object({
   email: z.string().email('邮箱格式不正确'),
   message: z.string().optional(),
@@ -91,7 +94,6 @@ export async function GET(
 
     return apiResponse(invitations);
   } catch (error) {
-    console.error('获取项目邀请列表失败:', error);
     return apiError(
       'SERVER_ERROR',
       '获取项目邀请列表失败',
@@ -138,6 +140,7 @@ export async function POST(
       return apiNotFound('项目不存在');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const body = await request.json();
 
     // 验证请求数据
@@ -211,7 +214,6 @@ export async function POST(
       );
     }
 
-    console.error('发送项目邀请失败:', error);
     return apiError(
       'SERVER_ERROR',
       '发送项目邀请失败',

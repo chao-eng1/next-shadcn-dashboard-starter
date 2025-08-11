@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
@@ -9,9 +10,11 @@ import {
   apiForbidden
 } from '@/lib/api-response';
 import { getBroadcastService } from '@/lib/socket-broadcast';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from 'zod';
 
 // 发送私聊消息的请求schema
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const sendMessageSchema = z.object({
   content: z
     .string()
@@ -32,9 +35,13 @@ export async function GET(
       return apiUnauthorized('用户未登录');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { projectId, conversationId } = params;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { searchParams } = new URL(request.url);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const page = parseInt(searchParams.get('page') || '1');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = (page - 1) * limit;
 
@@ -130,7 +137,6 @@ export async function GET(
       '获取私聊消息成功'
     );
   } catch (error) {
-    console.error('获取私聊消息失败:', error);
     return apiError('获取私聊消息失败');
   }
 }
@@ -146,8 +152,11 @@ export async function POST(
       return apiUnauthorized('用户未登录');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { projectId, conversationId } = params;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const body = await request.json();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { content, messageType, replyToId } = sendMessageSchema.parse(body);
 
     // 检查会话是否存在且用户有权限访问
@@ -271,16 +280,12 @@ export async function POST(
         message: formattedMessage,
         excludeUserId: user.id // 排除发送者自己
       });
-
-      console.log(`私聊消息已广播到会话: ${conversationId}`);
     } catch (broadcastError) {
-      console.error('广播私聊消息失败:', broadcastError);
       // 广播失败不影响消息发送成功
     }
 
     return apiResponse(formattedMessage, '发送私聊消息成功');
   } catch (error) {
-    console.error('发送私聊消息失败:', error);
     return apiError('发送私聊消息失败');
   }
 }

@@ -128,71 +128,7 @@ const mockTags = [
   'documentation'
 ];
 
-const typeConfig = {
-  functional: {
-    label: 'Functional',
-    color: 'bg-blue-100 text-blue-800',
-    icon: Target
-  },
-  non_functional: {
-    label: 'Non-Functional',
-    color: 'bg-purple-100 text-purple-800',
-    icon: Zap
-  },
-  business: {
-    label: 'Business',
-    color: 'bg-green-100 text-green-800',
-    icon: Users
-  },
-  technical: {
-    label: 'Technical',
-    color: 'bg-orange-100 text-orange-800',
-    icon: FileText
-  }
-};
-
-const priorityConfig = {
-  low: { label: 'Low', color: 'bg-gray-100 text-gray-800' },
-  medium: { label: 'Medium', color: 'bg-yellow-100 text-yellow-800' },
-  high: { label: 'High', color: 'bg-orange-100 text-orange-800' },
-  critical: { label: 'Critical', color: 'bg-red-100 text-red-800' }
-};
-
-const complexityConfig = {
-  simple: { label: 'Simple', color: 'bg-green-100 text-green-800' },
-  medium: { label: 'Medium', color: 'bg-yellow-100 text-yellow-800' },
-  complex: { label: 'Complex', color: 'bg-orange-100 text-orange-800' },
-  very_complex: { label: 'Very Complex', color: 'bg-red-100 text-red-800' }
-};
-
-const statusConfig = {
-  draft: { label: 'Draft', color: 'bg-gray-100 text-gray-800', icon: Clock },
-  review: {
-    label: 'Review',
-    color: 'bg-yellow-100 text-yellow-800',
-    icon: AlertCircle
-  },
-  approved: {
-    label: 'Approved',
-    color: 'bg-green-100 text-green-800',
-    icon: CheckCircle2
-  },
-  in_progress: {
-    label: 'In Progress',
-    color: 'bg-blue-100 text-blue-800',
-    icon: Clock
-  },
-  completed: {
-    label: 'Completed',
-    color: 'bg-green-100 text-green-800',
-    icon: CheckCircle2
-  },
-  rejected: {
-    label: 'Rejected',
-    color: 'bg-red-100 text-red-800',
-    icon: AlertCircle
-  }
-};
+// Move config objects inside component to access translations
 
 export function RequirementForm({
   initialData,
@@ -202,6 +138,98 @@ export function RequirementForm({
   mode = 'create'
 }: RequirementFormProps) {
   const t = useTranslations('requirements');
+
+  const typeConfig = {
+    functional: {
+      label: t('types.functional'),
+      color: 'bg-blue-100 text-blue-800',
+      icon: Target
+    },
+    non_functional: {
+      label: t('types.nonFunctional'),
+      color: 'bg-purple-100 text-purple-800',
+      icon: Zap
+    },
+    business: {
+      label: t('types.business'),
+      color: 'bg-green-100 text-green-800',
+      icon: Users
+    },
+    technical: {
+      label: t('types.technical'),
+      color: 'bg-orange-100 text-orange-800',
+      icon: FileText
+    }
+  };
+
+  const priorityConfig = {
+    low: { label: t('priorities.low'), color: 'bg-gray-100 text-gray-800' },
+    medium: {
+      label: t('priorities.medium'),
+      color: 'bg-yellow-100 text-yellow-800'
+    },
+    high: {
+      label: t('priorities.high'),
+      color: 'bg-orange-100 text-orange-800'
+    },
+    critical: {
+      label: t('priorities.critical'),
+      color: 'bg-red-100 text-red-800'
+    }
+  };
+
+  const complexityConfig = {
+    simple: {
+      label: t('complexities.simple'),
+      color: 'bg-green-100 text-green-800'
+    },
+    medium: {
+      label: t('complexities.medium'),
+      color: 'bg-yellow-100 text-yellow-800'
+    },
+    complex: {
+      label: t('complexities.complex'),
+      color: 'bg-orange-100 text-orange-800'
+    },
+    very_complex: {
+      label: t('complexities.veryComplex'),
+      color: 'bg-red-100 text-red-800'
+    }
+  };
+
+  const statusConfig = {
+    draft: {
+      label: t('statuses.draft'),
+      color: 'bg-gray-100 text-gray-800',
+      icon: Clock
+    },
+    review: {
+      label: t('statuses.review'),
+      color: 'bg-yellow-100 text-yellow-800',
+      icon: AlertCircle
+    },
+    approved: {
+      label: t('statuses.approved'),
+      color: 'bg-green-100 text-green-800',
+      icon: CheckCircle2
+    },
+    in_progress: {
+      label: t('statuses.inProgress'),
+      color: 'bg-blue-100 text-blue-800',
+      icon: Clock
+    },
+    completed: {
+      label: t('statuses.completed'),
+      color: 'bg-green-100 text-green-800',
+      icon: CheckCircle2
+    },
+    rejected: {
+      label: t('statuses.rejected'),
+      color: 'bg-red-100 text-red-800',
+      icon: AlertCircle
+    }
+  };
+
   const [newAcceptanceCriteria, setNewAcceptanceCriteria] = useState('');
   const [newTag, setNewTag] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>(

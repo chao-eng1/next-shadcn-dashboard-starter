@@ -1,9 +1,11 @@
 # Messages 模块
 
 ## 模块概述
+
 消息中心模块，统一管理系统通知、用户消息、邮件提醒等各类消息功能。
 
 ## 主要功能
+
 - 📬 系统通知管理
 - 📧 邮件消息集成
 - 🔔 实时推送通知
@@ -16,6 +18,7 @@
 - 📊 消息统计分析
 
 ## 技术栈
+
 - **WebSocket**: 实时消息推送
 - **Zustand**: 消息状态管理
 - **React Query**: 数据获取和缓存
@@ -24,6 +27,7 @@
 - **React Hook Form**: 表单管理
 
 ## 文件结构
+
 ```
 messages/
 ├── page.tsx                    # 消息列表主页
@@ -41,36 +45,38 @@ messages/
 ```
 
 ## 消息类型
+
 ```typescript
 interface Message {
-  id: string
-  type: 'system' | 'user' | 'email' | 'notification'
-  title: string
-  content: string
+  id: string;
+  type: 'system' | 'user' | 'email' | 'notification';
+  title: string;
+  content: string;
   sender?: {
-    id: string
-    name: string
-    avatar?: string
-  }
-  recipient: string
-  isRead: boolean
-  priority: 'low' | 'normal' | 'high' | 'urgent'
-  category: string
-  createdAt: Date
-  readAt?: Date
-  metadata?: Record<string, any>
+    id: string;
+    name: string;
+    avatar?: string;
+  };
+  recipient: string;
+  isRead: boolean;
+  priority: 'low' | 'normal' | 'high' | 'urgent';
+  category: string;
+  createdAt: Date;
+  readAt?: Date;
+  metadata?: Record<string, any>;
 }
 
 interface NotificationSettings {
-  email: boolean
-  push: boolean
-  desktop: boolean
-  sound: boolean
-  categories: string[]
+  email: boolean;
+  push: boolean;
+  desktop: boolean;
+  sound: boolean;
+  categories: string[];
 }
 ```
 
 ## 核心功能
+
 - **MessageCenter**: 消息中心主组件
 - **NotificationProvider**: 通知上下文提供者
 - **MessageQueue**: 消息队列管理
@@ -78,6 +84,7 @@ interface NotificationSettings {
 - **EmailIntegration**: 邮件集成服务
 
 ## 开发注意事项
+
 - 消息推送频率控制
 - 用户隐私和权限管理
 - 消息存储和清理策略
@@ -85,6 +92,7 @@ interface NotificationSettings {
 - 推送服务可用性检查
 
 ## API 端点
+
 - `/api/messages` - 消息 CRUD 操作
 - `/api/messages/mark-read` - 标记已读
 - `/api/messages/settings` - 通知设置
@@ -92,22 +100,24 @@ interface NotificationSettings {
 - `/api/messages/stats` - 消息统计
 
 ## WebSocket 事件
+
 ```typescript
 // 新消息通知
 socket.on('newMessage', (message) => {
   // 处理新消息
-})
+});
 
 // 消息状态更新
-socket.emit('markAsRead', { messageIds })
+socket.emit('markAsRead', { messageIds });
 
 // 实时通知
 socket.on('notification', (notification) => {
   // 显示通知
-})
+});
 ```
 
 ## 推送集成
+
 ```typescript
 // Web Push API
 if ('serviceWorker' in navigator && 'PushManager' in window) {

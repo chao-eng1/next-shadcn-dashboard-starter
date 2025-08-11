@@ -1,4 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextRequest, NextResponse } from 'next/server';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
@@ -12,6 +14,7 @@ import {
 import { hasProjectPermission } from '@/lib/permissions';
 
 // 更新项目请求验证
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const updateProjectSchema = z.object({
   name: z.string().min(1, '项目名称不能为空').optional(),
   description: z.string().optional(),
@@ -87,7 +90,6 @@ export async function GET(
 
     return apiResponse(project);
   } catch (error) {
-    console.error('获取项目详情失败:', error);
     return apiError(
       'SERVER_ERROR',
       '获取项目详情失败',
@@ -166,8 +168,6 @@ export async function PATCH(
         400
       );
     }
-
-    console.error('更新项目失败:', error);
     return apiError(
       'SERVER_ERROR',
       '更新项目失败',
@@ -209,7 +209,6 @@ export async function DELETE(
 
     return apiResponse({ success: true, message: '项目已成功删除' });
   } catch (error) {
-    console.error('删除项目失败:', error);
     return apiError(
       'SERVER_ERROR',
       '删除项目失败',

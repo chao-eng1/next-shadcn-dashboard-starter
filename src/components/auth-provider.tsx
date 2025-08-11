@@ -23,15 +23,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (response.ok) {
           const text = await response.text();
-          console.log('Raw API response:', text);
           try {
             const data = JSON.parse(text);
-            console.log('Parsed API response:', data);
             setUser(data.user);
             retryCountRef.current = 0; // Reset retry count on success
           } catch (parseError) {
             console.error('Failed to parse JSON response:', parseError);
-            console.error('Response text:', text);
             setUser(null);
           }
         } else if (response.status === 401) {
@@ -75,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     loadUser();
-  }, []); // 移除依赖数组中的setUser和setLoading，因为它们是稳定的zustand函数
+  }, [router, setLoading, setUser]); // 添加必要的依赖项
 
   return <>{children}</>;
 }

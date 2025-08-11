@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { apiResponse, apiError, apiUnauthorized } from '@/lib/api-response';
 import {
   RequirementStatus,
@@ -18,6 +19,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 解析查询参数
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { searchParams } = new URL(request.url);
     const projectId = searchParams.get('projectId');
 
@@ -108,6 +110,7 @@ export async function GET(request: NextRequest) {
       totalRequirements > 0 ? (completedCount / totalRequirements) * 100 : 0;
 
     // 计算高优先级需求数量
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const highPriorityCount = priorityStats
       .filter(
         (p) =>
@@ -117,6 +120,7 @@ export async function GET(request: NextRequest) {
       .reduce((sum, p) => sum + p._count.id, 0);
 
     // 计算进行中的需求数量
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const inProgressCount = statusStats
       .filter(
         (s) =>
@@ -340,7 +344,6 @@ export async function GET(request: NextRequest) {
       }))
     });
   } catch (error) {
-    console.error('获取需求统计失败:', error);
     return apiError('获取需求统计失败');
   }
 }

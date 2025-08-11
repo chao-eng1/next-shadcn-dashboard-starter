@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/get-current-user';
 import { prisma } from '@/lib/prisma';
@@ -37,7 +38,6 @@ export async function GET(
       memberId: projectMember.id
     });
   } catch (error) {
-    console.error('获取用户项目角色失败:', error);
     return NextResponse.json({ error: '服务器内部错误' }, { status: 500 });
   }
 }

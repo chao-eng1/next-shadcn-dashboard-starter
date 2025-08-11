@@ -95,6 +95,7 @@ export const useWebSocket = ({
 
       wsRef.current.onmessage = (event) => {
         try {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const message: WebSocketMessage = JSON.parse(event.data);
 
           // 处理心跳响应
@@ -103,9 +104,7 @@ export const useWebSocket = ({
           }
 
           onMessage?.(message);
-        } catch (error) {
-          console.error('Failed to parse WebSocket message:', error);
-        }
+        } catch (error) {}
       };
 
       wsRef.current.onclose = (event) => {
@@ -135,7 +134,6 @@ export const useWebSocket = ({
                 connectRef.current?.();
               }, reconnectInterval);
             } else {
-              console.log('连接失败，已达到最大重连次数');
               setConnectionStatus('error');
             }
             return newAttempts;
@@ -146,11 +144,9 @@ export const useWebSocket = ({
       wsRef.current.onerror = (error) => {
         setConnectionStatus('error');
         onError?.(error);
-        console.warn('WebSocket连接错误:', error);
       };
     } catch (error) {
       setConnectionStatus('error');
-      console.error('Failed to create WebSocket connection:', error);
       // 不显示错误提示，因为WebSocket服务器可能没有启动
     }
   }, [
@@ -194,7 +190,6 @@ export const useWebSocket = ({
       return true;
     } else {
       // 不显示错误提示，静默处理WebSocket不可用的情况
-      console.log('WebSocket连接未建立，无法发送消息');
       return false;
     }
   }, []);

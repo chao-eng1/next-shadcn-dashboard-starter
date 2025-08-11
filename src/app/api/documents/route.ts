@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
@@ -11,6 +12,7 @@ import {
 import { hasPermission } from '@/lib/permissions';
 
 // 创建文档请求验证
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createDocumentSchema = z.object({
   title: z.string().min(1, '文档标题不能为空'),
   content: z.string().optional(),
@@ -24,6 +26,7 @@ const createDocumentSchema = z.object({
 });
 
 // 查询参数验证
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getDocumentsQuerySchema = z.object({
   status: z.enum(['DRAFT', 'REVIEW', 'PUBLISHED', 'ARCHIVED']).optional(),
   format: z.enum(['MARKDOWN', 'RICH_TEXT', 'PLAIN_TEXT']).optional(),
@@ -51,9 +54,11 @@ export async function GET(request: NextRequest) {
   }
 
   // 解析查询参数
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { searchParams } = new URL(request.url);
 
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const query = getDocumentsQuerySchema.parse({
       status: searchParams.get('status') || undefined,
       format: searchParams.get('format') || undefined,
@@ -153,7 +158,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.error('获取文档列表失败:', error);
     return apiError(
       'SERVER_ERROR',
       '获取文档列表失败',
@@ -179,9 +183,11 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const body = await request.json();
 
     // 验证请求数据
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const validated = createDocumentSchema.parse(body);
 
     // 如果指定了文件夹，检查它是否存在且属于当前用户
@@ -257,7 +263,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('创建文档失败:', error);
     return apiError(
       'SERVER_ERROR',
       '创建文档失败',

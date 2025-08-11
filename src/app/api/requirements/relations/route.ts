@@ -18,6 +18,7 @@ export async function GET(request: NextRequest) {
 
     // 解析查询参数
     const { searchParams } = new URL(request.url);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const requirementId = searchParams.get('requirementId');
     const projectId = searchParams.get('projectId');
 
@@ -150,7 +151,6 @@ export async function GET(request: NextRequest) {
       stats
     });
   } catch (error) {
-    console.error('获取需求关联关系失败:', error);
     return apiError('获取需求关联关系失败');
   }
 }
@@ -164,6 +164,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { parentId, childId, taskId, requirementId, type } = body;
 
     // 验证输入
@@ -233,7 +234,6 @@ export async function POST(request: NextRequest) {
 
     return apiValidationError([{ message: '未知的关联类型' }]);
   } catch (error) {
-    console.error('创建需求关联关系失败:', error);
     return apiError('创建需求关联关系失败');
   }
 }
@@ -249,6 +249,7 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
     const childId = searchParams.get('childId');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const requirementId = searchParams.get('requirementId');
     const taskId = searchParams.get('taskId');
 
@@ -276,7 +277,6 @@ export async function DELETE(request: NextRequest) {
 
     return apiValidationError([{ message: '无效的删除参数' }]);
   } catch (error) {
-    console.error('删除需求关联关系失败:', error);
     return apiError('删除需求关联关系失败');
   }
 }

@@ -5,6 +5,7 @@
 本文档详细说明AI对话功能前后端开发过程中的协作流程、联调步骤、测试方法和问题排查，确保前后端团队能够高效协作，顺利完成功能开发。
 
 ### 1.1 联调目标
+
 - 🎯 **接口对接**: 确保前后端API接口完全匹配
 - 🔄 **实时通信**: 验证WebSocket连接和消息推送
 - 📱 **功能验证**: 测试完整的用户交互流程
@@ -12,6 +13,7 @@
 - 📊 **性能优化**: 监控和优化接口性能
 
 ### 1.2 联调环境
+
 - **开发环境**: 本地开发和测试
 - **集成环境**: 前后端集成测试
 - **预发布环境**: 生产环境模拟测试
@@ -85,14 +87,14 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
 
@@ -101,7 +103,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile.dev
     ports:
-      - "3001:3001"
+      - '3001:3001'
     environment:
       - NODE_ENV=development
       - DATABASE_URL=postgresql://postgres:password@postgres:5432/ai_chat_dev
@@ -119,7 +121,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.dev
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:3001/api
       - NEXT_PUBLIC_WS_URL=ws://localhost:3001
@@ -315,7 +317,7 @@ describe('Chat API', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveProperty('id');
       expect(response.body.data.title).toBe('Test Conversation');
-      
+
       conversationId = response.body.data.id;
     });
   });
@@ -399,14 +401,15 @@ class ApiClient {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-    
+    this.baseURL =
+      process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+
     this.instance = axios.create({
       baseURL: this.baseURL,
       timeout: 30000,
       headers: {
-        'Content-Type': 'application/json',
-      },
+        'Content-Type': 'application/json'
+      }
     });
 
     this.setupInterceptors();
@@ -467,7 +470,7 @@ class ApiClient {
 
         // 处理不同类型的错误
         this.handleError(error);
-        
+
         return Promise.reject(error);
       }
     );
@@ -483,7 +486,7 @@ class ApiClient {
         localStorage.removeItem('auth_token');
         window.location.href = '/login';
         break;
-      
+
       case 403:
         toast({
           title: '权限不足',
@@ -491,7 +494,7 @@ class ApiClient {
           variant: 'destructive'
         });
         break;
-      
+
       case 429:
         toast({
           title: '请求过于频繁',
@@ -499,7 +502,7 @@ class ApiClient {
           variant: 'destructive'
         });
         break;
-      
+
       case 500:
         toast({
           title: '服务器错误',
@@ -507,7 +510,7 @@ class ApiClient {
           variant: 'destructive'
         });
         break;
-      
+
       default:
         if (message) {
           toast({
@@ -588,7 +591,7 @@ class ApiClient {
       url,
       data: formData,
       headers: {
-        'Content-Type': 'multipart/form-data',
+        'Content-Type': 'multipart/form-data'
       },
       onUploadProgress: (progressEvent) => {
         if (onProgress && progressEvent.total) {
@@ -597,7 +600,7 @@ class ApiClient {
           );
           onProgress(progress);
         }
-      },
+      }
     });
   }
 
@@ -621,12 +624,12 @@ export const apiClient = new ApiClient();
 ```typescript
 // src/services/chat-api.service.ts
 import { apiClient } from '@/lib/api-client';
-import { 
-  Conversation, 
-  Message, 
+import {
+  Conversation,
+  Message,
   CreateMessageRequest,
   GetMessagesRequest,
-  SearchMessagesRequest 
+  SearchMessagesRequest
 } from '@/types/chat.types';
 
 export class ChatApiService {
@@ -647,11 +650,11 @@ export class ChatApiService {
   }
 
   async updateConversation(
-    id: string, 
+    id: string,
     data: Partial<Conversation>
   ): Promise<Conversation> {
     const response = await apiClient.patch<Conversation>(
-      `/conversations/${id}`, 
+      `/conversations/${id}`,
       data
     );
     return response.data!;
@@ -693,7 +696,7 @@ export class ChatApiService {
   }
 
   async updateMessage(
-    messageId: string, 
+    messageId: string,
     data: { content: string }
   ): Promise<Message> {
     const response = await apiClient.patch<Message>(
@@ -712,13 +715,12 @@ export class ChatApiService {
   }
 
   async addReaction(
-    messageId: string, 
+    messageId: string,
     emoji: string
   ): Promise<{ id: string; emoji: string }> {
-    const response = await apiClient.post(
-      `/messages/${messageId}/reactions`,
-      { emoji }
-    );
+    const response = await apiClient.post(`/messages/${messageId}/reactions`, {
+      emoji
+    });
     return response.data!;
   }
 
@@ -798,13 +800,13 @@ export const useWebSocketDebug = () => {
 
     // 连接状态监听
     socket.on('connect', () => {
-      setDebugInfo(prev => ({
+      setDebugInfo((prev) => ({
         ...prev,
         connectionState: 'connected',
         lastConnectedAt: new Date(),
         reconnectAttempts: 0
       }));
-      
+
       console.log('🟢 WebSocket Connected', {
         socketId: socket.id,
         timestamp: new Date().toISOString()
@@ -812,12 +814,12 @@ export const useWebSocketDebug = () => {
     });
 
     socket.on('disconnect', (reason) => {
-      setDebugInfo(prev => ({
+      setDebugInfo((prev) => ({
         ...prev,
         connectionState: 'disconnected',
         lastDisconnectedAt: new Date()
       }));
-      
+
       console.log('🔴 WebSocket Disconnected', {
         reason,
         timestamp: new Date().toISOString()
@@ -825,17 +827,20 @@ export const useWebSocketDebug = () => {
     });
 
     socket.on('connect_error', (error) => {
-      setDebugInfo(prev => ({
+      setDebugInfo((prev) => ({
         ...prev,
         connectionState: 'error',
         reconnectAttempts: prev.reconnectAttempts + 1,
-        errors: [...prev.errors, {
-          timestamp: new Date(),
-          error: error.message,
-          type: 'connection'
-        }]
+        errors: [
+          ...prev.errors,
+          {
+            timestamp: new Date(),
+            error: error.message,
+            type: 'connection'
+          }
+        ]
       }));
-      
+
       console.error('❌ WebSocket Connection Error', {
         error: error.message,
         timestamp: new Date().toISOString()
@@ -844,39 +849,39 @@ export const useWebSocketDebug = () => {
 
     // 消息监听
     const originalEmit = socket.emit;
-    socket.emit = function(...args) {
-      setDebugInfo(prev => ({
+    socket.emit = function (...args) {
+      setDebugInfo((prev) => ({
         ...prev,
         messagesSent: prev.messagesSent + 1
       }));
-      
+
       console.log('📤 WebSocket Message Sent', {
         event: args[0],
         data: args[1],
         timestamp: new Date().toISOString()
       });
-      
+
       return originalEmit.apply(this, args);
     };
 
     // 通用消息接收监听
     const originalOn = socket.on;
-    socket.on = function(event, handler) {
+    socket.on = function (event, handler) {
       const wrappedHandler = (...args: any[]) => {
-        setDebugInfo(prev => ({
+        setDebugInfo((prev) => ({
           ...prev,
           messagesReceived: prev.messagesReceived + 1
         }));
-        
+
         console.log('📥 WebSocket Message Received', {
           event,
           data: args[0],
           timestamp: new Date().toISOString()
         });
-        
+
         return handler(...args);
       };
-      
+
       return originalOn.call(this, event, wrappedHandler);
     };
 
@@ -893,15 +898,15 @@ export const useWebSocketDebug = () => {
 
     return new Promise((resolve) => {
       const startTime = Date.now();
-      
+
       socket.emit('ping', startTime);
-      
+
       socket.once('pong', (timestamp) => {
         const latency = Date.now() - timestamp;
-        setDebugInfo(prev => ({ ...prev, latency }));
+        setDebugInfo((prev) => ({ ...prev, latency }));
         resolve(latency);
       });
-      
+
       // 超时处理
       setTimeout(() => resolve(-1), 5000);
     });
@@ -910,7 +915,7 @@ export const useWebSocketDebug = () => {
   // 发送测试消息
   const sendTestMessage = (conversationId: string) => {
     if (!socket || !isConnected) return;
-    
+
     socket.emit('message:send', {
       conversationId,
       content: `Test message at ${new Date().toISOString()}`,
@@ -992,7 +997,7 @@ export const WebSocketDebugPanel: React.FC<WebSocketDebugPanelProps> = ({
           </Badge>
         </CardTitle>
       </CardHeader>
-      
+
       <CardContent>
         <Tabs defaultValue="status" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
@@ -1001,7 +1006,7 @@ export const WebSocketDebugPanel: React.FC<WebSocketDebugPanelProps> = ({
             <TabsTrigger value="errors">错误日志</TabsTrigger>
             <TabsTrigger value="tools">调试工具</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="status" className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -1011,19 +1016,19 @@ export const WebSocketDebugPanel: React.FC<WebSocketDebugPanelProps> = ({
                   <span className="text-sm">{getConnectionStatusText()}</span>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-medium">重连次数</label>
                 <span className="text-sm">{debugInfo.reconnectAttempts}</span>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-medium">最后连接时间</label>
                 <span className="text-sm">
                   {debugInfo.lastConnectedAt?.toLocaleString() || '未连接'}
                 </span>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm font-medium">最后断开时间</label>
                 <span className="text-sm">
@@ -1032,7 +1037,7 @@ export const WebSocketDebugPanel: React.FC<WebSocketDebugPanelProps> = ({
               </div>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="messages" className="space-y-4">
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
@@ -1041,14 +1046,14 @@ export const WebSocketDebugPanel: React.FC<WebSocketDebugPanelProps> = ({
                 </div>
                 <div className="text-sm text-gray-600">已发送消息</div>
               </div>
-              
+
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600">
                   {debugInfo.messagesReceived}
                 </div>
                 <div className="text-sm text-gray-600">已接收消息</div>
               </div>
-              
+
               <div className="text-center">
                 <div className="text-2xl font-bold text-purple-600">
                   {debugInfo.latency ? `${debugInfo.latency}ms` : '-'}
@@ -1057,7 +1062,7 @@ export const WebSocketDebugPanel: React.FC<WebSocketDebugPanelProps> = ({
               </div>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="errors" className="space-y-4">
             <ScrollArea className="h-48">
               {debugInfo.errors.length === 0 ? (
@@ -1087,7 +1092,7 @@ export const WebSocketDebugPanel: React.FC<WebSocketDebugPanelProps> = ({
               )}
             </ScrollArea>
           </TabsContent>
-          
+
           <TabsContent value="tools" className="space-y-4">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
@@ -1098,14 +1103,14 @@ export const WebSocketDebugPanel: React.FC<WebSocketDebugPanelProps> = ({
                 >
                   {isTestingLatency ? '测试中...' : '测试延迟'}
                 </Button>
-                
+
                 {latencyResult !== null && (
                   <Badge variant={latencyResult > 0 ? 'default' : 'destructive'}>
                     {latencyResult > 0 ? `${latencyResult}ms` : '测试失败'}
                   </Badge>
                 )}
               </div>
-              
+
               {conversationId && (
                 <div className="flex items-center gap-2">
                   <Button
@@ -1121,7 +1126,7 @@ export const WebSocketDebugPanel: React.FC<WebSocketDebugPanelProps> = ({
                   </span>
                 </div>
               )}
-              
+
               <div className="p-3 bg-gray-50 rounded text-sm">
                 <div className="font-medium mb-2">调试说明:</div>
                 <ul className="space-y-1 text-gray-600">
@@ -1159,7 +1164,7 @@ describe('WebSocket Message Flow', () => {
   beforeAll(async () => {
     testUser = await generateTestUser();
     authToken = generateTestToken(testUser.id);
-    
+
     // 创建测试对话
     const conversation = await prisma.conversation.create({
       data: {
@@ -1188,11 +1193,11 @@ describe('WebSocket Message Flow', () => {
         token: authToken
       }
     });
-    
+
     clientSocket.on('connect', () => {
       done();
     });
-    
+
     clientSocket.on('connect_error', (error) => {
       done(error);
     });
@@ -1211,7 +1216,7 @@ describe('WebSocket Message Flow', () => {
 
   it('should join conversation room', (done) => {
     clientSocket.emit('conversation:join', { conversationId });
-    
+
     clientSocket.on('user:joined', (data) => {
       expect(data.userId).toBe(testUser.id);
       expect(data.conversationId).toBe(conversationId);
@@ -1240,23 +1245,23 @@ describe('WebSocket Message Flow', () => {
 
   it('should handle typing indicators', (done) => {
     let typingStartReceived = false;
-    
+
     clientSocket.on('typing:start', (data) => {
       expect(data.userId).toBe(testUser.id);
       expect(data.conversationId).toBe(conversationId);
       typingStartReceived = true;
     });
-    
+
     clientSocket.on('typing:stop', (data) => {
       expect(data.userId).toBe(testUser.id);
       expect(data.conversationId).toBe(conversationId);
       expect(typingStartReceived).toBe(true);
       done();
     });
-    
+
     // 发送输入状态
     clientSocket.emit('typing:start', { conversationId });
-    
+
     setTimeout(() => {
       clientSocket.emit('typing:stop', { conversationId });
     }, 100);
@@ -1268,7 +1273,7 @@ describe('WebSocket Message Flow', () => {
       expect(data.conversationId).toBe(conversationId);
       done();
     });
-    
+
     clientSocket.emit('message:read', { conversationId });
   });
 
@@ -1278,7 +1283,7 @@ describe('WebSocket Message Flow', () => {
         token: 'invalid-token'
       }
     });
-    
+
     invalidSocket.on('connect_error', (error) => {
       expect(error.message).toContain('Authentication failed');
       invalidSocket.close();
@@ -1313,6 +1318,7 @@ flowchart TD
 ## 每日联调检查清单
 
 ### 环境检查
+
 - [ ] 后端服务正常启动 (http://localhost:3001)
 - [ ] 前端服务正常启动 (http://localhost:3000)
 - [ ] 数据库连接正常
@@ -1320,6 +1326,7 @@ flowchart TD
 - [ ] WebSocket连接正常
 
 ### API接口检查
+
 - [ ] 认证接口正常工作
 - [ ] 对话管理接口正常
 - [ ] 消息发送接口正常
@@ -1327,6 +1334,7 @@ flowchart TD
 - [ ] 错误处理机制正常
 
 ### WebSocket功能检查
+
 - [ ] 连接建立正常
 - [ ] 消息实时推送正常
 - [ ] 输入状态同步正常
@@ -1334,6 +1342,7 @@ flowchart TD
 - [ ] 多用户同时在线正常
 
 ### 前端功能检查
+
 - [ ] 聊天窗口显示正常
 - [ ] 消息发送和接收正常
 - [ ] 历史消息加载正常
@@ -1341,6 +1350,7 @@ flowchart TD
 - [ ] 响应式布局正常
 
 ### 性能检查
+
 - [ ] API响应时间 < 500ms
 - [ ] WebSocket延迟 < 100ms
 - [ ] 内存使用正常
@@ -1364,7 +1374,7 @@ export class DebugHelper {
       headers: request.headers,
       data: request.data
     });
-    
+
     if (error.response) {
       console.log('Response Error:', {
         status: error.response.status,
@@ -1372,7 +1382,7 @@ export class DebugHelper {
         data: error.response.data,
         headers: error.response.headers
       });
-      
+
       // 常见错误分析
       switch (error.response.status) {
         case 400:
@@ -1403,14 +1413,14 @@ export class DebugHelper {
     } else {
       console.log('Request Setup Error:', error.message);
     }
-    
+
     console.groupEnd();
   }
-  
+
   // WebSocket连接问题排查
   static debugWebSocketConnection(socket: any, error?: any) {
     console.group('🔍 WebSocket Connection Debug');
-    
+
     if (socket) {
       console.log('Socket Details:', {
         id: socket.id,
@@ -1419,7 +1429,7 @@ export class DebugHelper {
         transport: socket.io.engine.transport.name
       });
     }
-    
+
     if (error) {
       console.log('Connection Error:', {
         message: error.message,
@@ -1427,7 +1437,7 @@ export class DebugHelper {
         context: error.context,
         type: error.type
       });
-      
+
       // 常见WebSocket错误分析
       if (error.message.includes('Authentication')) {
         console.warn('❌ Authentication Error - 检查token有效性');
@@ -1437,7 +1447,7 @@ export class DebugHelper {
         console.warn('❌ CORS Error - 检查跨域配置');
       }
     }
-    
+
     // 连接建议
     console.log('🔧 Troubleshooting Tips:');
     console.log('1. 检查后端WebSocket服务是否启动');
@@ -1445,17 +1455,17 @@ export class DebugHelper {
     console.log('3. 确认网络连接是否正常');
     console.log('4. 查看浏览器控制台是否有CORS错误');
     console.log('5. 检查防火墙是否阻止WebSocket连接');
-    
+
     console.groupEnd();
   }
-  
+
   // 性能问题排查
   static debugPerformance(operation: string, startTime: number) {
     const duration = performance.now() - startTime;
-    
+
     console.group(`⏱️ Performance Debug: ${operation}`);
     console.log(`Duration: ${duration.toFixed(2)}ms`);
-    
+
     if (duration > 1000) {
       console.warn('❌ Slow Operation - 操作耗时过长');
       console.log('建议检查:');
@@ -1468,25 +1478,35 @@ export class DebugHelper {
     } else {
       console.log('✅ Good Performance - 操作正常');
     }
-    
+
     console.groupEnd();
-    
+
     return duration;
   }
-  
+
   // 内存使用检查
   static debugMemoryUsage() {
     if (typeof window !== 'undefined' && 'performance' in window) {
       const memory = (performance as any).memory;
-      
+
       if (memory) {
         console.group('💾 Memory Usage Debug');
-        console.log('Used JS Heap Size:', (memory.usedJSHeapSize / 1024 / 1024).toFixed(2) + ' MB');
-        console.log('Total JS Heap Size:', (memory.totalJSHeapSize / 1024 / 1024).toFixed(2) + ' MB');
-        console.log('JS Heap Size Limit:', (memory.jsHeapSizeLimit / 1024 / 1024).toFixed(2) + ' MB');
-        
-        const usagePercentage = (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100;
-        
+        console.log(
+          'Used JS Heap Size:',
+          (memory.usedJSHeapSize / 1024 / 1024).toFixed(2) + ' MB'
+        );
+        console.log(
+          'Total JS Heap Size:',
+          (memory.totalJSHeapSize / 1024 / 1024).toFixed(2) + ' MB'
+        );
+        console.log(
+          'JS Heap Size Limit:',
+          (memory.jsHeapSizeLimit / 1024 / 1024).toFixed(2) + ' MB'
+        );
+
+        const usagePercentage =
+          (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100;
+
         if (usagePercentage > 80) {
           console.warn('❌ High Memory Usage - 内存使用率过高');
         } else if (usagePercentage > 60) {
@@ -1494,12 +1514,12 @@ export class DebugHelper {
         } else {
           console.log('✅ Normal Memory Usage - 内存使用正常');
         }
-        
+
         console.groupEnd();
       }
     }
   }
-  
+
   // 生成调试报告
   static generateDebugReport() {
     const report = {
@@ -1510,19 +1530,21 @@ export class DebugHelper {
         width: window.innerWidth,
         height: window.innerHeight
       },
-      connection: (navigator as any).connection ? {
-        effectiveType: (navigator as any).connection.effectiveType,
-        downlink: (navigator as any).connection.downlink,
-        rtt: (navigator as any).connection.rtt
-      } : null,
+      connection: (navigator as any).connection
+        ? {
+            effectiveType: (navigator as any).connection.effectiveType,
+            downlink: (navigator as any).connection.downlink,
+            rtt: (navigator as any).connection.rtt
+          }
+        : null,
       localStorage: {
         authToken: !!localStorage.getItem('auth_token'),
         chatSettings: !!localStorage.getItem('chat_settings')
       }
     };
-    
+
     console.log('📋 Debug Report:', report);
-    
+
     return report;
   }
 }
@@ -1551,7 +1573,7 @@ interface ErrorReport {
 export class ErrorReporter {
   private static reports: ErrorReport[] = [];
   private static maxReports = 100;
-  
+
   static report(error: {
     type: ErrorReport['type'];
     severity: ErrorReport['severity'];
@@ -1572,25 +1594,25 @@ export class ErrorReporter {
         ...error.context
       }
     };
-    
+
     // 添加到本地报告列表
     this.reports.unshift(report);
     if (this.reports.length > this.maxReports) {
       this.reports = this.reports.slice(0, this.maxReports);
     }
-    
+
     // 控制台输出
     const logMethod = this.getLogMethod(error.severity);
     logMethod(`[${error.type.toUpperCase()}] ${error.message}`, report);
-    
+
     // 发送到监控服务（生产环境）
     if (process.env.NODE_ENV === 'production') {
       this.sendToMonitoring(report);
     }
-    
+
     return report.id;
   }
-  
+
   private static getLogMethod(severity: ErrorReport['severity']) {
     switch (severity) {
       case 'critical':
@@ -1603,7 +1625,7 @@ export class ErrorReporter {
         return console.log;
     }
   }
-  
+
   private static async sendToMonitoring(report: ErrorReport) {
     try {
       // 这里可以集成第三方监控服务
@@ -1619,33 +1641,33 @@ export class ErrorReporter {
       console.error('Failed to send error report:', error);
     }
   }
-  
+
   static getReports(filter?: {
     type?: ErrorReport['type'];
     severity?: ErrorReport['severity'];
     since?: Date;
   }): ErrorReport[] {
     let filtered = this.reports;
-    
+
     if (filter) {
       if (filter.type) {
-        filtered = filtered.filter(r => r.type === filter.type);
+        filtered = filtered.filter((r) => r.type === filter.type);
       }
       if (filter.severity) {
-        filtered = filtered.filter(r => r.severity === filter.severity);
+        filtered = filtered.filter((r) => r.severity === filter.severity);
       }
       if (filter.since) {
-        filtered = filtered.filter(r => r.timestamp >= filter.since!);
+        filtered = filtered.filter((r) => r.timestamp >= filter.since!);
       }
     }
-    
+
     return filtered;
   }
-  
+
   static clearReports() {
     this.reports = [];
   }
-  
+
   static exportReports(): string {
     return JSON.stringify(this.reports, null, 2);
   }
@@ -1666,7 +1688,7 @@ if (typeof window !== 'undefined') {
       }
     });
   });
-  
+
   window.addEventListener('unhandledrejection', (event) => {
     ErrorReporter.report({
       type: 'ui',
@@ -1710,50 +1732,56 @@ test.describe('AI Chat E2E Tests', () => {
     await page.click('[data-testid="send-button"]');
 
     // 验证消息显示
-    await expect(page.locator('[data-testid="user-message"]').last()).toContainText('Hello, AI assistant!');
+    await expect(
+      page.locator('[data-testid="user-message"]').last()
+    ).toContainText('Hello, AI assistant!');
 
     // 等待AI回复
-    await expect(page.locator('[data-testid="ai-message"]').last()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('[data-testid="ai-message"]').last()).toBeVisible(
+      { timeout: 10000 }
+    );
   });
 
   test('should handle file upload', async ({ page }) => {
     await page.click('[data-testid="chat-trigger-button"]');
-    
+
     // 上传文件
     const fileInput = page.locator('[data-testid="file-input"]');
     await fileInput.setInputFiles('tests/fixtures/test-image.png');
-    
+
     // 验证文件预览
     await expect(page.locator('[data-testid="file-preview"]')).toBeVisible();
-    
+
     // 发送带文件的消息
     await page.click('[data-testid="send-button"]');
-    
+
     // 验证文件消息显示
-    await expect(page.locator('[data-testid="file-message"]').last()).toBeVisible();
+    await expect(
+      page.locator('[data-testid="file-message"]').last()
+    ).toBeVisible();
   });
 
   test('should maintain conversation history', async ({ page }) => {
     await page.click('[data-testid="chat-trigger-button"]');
-    
+
     // 发送多条消息
     const messages = ['First message', 'Second message', 'Third message'];
-    
+
     for (const message of messages) {
       await page.fill('[data-testid="message-input"]', message);
       await page.click('[data-testid="send-button"]');
       await page.waitForTimeout(1000);
     }
-    
+
     // 验证所有消息都显示
     for (const message of messages) {
       await expect(page.locator(`text=${message}`)).toBeVisible();
     }
-    
+
     // 刷新页面后验证历史记录
     await page.reload();
     await page.click('[data-testid="chat-trigger-button"]');
-    
+
     for (const message of messages) {
       await expect(page.locator(`text=${message}`)).toBeVisible();
     }
@@ -1772,20 +1800,20 @@ import { apiClient } from '../../src/lib/api-client';
 describe('Chat Performance Tests', () => {
   test('API response time should be under 500ms', async () => {
     const startTime = performance.now();
-    
+
     await apiClient.get('/conversations');
-    
+
     const duration = performance.now() - startTime;
     expect(duration).toBeLessThan(500);
   });
 
   test('WebSocket connection should establish quickly', async () => {
     const startTime = performance.now();
-    
+
     const socket = io('http://localhost:3001', {
       auth: { token: 'test-token' }
     });
-    
+
     await new Promise((resolve) => {
       socket.on('connect', () => {
         const duration = performance.now() - startTime;
@@ -1800,17 +1828,17 @@ describe('Chat Performance Tests', () => {
     const socket = io('http://localhost:3001', {
       auth: { token: 'test-token' }
     });
-    
+
     await new Promise((resolve) => {
       socket.on('connect', () => {
         const startTime = performance.now();
-        
+
         socket.emit('message:send', {
           conversationId: 'test-conversation',
           content: 'Performance test message',
           type: 'TEXT'
         });
-        
+
         socket.on('message:received', () => {
           const duration = performance.now() - startTime;
           expect(duration).toBeLessThan(200);
@@ -1837,8 +1865,8 @@ services:
   nginx:
     image: nginx:alpine
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - ./ssl:/etc/nginx/ssl
@@ -1918,10 +1946,10 @@ export class MonitoringService {
   static requestLogger() {
     return (req: Request, res: Response, next: NextFunction) => {
       const startTime = performance.now();
-      
+
       res.on('finish', () => {
         const duration = performance.now() - startTime;
-        
+
         const metric: RequestMetrics = {
           method: req.method,
           path: req.path,
@@ -1931,15 +1959,17 @@ export class MonitoringService {
           userAgent: req.get('User-Agent'),
           ip: req.ip
         };
-        
+
         this.addMetric(metric);
-        
+
         // 记录慢请求
         if (duration > 1000) {
-          console.warn(`Slow request: ${req.method} ${req.path} - ${duration.toFixed(2)}ms`);
+          console.warn(
+            `Slow request: ${req.method} ${req.path} - ${duration.toFixed(2)}ms`
+          );
         }
       });
-      
+
       next();
     };
   }
@@ -1951,25 +1981,21 @@ export class MonitoringService {
     }
   }
 
-  static getMetrics(filter?: {
-    method?: string;
-    path?: string;
-    since?: Date;
-  }) {
+  static getMetrics(filter?: { method?: string; path?: string; since?: Date }) {
     let filtered = this.metrics;
-    
+
     if (filter) {
       if (filter.method) {
-        filtered = filtered.filter(m => m.method === filter.method);
+        filtered = filtered.filter((m) => m.method === filter.method);
       }
       if (filter.path) {
-        filtered = filtered.filter(m => m.path.includes(filter.path));
+        filtered = filtered.filter((m) => m.path.includes(filter.path));
       }
       if (filter.since) {
-        filtered = filtered.filter(m => m.timestamp >= filter.since!);
+        filtered = filtered.filter((m) => m.timestamp >= filter.since!);
       }
     }
-    
+
     return filtered;
   }
 
@@ -1977,16 +2003,23 @@ export class MonitoringService {
     const now = new Date();
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
     const recentMetrics = this.getMetrics({ since: oneHourAgo });
-    
+
     return {
       totalRequests: recentMetrics.length,
-      averageResponseTime: recentMetrics.reduce((sum, m) => sum + m.duration, 0) / recentMetrics.length,
-      errorRate: recentMetrics.filter(m => m.statusCode >= 400).length / recentMetrics.length,
-      slowRequests: recentMetrics.filter(m => m.duration > 1000).length,
-      statusCodes: recentMetrics.reduce((acc, m) => {
-        acc[m.statusCode] = (acc[m.statusCode] || 0) + 1;
-        return acc;
-      }, {} as Record<number, number>)
+      averageResponseTime:
+        recentMetrics.reduce((sum, m) => sum + m.duration, 0) /
+        recentMetrics.length,
+      errorRate:
+        recentMetrics.filter((m) => m.statusCode >= 400).length /
+        recentMetrics.length,
+      slowRequests: recentMetrics.filter((m) => m.duration > 1000).length,
+      statusCodes: recentMetrics.reduce(
+        (acc, m) => {
+          acc[m.statusCode] = (acc[m.statusCode] || 0) + 1;
+          return acc;
+        },
+        {} as Record<number, number>
+      )
     };
   }
 }
@@ -1997,6 +2030,7 @@ export class MonitoringService {
 本联调指南提供了AI对话功能前后端开发的完整协作流程，包括：
 
 ### 7.1 核心要点
+
 - 🔧 **环境搭建**: 统一的开发环境和配置
 - 🔌 **接口对接**: 标准化的API设计和测试
 - ⚡ **实时通信**: WebSocket连接和消息流测试
@@ -2004,12 +2038,14 @@ export class MonitoringService {
 - 📊 **性能监控**: 全面的性能指标和优化
 
 ### 7.2 最佳实践
+
 - 📝 **文档先行**: 接口文档和规范优先
 - 🧪 **测试驱动**: 自动化测试覆盖核心功能
 - 🔍 **持续监控**: 实时性能和错误监控
 - 🤝 **团队协作**: 规范化的沟通和协作流程
 
 ### 7.3 后续优化
+
 - 🚀 **性能优化**: 持续优化响应时间和用户体验
 - 🔒 **安全加固**: 加强认证和数据保护
 - 📈 **功能扩展**: 基于用户反馈持续迭代

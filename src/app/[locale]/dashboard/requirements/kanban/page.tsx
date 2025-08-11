@@ -1,4 +1,6 @@
-import { Metadata } from 'next';
+'use client';
+
+import { useState } from 'react';
 import { RequirementKanban } from '@/features/requirement-management/components/requirement-kanban';
 import { RequirementFilter } from '@/features/requirement-management/components/requirement-filter';
 import { RequirementActions } from '@/features/requirement-management/components/requirement-actions';
@@ -14,13 +16,39 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-export const metadata: Metadata = {
-  title: '需求看板',
-  description: '可视化需求状态管理和进度跟踪'
-};
+interface FilterOptions {
+  search?: string;
+  status?: string[];
+  priority?: string[];
+  type?: string[];
+  complexity?: string[];
+  projectId?: string[];
+  assigneeId?: string[];
+  creatorId?: string[];
+  tags?: string[];
+  dueDateFrom?: Date;
+  dueDateTo?: Date;
+  createdFrom?: Date;
+  createdTo?: Date;
+  businessValueMin?: number;
+  businessValueMax?: number;
+  effortMin?: number;
+  effortMax?: number;
+}
 
 export default function RequirementKanbanPage() {
   const t = useTranslations('requirements');
+  const [filters, setFilters] = useState<FilterOptions>({});
+
+  const handleFilterChange = (newFilters: FilterOptions) => {
+    setFilters(newFilters);
+    console.log('Kanban filter changed:', newFilters);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({});
+    console.log('Kanban filters cleared');
+  };
 
   return (
     <div className='flex-1 space-y-4 p-4 pt-6 md:p-8'>
@@ -59,7 +87,12 @@ export default function RequirementKanbanPage() {
         </CardHeader>
         <CardContent>
           <div className='space-y-4'>
-            <RequirementFilter compact />
+            <RequirementFilter
+              filters={filters}
+              onFiltersChange={handleFilterChange}
+              onClearFilters={handleClearFilters}
+              compact
+            />
             <RequirementKanban />
           </div>
         </CardContent>

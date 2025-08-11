@@ -5,6 +5,7 @@
 本文档详细描述AI对话功能的后端技术实现方案，包括API设计、WebSocket实时通信、数据库架构、AI模型集成、安全认证等核心技术要点。
 
 ### 1.1 技术栈
+
 - **运行时**: Node.js 18+
 - **框架**: Express.js + Socket.io
 - **数据库**: PostgreSQL + Prisma ORM
@@ -16,6 +17,7 @@
 - **监控**: Winston + Prometheus
 
 ### 1.2 核心特性
+
 - RESTful API设计
 - WebSocket实时通信
 - 流式响应处理
@@ -107,21 +109,21 @@ model User {
   username  String?  @unique
   avatar    String?
   role      UserRole @default(USER)
-  
+
   // 认证相关
   passwordHash String?
   emailVerified Boolean @default(false)
-  
+
   // 时间戳
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   lastActiveAt DateTime @default(now())
-  
+
   // 关联关系
   conversations ConversationParticipant[]
   messages      Message[]
   sessions      UserSession[]
-  
+
   @@map("users")
 }
 
@@ -129,21 +131,21 @@ model Conversation {
   id          String   @id @default(cuid())
   title       String   @default("新对话")
   description String?
-  
+
   // 对话设置
   isArchived  Boolean @default(false)
   isDeleted   Boolean @default(false)
   settings    Json?   // 对话特定设置
-  
+
   // 时间戳
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   lastMessageAt DateTime?
-  
+
   // 关联关系
   participants ConversationParticipant[]
   messages     Message[]
-  
+
   @@map("conversations")
 }
 
@@ -151,16 +153,16 @@ model ConversationParticipant {
   id             String   @id @default(cuid())
   conversationId String
   userId         String
-  
+
   // 参与者设置
   role           ParticipantRole @default(MEMBER)
   joinedAt       DateTime @default(now())
   lastReadAt     DateTime @default(now())
-  
+
   // 关联关系
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@unique([conversationId, userId])
   @@map("conversation_participants")
 }
@@ -169,27 +171,27 @@ model Message {
   id             String   @id @default(cuid())
   conversationId String
   userId         String?
-  
+
   // 消息内容
   content        String
   role           MessageRole
   type           MessageType @default(TEXT)
-  
+
   // 消息元数据
   metadata       Json?    // 扩展数据
   parentId       String?  // 回复消息ID
   threadId       String?  // 线程ID
-  
+
   // 状态
   status         MessageStatus @default(SENT)
   isEdited       Boolean @default(false)
   isDeleted      Boolean @default(false)
-  
+
   // 时间戳
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   editedAt  DateTime?
-  
+
   // 关联关系
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   user         User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -197,7 +199,7 @@ model Message {
   replies      Message[]    @relation("MessageReplies")
   attachments  Attachment[]
   reactions    MessageReaction[]
-  
+
   @@index([conversationId, createdAt])
   @@index([userId])
   @@map("messages")
@@ -206,23 +208,23 @@ model Message {
 model Attachment {
   id        String   @id @default(cuid())
   messageId String
-  
+
   // 文件信息
   filename     String
   originalName String
   mimeType     String
   size         Int
   url          String
-  
+
   // 元数据
   metadata Json? // 图片尺寸、视频时长等
-  
+
   // 时间戳
   createdAt DateTime @default(now())
-  
+
   // 关联关系
   message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  
+
   @@map("attachments")
 }
 
@@ -231,13 +233,13 @@ model MessageReaction {
   messageId String
   userId    String
   emoji     String
-  
+
   // 时间戳
   createdAt DateTime @default(now())
-  
+
   // 关联关系
   message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  
+
   @@unique([messageId, userId, emoji])
   @@map("message_reactions")
 }
@@ -246,19 +248,19 @@ model UserSession {
   id        String   @id @default(cuid())
   userId    String
   token     String   @unique
-  
+
   // 会话信息
   userAgent String?
   ipAddress String?
-  
+
   // 时间戳
   createdAt DateTime @default(now())
   expiresAt DateTime
   lastUsedAt DateTime @default(now())
-  
+
   // 关联关系
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@map("user_sessions")
 }
 
@@ -309,7 +311,7 @@ import { logger } from '../utils/logger';
 
 class DatabaseService {
   private static instance: PrismaClient;
-  
+
   static getInstance(): PrismaClient {
     if (!DatabaseService.instance) {
       DatabaseService.instance = new PrismaClient({
@@ -317,11 +319,11 @@ class DatabaseService {
           { emit: 'event', level: 'query' },
           { emit: 'event', level: 'error' },
           { emit: 'event', level: 'info' },
-          { emit: 'event', level: 'warn' },
+          { emit: 'event', level: 'warn' }
         ],
-        errorFormat: 'pretty',
+        errorFormat: 'pretty'
       });
-      
+
       // 日志记录
       DatabaseService.instance.$on('query', (e) => {
         if (process.env.NODE_ENV === 'development') {
@@ -332,15 +334,15 @@ class DatabaseService {
           });
         }
       });
-      
+
       DatabaseService.instance.$on('error', (e) => {
         logger.error('Database Error', e);
       });
     }
-    
+
     return DatabaseService.instance;
   }
-  
+
   static async connect(): Promise<void> {
     try {
       await DatabaseService.getInstance().$connect();
@@ -350,7 +352,7 @@ class DatabaseService {
       throw error;
     }
   }
-  
+
   static async disconnect(): Promise<void> {
     try {
       await DatabaseService.getInstance().$disconnect();
@@ -359,7 +361,7 @@ class DatabaseService {
       logger.error('Database disconnection failed', error);
     }
   }
-  
+
   static async healthCheck(): Promise<boolean> {
     try {
       await DatabaseService.getInstance().$queryRaw`SELECT 1`;
@@ -386,10 +388,10 @@ import { ChatController } from '../controllers/chat.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
 import { validateRequest } from '../middleware/validation.middleware';
 import { rateLimitMiddleware } from '../middleware/rate-limit.middleware';
-import { 
-  sendMessageSchema, 
+import {
+  sendMessageSchema,
   getMessagesSchema,
-  updateMessageSchema 
+  updateMessageSchema
 } from '../schemas/chat.schemas';
 
 const router = Router();
@@ -421,16 +423,10 @@ router.patch(
 );
 
 // 删除消息
-router.delete(
-  '/messages/:messageId',
-  chatController.deleteMessage
-);
+router.delete('/messages/:messageId', chatController.deleteMessage);
 
 // 消息反应
-router.post(
-  '/messages/:messageId/reactions',
-  chatController.addReaction
-);
+router.post('/messages/:messageId/reactions', chatController.addReaction);
 
 router.delete(
   '/messages/:messageId/reactions/:emoji',
@@ -438,10 +434,7 @@ router.delete(
 );
 
 // 标记消息为已读
-router.post(
-  '/conversations/:conversationId/read',
-  chatController.markAsRead
-);
+router.post('/conversations/:conversationId/read', chatController.markAsRead);
 
 // 搜索消息
 router.get(
@@ -460,10 +453,10 @@ import { Router } from 'express';
 import { ConversationController } from '../controllers/conversation.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
 import { validateRequest } from '../middleware/validation.middleware';
-import { 
+import {
   createConversationSchema,
   updateConversationSchema,
-  addParticipantSchema 
+  addParticipantSchema
 } from '../schemas/conversation.schemas';
 
 const router = Router();
@@ -479,16 +472,10 @@ router.post(
 );
 
 // 获取用户对话列表
-router.get(
-  '/',
-  conversationController.getUserConversations
-);
+router.get('/', conversationController.getUserConversations);
 
 // 获取对话详情
-router.get(
-  '/:conversationId',
-  conversationController.getConversation
-);
+router.get('/:conversationId', conversationController.getConversation);
 
 // 更新对话
 router.patch(
@@ -498,10 +485,7 @@ router.patch(
 );
 
 // 删除对话
-router.delete(
-  '/:conversationId',
-  conversationController.deleteConversation
-);
+router.delete('/:conversationId', conversationController.deleteConversation);
 
 // 归档对话
 router.post(
@@ -539,31 +523,34 @@ import { AuthenticatedRequest } from '../types/auth.types';
 export class ChatController {
   private chatService: ChatService;
   private wsService: WebSocketService;
-  
+
   constructor() {
     this.chatService = new ChatService();
     this.wsService = WebSocketService.getInstance();
   }
-  
-  sendMessage = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+
+  sendMessage = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
     try {
       const { conversationId } = req.params;
       const { content, type = 'TEXT', attachments = [] } = req.body;
       const userId = req.user!.id;
-      
+
       logger.info('Sending message', {
         userId,
         conversationId,
         contentLength: content.length,
         type
       });
-      
+
       // 验证用户是否有权限发送消息
       const hasPermission = await this.chatService.checkSendPermission(
         userId,
         conversationId
       );
-      
+
       if (!hasPermission) {
         res.status(403).json({
           success: false,
@@ -571,7 +558,7 @@ export class ChatController {
         } as ApiResponse);
         return;
       }
-      
+
       // 创建消息
       const message = await this.chatService.createMessage({
         conversationId,
@@ -580,18 +567,19 @@ export class ChatController {
         type,
         attachments
       });
-      
+
       // 通过WebSocket广播消息
       this.wsService.broadcastToConversation(conversationId, 'message:new', {
         message,
         conversationId
       });
-      
+
       // 如果是用户消息，触发AI回复
       if (message.role === 'USER') {
         // 异步处理AI回复，不阻塞响应
-        this.chatService.generateAIResponse(conversationId, message.id)
-          .catch(error => {
+        this.chatService
+          .generateAIResponse(conversationId, message.id)
+          .catch((error) => {
             logger.error('AI response generation failed', {
               error,
               conversationId,
@@ -599,44 +587,41 @@ export class ChatController {
             });
           });
       }
-      
+
       res.status(201).json({
         success: true,
         data: message
       } as ApiResponse);
-      
     } catch (error) {
       logger.error('Send message failed', {
         error,
         userId: req.user?.id,
         conversationId: req.params.conversationId
       });
-      
+
       res.status(500).json({
         success: false,
         error: 'Failed to send message'
       } as ApiResponse);
     }
   };
-  
-  getMessages = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+
+  getMessages = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
     try {
       const { conversationId } = req.params;
-      const { 
-        page = 1, 
-        limit = 50, 
-        before, 
-        after 
-      } = req.query;
-      
+      const { page = 1, limit = 50, before, after } = req.query;
+
       const userId = req.user!.id;
-      
+
       // 验证用户是否有权限查看消息
       const hasPermission = await this.chatService.checkReadPermission(
         userId,
         conversationId
       );
-      
+
       if (!hasPermission) {
         res.status(403).json({
           success: false,
@@ -644,7 +629,7 @@ export class ChatController {
         } as ApiResponse);
         return;
       }
-      
+
       const result = await this.chatService.getMessages({
         conversationId,
         page: Number(page),
@@ -652,32 +637,34 @@ export class ChatController {
         before: before as string,
         after: after as string
       });
-      
+
       res.json({
         success: true,
         data: result
       } as ApiResponse);
-      
     } catch (error) {
       logger.error('Get messages failed', {
         error,
         userId: req.user?.id,
         conversationId: req.params.conversationId
       });
-      
+
       res.status(500).json({
         success: false,
         error: 'Failed to get messages'
       } as ApiResponse);
     }
   };
-  
-  updateMessage = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+
+  updateMessage = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
     try {
       const { messageId } = req.params;
       const { content } = req.body;
       const userId = req.user!.id;
-      
+
       // 验证消息所有权
       const message = await this.chatService.getMessage(messageId);
       if (!message || message.userId !== userId) {
@@ -687,44 +674,46 @@ export class ChatController {
         } as ApiResponse);
         return;
       }
-      
+
       const updatedMessage = await this.chatService.updateMessage(messageId, {
         content,
         isEdited: true,
         editedAt: new Date()
       });
-      
+
       // 广播消息更新
       this.wsService.broadcastToConversation(
         message.conversationId,
         'message:updated',
         { message: updatedMessage }
       );
-      
+
       res.json({
         success: true,
         data: updatedMessage
       } as ApiResponse);
-      
     } catch (error) {
       logger.error('Update message failed', {
         error,
         userId: req.user?.id,
         messageId: req.params.messageId
       });
-      
+
       res.status(500).json({
         success: false,
         error: 'Failed to update message'
       } as ApiResponse);
     }
   };
-  
-  deleteMessage = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+
+  deleteMessage = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
     try {
       const { messageId } = req.params;
       const userId = req.user!.id;
-      
+
       // 验证消息所有权或管理员权限
       const message = await this.chatService.getMessage(messageId);
       if (!message) {
@@ -734,10 +723,10 @@ export class ChatController {
         } as ApiResponse);
         return;
       }
-      
-      const hasPermission = message.userId === userId || 
-                           req.user!.role === 'ADMIN';
-      
+
+      const hasPermission =
+        message.userId === userId || req.user!.role === 'ADMIN';
+
       if (!hasPermission) {
         res.status(403).json({
           success: false,
@@ -745,80 +734,84 @@ export class ChatController {
         } as ApiResponse);
         return;
       }
-      
+
       await this.chatService.deleteMessage(messageId);
-      
+
       // 广播消息删除
       this.wsService.broadcastToConversation(
         message.conversationId,
         'message:deleted',
         { messageId }
       );
-      
+
       res.json({
         success: true,
         message: 'Message deleted successfully'
       } as ApiResponse);
-      
     } catch (error) {
       logger.error('Delete message failed', {
         error,
         userId: req.user?.id,
         messageId: req.params.messageId
       });
-      
+
       res.status(500).json({
         success: false,
         error: 'Failed to delete message'
       } as ApiResponse);
     }
   };
-  
-  markAsRead = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+
+  markAsRead = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
     try {
       const { conversationId } = req.params;
       const userId = req.user!.id;
-      
+
       await this.chatService.markConversationAsRead(userId, conversationId);
-      
+
       // 广播已读状态
       this.wsService.broadcastToConversation(
         conversationId,
         'conversation:read',
         { userId, conversationId, readAt: new Date() }
       );
-      
+
       res.json({
         success: true,
         message: 'Conversation marked as read'
       } as ApiResponse);
-      
     } catch (error) {
       logger.error('Mark as read failed', {
         error,
         userId: req.user?.id,
         conversationId: req.params.conversationId
       });
-      
+
       res.status(500).json({
         success: false,
         error: 'Failed to mark as read'
       } as ApiResponse);
     }
   };
-  
-  addReaction = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+
+  addReaction = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
     try {
       const { messageId } = req.params;
       const { emoji } = req.body;
       const userId = req.user!.id;
-      
+
       const reaction = await this.chatService.addMessageReaction({
         messageId,
         userId,
         emoji
       });
-      
+
       // 获取消息信息用于广播
       const message = await this.chatService.getMessage(messageId);
       if (message) {
@@ -828,37 +821,39 @@ export class ChatController {
           { messageId, reaction }
         );
       }
-      
+
       res.status(201).json({
         success: true,
         data: reaction
       } as ApiResponse);
-      
     } catch (error) {
       logger.error('Add reaction failed', {
         error,
         userId: req.user?.id,
         messageId: req.params.messageId
       });
-      
+
       res.status(500).json({
         success: false,
         error: 'Failed to add reaction'
       } as ApiResponse);
     }
   };
-  
-  removeReaction = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+
+  removeReaction = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
     try {
       const { messageId, emoji } = req.params;
       const userId = req.user!.id;
-      
+
       await this.chatService.removeMessageReaction({
         messageId,
         userId,
         emoji
       });
-      
+
       // 获取消息信息用于广播
       const message = await this.chatService.getMessage(messageId);
       if (message) {
@@ -868,32 +863,34 @@ export class ChatController {
           { messageId, emoji, userId }
         );
       }
-      
+
       res.json({
         success: true,
         message: 'Reaction removed successfully'
       } as ApiResponse);
-      
     } catch (error) {
       logger.error('Remove reaction failed', {
         error,
         userId: req.user?.id,
         messageId: req.params.messageId
       });
-      
+
       res.status(500).json({
         success: false,
         error: 'Failed to remove reaction'
       } as ApiResponse);
     }
   };
-  
-  searchMessages = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+
+  searchMessages = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> => {
     try {
       const { conversationId } = req.params;
       const { q: query, page = 1, limit = 20 } = req.query;
       const userId = req.user!.id;
-      
+
       if (!query || typeof query !== 'string') {
         res.status(400).json({
           success: false,
@@ -901,13 +898,13 @@ export class ChatController {
         } as ApiResponse);
         return;
       }
-      
+
       // 验证权限
       const hasPermission = await this.chatService.checkReadPermission(
         userId,
         conversationId
       );
-      
+
       if (!hasPermission) {
         res.status(403).json({
           success: false,
@@ -915,26 +912,25 @@ export class ChatController {
         } as ApiResponse);
         return;
       }
-      
+
       const results = await this.chatService.searchMessages({
         conversationId,
         query,
         page: Number(page),
         limit: Math.min(Number(limit), 50)
       });
-      
+
       res.json({
         success: true,
         data: results
       } as ApiResponse);
-      
     } catch (error) {
       logger.error('Search messages failed', {
         error,
         userId: req.user?.id,
         conversationId: req.params.conversationId
       });
-      
+
       res.status(500).json({
         success: false,
         error: 'Failed to search messages'
@@ -972,59 +968,60 @@ export class WebSocketService {
   private io: SocketIOServer;
   private chatService: ChatService;
   private redisService: RedisService;
-  
+
   private constructor(server: HTTPServer) {
     this.io = new SocketIOServer(server, {
       cors: {
-        origin: process.env.FRONTEND_URL || "http://localhost:3000",
-        methods: ["GET", "POST"]
+        origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+        methods: ['GET', 'POST']
       },
       transports: ['websocket', 'polling']
     });
-    
+
     this.chatService = new ChatService();
     this.redisService = RedisService.getInstance();
-    
+
     this.setupMiddleware();
     this.setupEventHandlers();
   }
-  
+
   static getInstance(server?: HTTPServer): WebSocketService {
     if (!WebSocketService.instance && server) {
       WebSocketService.instance = new WebSocketService(server);
     }
     return WebSocketService.instance;
   }
-  
+
   private setupMiddleware(): void {
     // 认证中间件
     this.io.use(async (socket: AuthenticatedSocket, next) => {
       try {
-        const token = socket.handshake.auth.token || 
-                     socket.handshake.headers.authorization?.replace('Bearer ', '');
-        
+        const token =
+          socket.handshake.auth.token ||
+          socket.handshake.headers.authorization?.replace('Bearer ', '');
+
         if (!token) {
           return next(new Error('Authentication token required'));
         }
-        
+
         const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
         const user = await prisma.user.findUnique({
           where: { id: decoded.userId },
           select: { id: true, email: true, username: true }
         });
-        
+
         if (!user) {
           return next(new Error('User not found'));
         }
-        
+
         socket.userId = user.id;
         socket.user = user;
-        
+
         logger.info('WebSocket user authenticated', {
           userId: user.id,
           socketId: socket.id
         });
-        
+
         next();
       } catch (error) {
         logger.error('WebSocket authentication failed', {
@@ -1035,51 +1032,51 @@ export class WebSocketService {
       }
     });
   }
-  
+
   private setupEventHandlers(): void {
     this.io.on('connection', (socket: AuthenticatedSocket) => {
       logger.info('WebSocket client connected', {
         userId: socket.userId,
         socketId: socket.id
       });
-      
+
       // 用户上线
       this.handleUserOnline(socket);
-      
+
       // 加入对话房间
       socket.on('conversation:join', (data) => {
         this.handleJoinConversation(socket, data);
       });
-      
+
       // 离开对话房间
       socket.on('conversation:leave', (data) => {
         this.handleLeaveConversation(socket, data);
       });
-      
+
       // 发送消息
       socket.on('message:send', (data) => {
         this.handleSendMessage(socket, data);
       });
-      
+
       // 输入状态
       socket.on('typing:start', (data) => {
         this.handleTypingStart(socket, data);
       });
-      
+
       socket.on('typing:stop', (data) => {
         this.handleTypingStop(socket, data);
       });
-      
+
       // 消息已读
       socket.on('message:read', (data) => {
         this.handleMessageRead(socket, data);
       });
-      
+
       // 断开连接
       socket.on('disconnect', (reason) => {
         this.handleDisconnect(socket, reason);
       });
-      
+
       // 错误处理
       socket.on('error', (error) => {
         logger.error('WebSocket error', {
@@ -1090,32 +1087,33 @@ export class WebSocketService {
       });
     });
   }
-  
+
   private async handleUserOnline(socket: AuthenticatedSocket): Promise<void> {
     if (!socket.userId) return;
-    
+
     try {
       // 更新用户在线状态
       await prisma.user.update({
         where: { id: socket.userId },
         data: { lastActiveAt: new Date() }
       });
-      
+
       // 缓存用户socket映射
       await this.redisService.setUserSocket(socket.userId, socket.id);
-      
+
       // 获取用户的对话列表并加入房间
-      const conversations = await this.chatService.getUserConversations(socket.userId);
+      const conversations = await this.chatService.getUserConversations(
+        socket.userId
+      );
       for (const conversation of conversations) {
         socket.join(`conversation:${conversation.id}`);
       }
-      
+
       // 广播用户上线状态
       socket.broadcast.emit('user:online', {
         userId: socket.userId,
         timestamp: new Date()
       });
-      
     } catch (error) {
       logger.error('Handle user online failed', {
         error,
@@ -1123,22 +1121,22 @@ export class WebSocketService {
       });
     }
   }
-  
+
   private async handleJoinConversation(
-    socket: AuthenticatedSocket, 
+    socket: AuthenticatedSocket,
     data: { conversationId: string }
   ): Promise<void> {
     if (!socket.userId) return;
-    
+
     try {
       const { conversationId } = data;
-      
+
       // 验证用户是否有权限加入对话
       const hasPermission = await this.chatService.checkReadPermission(
         socket.userId,
         conversationId
       );
-      
+
       if (!hasPermission) {
         socket.emit('error', {
           message: 'No permission to join this conversation',
@@ -1146,62 +1144,61 @@ export class WebSocketService {
         });
         return;
       }
-      
+
       // 加入房间
       socket.join(`conversation:${conversationId}`);
-      
+
       // 通知其他用户
       socket.to(`conversation:${conversationId}`).emit('user:joined', {
         userId: socket.userId,
         conversationId,
         timestamp: new Date()
       });
-      
+
       logger.info('User joined conversation', {
         userId: socket.userId,
         conversationId,
         socketId: socket.id
       });
-      
     } catch (error) {
       logger.error('Handle join conversation failed', {
         error,
         userId: socket.userId,
         data
       });
-      
+
       socket.emit('error', {
         message: 'Failed to join conversation',
         code: 'JOIN_FAILED'
       });
     }
   }
-  
+
   private handleLeaveConversation(
     socket: AuthenticatedSocket,
     data: { conversationId: string }
   ): void {
     if (!socket.userId) return;
-    
+
     const { conversationId } = data;
-    
+
     // 离开房间
     socket.leave(`conversation:${conversationId}`);
-    
+
     // 通知其他用户
     socket.to(`conversation:${conversationId}`).emit('user:left', {
       userId: socket.userId,
       conversationId,
       timestamp: new Date()
     });
-    
+
     logger.info('User left conversation', {
       userId: socket.userId,
       conversationId,
       socketId: socket.id
     });
   }
-  
+
   private async handleSendMessage(
     socket: AuthenticatedSocket,
     data: {
@@ -1212,16 +1209,16 @@ export class WebSocketService {
     }
   ): Promise<void> {
     if (!socket.userId) return;
-    
+
     try {
       const { conversationId, content, type = 'TEXT', attachments = [] } = data;
-      
+
       // 验证权限
       const hasPermission = await this.chatService.checkSendPermission(
         socket.userId,
         conversationId
       );
-      
+
       if (!hasPermission) {
         socket.emit('error', {
           message: 'No permission to send message',
@@ -1229,7 +1226,7 @@ export class WebSocketService {
         });
         return;
       }
-      
+
       // 创建消息
       const message = await this.chatService.createMessage({
         conversationId,
@@ -1238,40 +1235,39 @@ export class WebSocketService {
         type,
         attachments
       });
-      
+
       // 广播消息到对话房间
       this.io.to(`conversation:${conversationId}`).emit('message:received', {
         message,
         conversationId
       });
-      
+
       // 如果是用户消息，触发AI回复
       if (message.role === 'USER') {
         this.generateAIResponse(conversationId, message.id);
       }
-      
     } catch (error) {
       logger.error('Handle send message failed', {
         error,
         userId: socket.userId,
         data
       });
-      
+
       socket.emit('error', {
         message: 'Failed to send message',
         code: 'SEND_FAILED'
       });
     }
   }
-  
+
   private handleTypingStart(
     socket: AuthenticatedSocket,
     data: { conversationId: string }
   ): void {
     if (!socket.userId) return;
-    
+
     const { conversationId } = data;
-    
+
     // 广播输入状态到对话房间（除了发送者）
     socket.to(`conversation:${conversationId}`).emit('typing:start', {
       userId: socket.userId,
@@ -1279,15 +1275,15 @@ export class WebSocketService {
       timestamp: new Date()
     });
   }
-  
+
   private handleTypingStop(
     socket: AuthenticatedSocket,
     data: { conversationId: string }
   ): void {
     if (!socket.userId) return;
-    
+
     const { conversationId } = data;
-    
+
     // 广播停止输入状态
     socket.to(`conversation:${conversationId}`).emit('typing:stop', {
       userId: socket.userId,
@@ -1295,24 +1291,27 @@ export class WebSocketService {
       timestamp: new Date()
     });
   }
-  
+
   private async handleMessageRead(
     socket: AuthenticatedSocket,
     data: { conversationId: string; messageId?: string }
   ): Promise<void> {
     if (!socket.userId) return;
-    
+
     try {
       const { conversationId, messageId } = data;
-      
+
       if (messageId) {
         // 标记特定消息为已读
         await this.chatService.markMessageAsRead(socket.userId, messageId);
       } else {
         // 标记整个对话为已读
-        await this.chatService.markConversationAsRead(socket.userId, conversationId);
+        await this.chatService.markConversationAsRead(
+          socket.userId,
+          conversationId
+        );
       }
-      
+
       // 广播已读状态
       socket.to(`conversation:${conversationId}`).emit('message:read', {
         userId: socket.userId,
@@ -1320,7 +1319,6 @@ export class WebSocketService {
         messageId,
         timestamp: new Date()
       });
-      
     } catch (error) {
       logger.error('Handle message read failed', {
         error,
@@ -1329,30 +1327,29 @@ export class WebSocketService {
       });
     }
   }
-  
+
   private async handleDisconnect(
     socket: AuthenticatedSocket,
     reason: string
   ): Promise<void> {
     if (!socket.userId) return;
-    
+
     try {
       // 清除用户socket映射
       await this.redisService.removeUserSocket(socket.userId);
-      
+
       // 广播用户离线状态
       socket.broadcast.emit('user:offline', {
         userId: socket.userId,
         timestamp: new Date(),
         reason
       });
-      
+
       logger.info('WebSocket client disconnected', {
         userId: socket.userId,
         socketId: socket.id,
         reason
       });
-      
     } catch (error) {
       logger.error('Handle disconnect failed', {
         error,
@@ -1361,7 +1358,7 @@ export class WebSocketService {
       });
     }
   }
-  
+
   // 公共方法：广播消息到对话
   public broadcastToConversation(
     conversationId: string,
@@ -1370,7 +1367,7 @@ export class WebSocketService {
   ): void {
     this.io.to(`conversation:${conversationId}`).emit(event, data);
   }
-  
+
   // 公共方法：发送消息给特定用户
   public async sendToUser(
     userId: string,
@@ -1390,7 +1387,7 @@ export class WebSocketService {
       });
     }
   }
-  
+
   // AI回复生成（异步）
   private async generateAIResponse(
     conversationId: string,
@@ -1403,33 +1400,32 @@ export class WebSocketService {
         conversationId,
         timestamp: new Date()
       });
-      
+
       // 生成AI回复
       const aiResponse = await this.chatService.generateAIResponse(
         conversationId,
         userMessageId
       );
-      
+
       // 停止输入状态
       this.broadcastToConversation(conversationId, 'typing:stop', {
         userId: 'ai-assistant',
         conversationId,
         timestamp: new Date()
       });
-      
+
       // 广播AI回复
       this.broadcastToConversation(conversationId, 'message:received', {
         message: aiResponse,
         conversationId
       });
-      
     } catch (error) {
       logger.error('Generate AI response failed', {
         error,
         conversationId,
         userMessageId
       });
-      
+
       // 发送错误消息
       this.broadcastToConversation(conversationId, 'ai:error', {
         error: 'AI response generation failed',
@@ -1438,15 +1434,17 @@ export class WebSocketService {
       });
     }
   }
-  
+
   // 获取在线用户数
   public getOnlineUsersCount(): number {
     return this.io.sockets.sockets.size;
   }
-  
+
   // 获取对话房间用户数
   public getConversationUsersCount(conversationId: string): number {
-    const room = this.io.sockets.adapter.rooms.get(`conversation:${conversationId}`);
+    const room = this.io.sockets.adapter.rooms.get(
+      `conversation:${conversationId}`
+    );
     return room ? room.size : 0;
   }
 }

@@ -3,9 +3,11 @@
 ## 1. 页面概述
 
 ### 1.1 功能概述
+
 AI模型配置页面是AI模块的核心管理界面，为系统管理员和项目管理员提供AI模型的配置、监控和管理功能。该页面支持多种AI服务提供商的配置，包括OpenAI、Claude、本地模型等，并提供实时的使用统计、成本监控和性能分析。
 
 ### 1.2 核心价值
+
 - **统一管理**: 集中管理所有AI模型配置和API密钥
 - **成本控制**: 实时监控AI服务使用成本和配额
 - **性能优化**: 提供模型性能分析和优化建议
@@ -13,6 +15,7 @@ AI模型配置页面是AI模块的核心管理界面，为系统管理员和项�
 - **灵活配置**: 支持多种AI服务提供商和模型类型
 
 ### 1.3 目标用户
+
 - **系统管理员**: 全局AI配置管理和监控
 - **项目管理员**: 项目级别的AI配置和使用管理
 - **开发人员**: 查看AI服务状态和使用情况
@@ -20,24 +23,28 @@ AI模型配置页面是AI模块的核心管理界面，为系统管理员和项�
 ## 2. 功能需求
 
 ### 2.1 AI服务提供商管理
+
 - **多提供商支持**: OpenAI、Anthropic Claude、Google PaLM、本地模型等
 - **API密钥管理**: 安全的密钥存储、轮换和验证
 - **服务状态监控**: 实时检测API服务可用性
 - **负载均衡**: 多个API密钥的智能分配和负载均衡
 
 ### 2.2 模型配置管理
+
 - **模型参数设置**: Temperature、Max Tokens、Top-p等参数配置
 - **模型选择**: 支持不同场景下的模型选择策略
 - **预设模板**: 常用配置的快速模板
 - **A/B测试**: 不同配置的效果对比测试
 
 ### 2.3 使用统计与监控
+
 - **实时统计**: API调用次数、成功率、响应时间
 - **成本分析**: 按时间、项目、用户维度的成本统计
 - **配额管理**: API使用配额的设置和监控
 - **告警通知**: 异常使用和成本超标的告警
 
 ### 2.4 性能优化
+
 - **缓存策略**: 智能缓存配置和管理
 - **请求优化**: 批量请求和并发控制
 - **模型推荐**: 基于使用场景的模型推荐
@@ -45,11 +52,11 @@ AI模型配置页面是AI模块的核心管理界面，为系统管理员和项�
 
 ### 2.5 用户角色权限
 
-| 角色 | 权限范围 | 核心功能 |
-|------|----------|----------|
+| 角色       | 权限范围     | 核心功能                           |
+| ---------- | ------------ | ---------------------------------- |
 | 系统管理员 | 全局配置管理 | 所有AI服务配置、全局监控、成本管理 |
-| 项目管理员 | 项目级配置 | 项目AI配置、项目使用统计、成本控制 |
-| 开发人员 | 只读查看 | 查看配置状态、使用统计、性能数据 |
+| 项目管理员 | 项目级配置   | 项目AI配置、项目使用统计、成本控制 |
+| 开发人员   | 只读查看     | 查看配置状态、使用统计、性能数据   |
 
 ## 3. 前端设计
 
@@ -107,7 +114,7 @@ export function AIConfigLayout({ children, activeTab, onTabChange }: AIConfigLay
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">成功率</CardTitle>
@@ -120,7 +127,7 @@ export function AIConfigLayout({ children, activeTab, onTabChange }: AIConfigLay
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">今日成本</CardTitle>
@@ -133,7 +140,7 @@ export function AIConfigLayout({ children, activeTab, onTabChange }: AIConfigLay
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">平均延迟</CardTitle>
@@ -157,7 +164,7 @@ export function AIConfigLayout({ children, activeTab, onTabChange }: AIConfigLay
           <TabsTrigger value="optimization">性能优化</TabsTrigger>
           <TabsTrigger value="security">安全设置</TabsTrigger>
         </TabsList>
-        
+
         {children}
       </Tabs>
     </div>
@@ -207,7 +214,7 @@ export function ProvidersConfig() {
       const response = await fetch(`/api/ai-config/test-provider/${providerId}`, {
         method: 'POST'
       });
-      
+
       if (response.ok) {
         toast({
           title: "连接测试成功",
@@ -234,7 +241,7 @@ export function ProvidersConfig() {
         },
         body: JSON.stringify(provider)
       });
-      
+
       if (response.ok) {
         toast({
           title: "保存成功",
@@ -271,24 +278,24 @@ export function ProvidersConfig() {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center space-x-2">
                   <span>{provider.name}</span>
-                  <Badge 
-                    variant={provider.status === 'active' ? 'default' : 
+                  <Badge
+                    variant={provider.status === 'active' ? 'default' :
                             provider.status === 'error' ? 'destructive' : 'secondary'}
                   >
-                    {provider.status === 'active' ? '正常' : 
+                    {provider.status === 'active' ? '正常' :
                      provider.status === 'error' ? '错误' : '未激活'}
                   </Badge>
                 </CardTitle>
                 <div className="flex space-x-1">
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="sm"
                     onClick={() => setEditingProvider(provider.id)}
                   >
                     <Edit className="w-4 h-4" />
                   </Button>
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="sm"
                     onClick={() => handleTestConnection(provider.id)}
                   >
@@ -300,28 +307,28 @@ export function ProvidersConfig() {
                 类型: {provider.type.toUpperCase()} | 模型: {provider.models.length}个
               </CardDescription>
             </CardHeader>
-            
+
             <CardContent className="space-y-4">
               {/* API密钥显示 */}
               <div className="space-y-2">
                 <Label>API密钥</Label>
                 <div className="flex items-center space-x-2">
-                  <Input 
+                  <Input
                     type={showApiKey[provider.id] ? 'text' : 'password'}
                     value={provider.apiKey}
                     readOnly
                     className="font-mono text-sm"
                   />
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="sm"
                     onClick={() => setShowApiKey(prev => ({
                       ...prev,
                       [provider.id]: !prev[provider.id]
                     }))}
                   >
-                    {showApiKey[provider.id] ? 
-                      <EyeOff className="w-4 h-4" /> : 
+                    {showApiKey[provider.id] ?
+                      <EyeOff className="w-4 h-4" /> :
                       <Eye className="w-4 h-4" />
                     }
                   </Button>
@@ -351,7 +358,7 @@ export function ProvidersConfig() {
 
       {/* 添加/编辑提供商对话框 */}
       {editingProvider && (
-        <ProviderEditDialog 
+        <ProviderEditDialog
           providerId={editingProvider}
           onSave={handleSaveProvider}
           onCancel={() => setEditingProvider(null)}
@@ -362,10 +369,10 @@ export function ProvidersConfig() {
 }
 
 // 提供商编辑对话框组件
-function ProviderEditDialog({ 
-  providerId, 
-  onSave, 
-  onCancel 
+function ProviderEditDialog({
+  providerId,
+  onSave,
+  onCancel
 }: {
   providerId: string;
   onSave: (provider: Partial<Provider>) => void;
@@ -387,21 +394,21 @@ function ProviderEditDialog({
             {providerId === 'new' ? '添加' : '编辑'}AI服务提供商
           </CardTitle>
         </CardHeader>
-        
+
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">提供商名称</Label>
-            <Input 
+            <Input
               id="name"
               value={formData.name}
               onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
               placeholder="例如: OpenAI GPT-4"
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="type">服务类型</Label>
-            <select 
+            <select
               id="type"
               value={formData.type}
               onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as any }))}
@@ -413,10 +420,10 @@ function ProviderEditDialog({
               <option value="local">本地模型</option>
             </select>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="apiKey">API密钥</Label>
-            <Input 
+            <Input
               id="apiKey"
               type="password"
               value={formData.apiKey}
@@ -424,11 +431,11 @@ function ProviderEditDialog({
               placeholder="输入API密钥"
             />
           </div>
-          
+
           {formData.type === 'local' && (
             <div className="space-y-2">
               <Label htmlFor="endpoint">API端点</Label>
-              <Input 
+              <Input
                 id="endpoint"
                 value={formData.endpoint}
                 onChange={(e) => setFormData(prev => ({ ...prev, endpoint: e.target.value }))}
@@ -436,7 +443,7 @@ function ProviderEditDialog({
               />
             </div>
           )}
-          
+
           <div className="flex justify-end space-x-2">
             <Button variant="outline" onClick={onCancel}>
               取消
@@ -494,14 +501,14 @@ export function ModelsConfig() {
   const [testResult, setTestResult] = useState('');
 
   const handleParameterChange = (configId: string, parameter: string, value: number) => {
-    setConfigs(prev => prev.map(config => 
-      config.id === configId 
-        ? { 
-            ...config, 
-            parameters: { 
-              ...config.parameters, 
-              [parameter]: value 
-            } 
+    setConfigs(prev => prev.map(config =>
+      config.id === configId
+        ? {
+            ...config,
+            parameters: {
+              ...config.parameters,
+              [parameter]: value
+            }
           }
         : config
     ));
@@ -509,7 +516,7 @@ export function ModelsConfig() {
 
   const handleTestModel = async (configId: string) => {
     if (!testPrompt.trim()) return;
-    
+
     try {
       const response = await fetch('/api/ai-config/test-model', {
         method: 'POST',
@@ -521,7 +528,7 @@ export function ModelsConfig() {
           prompt: testPrompt
         })
       });
-      
+
       const result = await response.json();
       setTestResult(result.response);
     } catch (error) {
@@ -532,7 +539,7 @@ export function ModelsConfig() {
   const handleSaveConfig = async (configId: string) => {
     const config = configs.find(c => c.id === configId);
     if (!config) return;
-    
+
     try {
       await fetch(`/api/ai-config/models/${configId}`, {
         method: 'PUT',
@@ -541,7 +548,7 @@ export function ModelsConfig() {
         },
         body: JSON.stringify(config)
       });
-      
+
       // 显示成功提示
     } catch (error) {
       // 显示错误提示
@@ -568,11 +575,11 @@ export function ModelsConfig() {
             </CardHeader>
             <CardContent className="space-y-2">
               {configs.map((config) => (
-                <div 
+                <div
                   key={config.id}
                   className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                    selectedConfig === config.id 
-                      ? 'border-primary bg-primary/5' 
+                    selectedConfig === config.id
+                      ? 'border-primary bg-primary/5'
                       : 'border-border hover:bg-muted/50'
                   }`}
                   onClick={() => setSelectedConfig(config.id)}
@@ -585,15 +592,15 @@ export function ModelsConfig() {
                       </p>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Switch 
+                      <Switch
                         checked={config.enabled}
                         onCheckedChange={(checked) => {
-                          setConfigs(prev => prev.map(c => 
+                          setConfigs(prev => prev.map(c =>
                             c.id === config.id ? { ...c, enabled: checked } : c
                           ));
                         }}
                       />
-                      <Badge 
+                      <Badge
                         variant={config.enabled ? 'default' : 'secondary'}
                         className="text-xs"
                       >
@@ -601,7 +608,7 @@ export function ModelsConfig() {
                       </Badge>
                     </div>
                   </div>
-                  
+
                   {/* 使用统计 */}
                   <div className="mt-2 grid grid-cols-3 gap-2 text-xs text-muted-foreground">
                     <div>
@@ -626,7 +633,7 @@ export function ModelsConfig() {
         {/* 右侧: 配置详情 */}
         <div className="lg:col-span-2">
           {selectedConfig ? (
-            <ModelConfigDetail 
+            <ModelConfigDetail
               config={configs.find(c => c.id === selectedConfig)!}
               onParameterChange={handleParameterChange}
               onSave={handleSaveConfig}
@@ -688,7 +695,7 @@ function ModelConfigDetail({
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent>
         <Tabs defaultValue="parameters" className="space-y-4">
           <TabsList>
@@ -696,7 +703,7 @@ function ModelConfigDetail({
             <TabsTrigger value="test">模型测试</TabsTrigger>
             <TabsTrigger value="advanced">高级设置</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="parameters" className="space-y-6">
             {/* Temperature */}
             <div className="space-y-2">
@@ -718,7 +725,7 @@ function ModelConfigDetail({
                 较低值使输出更确定，较高值使输出更随机
               </p>
             </div>
-            
+
             {/* Max Tokens */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -739,7 +746,7 @@ function ModelConfigDetail({
                 生成响应的最大长度
               </p>
             </div>
-            
+
             {/* Top P */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -760,7 +767,7 @@ function ModelConfigDetail({
                 控制输出的多样性，建议与temperature二选一调整
               </p>
             </div>
-            
+
             {/* Frequency Penalty */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -781,7 +788,7 @@ function ModelConfigDetail({
                 减少重复内容的出现
               </p>
             </div>
-            
+
             {/* Presence Penalty */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -803,7 +810,7 @@ function ModelConfigDetail({
               </p>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="test" className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="test-prompt">测试提示词</Label>
@@ -815,8 +822,8 @@ function ModelConfigDetail({
                 className="w-full h-32 p-3 border rounded-md resize-none"
               />
             </div>
-            
-            <Button 
+
+            <Button
               onClick={() => onTest(config.id)}
               disabled={!testPrompt.trim()}
               className="w-full"
@@ -824,7 +831,7 @@ function ModelConfigDetail({
               <Play className="w-4 h-4 mr-2" />
               运行测试
             </Button>
-            
+
             {testResult && (
               <div className="space-y-2">
                 <Label>测试结果</Label>
@@ -834,7 +841,7 @@ function ModelConfigDetail({
               </div>
             )}
           </TabsContent>
-          
+
           <TabsContent value="advanced" className="space-y-4">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -846,7 +853,7 @@ function ModelConfigDetail({
                 </div>
                 <Switch defaultChecked />
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div>
                   <Label>启用流式输出</Label>
@@ -856,12 +863,12 @@ function ModelConfigDetail({
                 </div>
                 <Switch defaultChecked />
               </div>
-              
+
               <div className="space-y-2">
                 <Label>请求超时 (秒)</Label>
                 <Input type="number" defaultValue="30" min="5" max="300" />
               </div>
-              
+
               <div className="space-y-2">
                 <Label>并发限制</Label>
                 <Input type="number" defaultValue="10" min="1" max="100" />
@@ -886,122 +893,132 @@ interface AIConfigState {
   // 服务提供商状态
   providers: Provider[];
   selectedProvider: string | null;
-  
+
   // 模型配置状态
   modelConfigs: ModelConfig[];
   selectedModelConfig: string | null;
-  
+
   // 监控数据状态
   usageStats: {
     daily: UsageData[];
     realtime: RealtimeStats;
   };
-  
+
   // 告警状态
   alerts: Alert[];
   unreadAlerts: number;
-  
+
   // 加载状态
   loading: {
     providers: boolean;
     models: boolean;
     stats: boolean;
   };
-  
+
   // Actions
   setProviders: (providers: Provider[]) => void;
   addProvider: (provider: Provider) => void;
   updateProvider: (id: string, updates: Partial<Provider>) => void;
   deleteProvider: (id: string) => void;
-  
+
   setModelConfigs: (configs: ModelConfig[]) => void;
   updateModelConfig: (id: string, updates: Partial<ModelConfig>) => void;
-  
+
   setUsageStats: (stats: any) => void;
   updateRealtimeStats: (stats: RealtimeStats) => void;
-  
+
   addAlert: (alert: Alert) => void;
   markAlertAsRead: (id: string) => void;
-  
+
   setLoading: (key: keyof AIConfigState['loading'], value: boolean) => void;
 }
 
-export const useAIConfigStore = create<AIConfigState>()(devtools((set, get) => ({
-  // 初始状态
-  providers: [],
-  selectedProvider: null,
-  modelConfigs: [],
-  selectedModelConfig: null,
-  usageStats: {
-    daily: [],
-    realtime: {
-      activeRequests: 0,
-      requestsPerMinute: 0,
-      averageLatency: 0,
-      errorRate: 0
-    }
-  },
-  alerts: [],
-  unreadAlerts: 0,
-  loading: {
-    providers: false,
-    models: false,
-    stats: false
-  },
-  
-  // Actions
-  setProviders: (providers) => set({ providers }),
-  
-  addProvider: (provider) => set((state) => ({
-    providers: [...state.providers, provider]
-  })),
-  
-  updateProvider: (id, updates) => set((state) => ({
-    providers: state.providers.map(p => 
-      p.id === id ? { ...p, ...updates } : p
-    )
-  })),
-  
-  deleteProvider: (id) => set((state) => ({
-    providers: state.providers.filter(p => p.id !== id)
-  })),
-  
-  setModelConfigs: (configs) => set({ modelConfigs: configs }),
-  
-  updateModelConfig: (id, updates) => set((state) => ({
-    modelConfigs: state.modelConfigs.map(c => 
-      c.id === id ? { ...c, ...updates } : c
-    )
-  })),
-  
-  setUsageStats: (stats) => set({ usageStats: stats }),
-  
-  updateRealtimeStats: (stats) => set((state) => ({
+export const useAIConfigStore = create<AIConfigState>()(
+  devtools((set, get) => ({
+    // 初始状态
+    providers: [],
+    selectedProvider: null,
+    modelConfigs: [],
+    selectedModelConfig: null,
     usageStats: {
-      ...state.usageStats,
-      realtime: stats
-    }
-  })),
-  
-  addAlert: (alert) => set((state) => ({
-    alerts: [alert, ...state.alerts],
-    unreadAlerts: state.unreadAlerts + 1
-  })),
-  
-  markAlertAsRead: (id) => set((state) => ({
-    alerts: state.alerts.map(a => 
-      a.id === id ? { ...a, read: true } : a
-    ),
-    unreadAlerts: Math.max(0, state.unreadAlerts - 1)
-  })),
-  
-  setLoading: (key, value) => set((state) => ({
+      daily: [],
+      realtime: {
+        activeRequests: 0,
+        requestsPerMinute: 0,
+        averageLatency: 0,
+        errorRate: 0
+      }
+    },
+    alerts: [],
+    unreadAlerts: 0,
     loading: {
-      ...state.loading,
-      [key]: value
-    }
+      providers: false,
+      models: false,
+      stats: false
+    },
+
+    // Actions
+    setProviders: (providers) => set({ providers }),
+
+    addProvider: (provider) =>
+      set((state) => ({
+        providers: [...state.providers, provider]
+      })),
+
+    updateProvider: (id, updates) =>
+      set((state) => ({
+        providers: state.providers.map((p) =>
+          p.id === id ? { ...p, ...updates } : p
+        )
+      })),
+
+    deleteProvider: (id) =>
+      set((state) => ({
+        providers: state.providers.filter((p) => p.id !== id)
+      })),
+
+    setModelConfigs: (configs) => set({ modelConfigs: configs }),
+
+    updateModelConfig: (id, updates) =>
+      set((state) => ({
+        modelConfigs: state.modelConfigs.map((c) =>
+          c.id === id ? { ...c, ...updates } : c
+        )
+      })),
+
+    setUsageStats: (stats) => set({ usageStats: stats }),
+
+    updateRealtimeStats: (stats) =>
+      set((state) => ({
+        usageStats: {
+          ...state.usageStats,
+          realtime: stats
+        }
+      })),
+
+    addAlert: (alert) =>
+      set((state) => ({
+        alerts: [alert, ...state.alerts],
+        unreadAlerts: state.unreadAlerts + 1
+      })),
+
+    markAlertAsRead: (id) =>
+      set((state) => ({
+        alerts: state.alerts.map((a) =>
+          a.id === id ? { ...a, read: true } : a
+        ),
+        unreadAlerts: Math.max(0, state.unreadAlerts - 1)
+      })),
+
+    setLoading: (key, value) =>
+      set((state) => ({
+        loading: {
+          ...state.loading,
+          [key]: value
+        }
+      }))
   }))
-})));
+);
 
 // 类型定义
 interface Provider {
@@ -1106,7 +1123,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 解密API密钥（仅显示部分）
-    const providersWithMaskedKeys = providers.map(provider => ({
+    const providersWithMaskedKeys = providers.map((provider) => ({
       ...provider,
       apiKey: maskApiKey(decrypt(provider.encryptedApiKey)),
       encryptedApiKey: undefined // 不返回加密的密钥
@@ -1115,10 +1132,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(providersWithMaskedKeys);
   } catch (error) {
     console.error('获取AI提供商失败:', error);
-    return NextResponse.json(
-      { error: '获取AI提供商失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '获取AI提供商失败' }, { status: 500 });
   }
 }
 
@@ -1135,19 +1149,13 @@ export async function POST(request: NextRequest) {
 
     // 验证必填字段
     if (!name || !type || !apiKey) {
-      return NextResponse.json(
-        { error: '缺少必填字段' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: '缺少必填字段' }, { status: 400 });
     }
 
     // 测试API连接
     const isValid = await testProviderConnection(type, apiKey, endpoint);
     if (!isValid) {
-      return NextResponse.json(
-        { error: 'API连接测试失败' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'API连接测试失败' }, { status: 400 });
     }
 
     // 加密API密钥
@@ -1183,10 +1191,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('创建AI提供商失败:', error);
-    return NextResponse.json(
-      { error: '创建AI提供商失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '创建AI提供商失败' }, { status: 500 });
   }
 }
 
@@ -1213,10 +1218,7 @@ export async function PUT(request: NextRequest) {
     if (apiKey && !apiKey.includes('***')) {
       const isValid = await testProviderConnection(body.type, apiKey, endpoint);
       if (!isValid) {
-        return NextResponse.json(
-          { error: 'API连接测试失败' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'API连接测试失败' }, { status: 400 });
       }
       updateData.encryptedApiKey = encrypt(apiKey);
     }
@@ -1244,10 +1246,7 @@ export async function PUT(request: NextRequest) {
     });
   } catch (error) {
     console.error('更新AI提供商失败:', error);
-    return NextResponse.json(
-      { error: '更新AI提供商失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '更新AI提供商失败' }, { status: 500 });
   }
 }
 
@@ -1282,7 +1281,7 @@ async function testProviderConnection(
 async function testOpenAIConnection(apiKey: string): Promise<boolean> {
   const response = await fetch('https://api.openai.com/v1/models', {
     headers: {
-      'Authorization': `Bearer ${apiKey}`
+      Authorization: `Bearer ${apiKey}`
     }
   });
   return response.ok;
@@ -1292,7 +1291,7 @@ async function testAnthropicConnection(apiKey: string): Promise<boolean> {
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${apiKey}`,
+      Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
       'anthropic-version': '2023-06-01'
     },
@@ -1305,10 +1304,13 @@ async function testAnthropicConnection(apiKey: string): Promise<boolean> {
   return response.status !== 401; // 401表示认证失败
 }
 
-async function testLocalConnection(endpoint: string, apiKey: string): Promise<boolean> {
+async function testLocalConnection(
+  endpoint: string,
+  apiKey: string
+): Promise<boolean> {
   const response = await fetch(`${endpoint}/models`, {
     headers: {
-      'Authorization': `Bearer ${apiKey}`
+      Authorization: `Bearer ${apiKey}`
     }
   });
   return response.ok;
@@ -1356,10 +1358,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(modelConfigs);
   } catch (error) {
     console.error('获取模型配置失败:', error);
-    return NextResponse.json(
-      { error: '获取模型配置失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '获取模型配置失败' }, { status: 500 });
   }
 }
 
@@ -1372,29 +1371,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const {
-      name,
-      providerId,
-      model,
-      parameters,
-      enabled = true
-    } = body;
+    const { name, providerId, model, parameters, enabled = true } = body;
 
     // 验证必填字段
     if (!name || !providerId || !model || !parameters) {
-      return NextResponse.json(
-        { error: '缺少必填字段' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: '缺少必填字段' }, { status: 400 });
     }
 
     // 验证参数范围
     const validationError = validateModelParameters(parameters);
     if (validationError) {
-      return NextResponse.json(
-        { error: validationError },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: validationError }, { status: 400 });
     }
 
     const modelConfig = await prisma.aiModelConfig.create({
@@ -1425,22 +1412,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(modelConfig);
   } catch (error) {
     console.error('创建模型配置失败:', error);
-    return NextResponse.json(
-      { error: '创建模型配置失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '创建模型配置失败' }, { status: 500 });
   }
 }
 
 // 验证模型参数
 function validateModelParameters(parameters: any): string | null {
-  const {
-    temperature,
-    maxTokens,
-    topP,
-    frequencyPenalty,
-    presencePenalty
-  } = parameters;
+  const { temperature, maxTokens, topP, frequencyPenalty, presencePenalty } =
+    parameters;
 
   if (temperature < 0 || temperature > 2) {
     return 'Temperature必须在0-2之间';
@@ -1490,7 +1469,7 @@ export async function GET(request: NextRequest) {
     // 计算时间范围
     const endDate = new Date();
     const startDate = new Date();
-    
+
     switch (timeRange) {
       case '1d':
         startDate.setDate(endDate.getDate() - 1);
@@ -1548,7 +1527,12 @@ export async function GET(request: NextRequest) {
     const realtimeStats = await getRealtimeStats(providerId, projectId);
 
     // 获取成本分析
-    const costAnalysis = await getCostAnalysis(startDate, endDate, providerId, projectId);
+    const costAnalysis = await getCostAnalysis(
+      startDate,
+      endDate,
+      providerId,
+      projectId
+    );
 
     return NextResponse.json({
       timeRange,
@@ -1558,10 +1542,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('获取使用统计失败:', error);
-    return NextResponse.json(
-      { error: '获取使用统计失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '获取使用统计失败' }, { status: 500 });
   }
 }
 
@@ -1580,37 +1561,38 @@ async function getRealtimeStats(providerId?: string, projectId?: string) {
   if (providerId) where.providerId = providerId;
   if (projectId) where.projectId = projectId;
 
-  const [activeRequests, recentRequests, avgLatency, errorCount] = await Promise.all([
-    // 当前活跃请求数
-    prisma.aiRequest.count({
-      where: {
-        ...where,
-        status: 'processing'
-      }
-    }),
-    
-    // 最近一分钟请求数
-    prisma.aiRequest.count({ where }),
-    
-    // 平均延迟
-    prisma.aiRequest.aggregate({
-      where: {
-        ...where,
-        status: 'completed'
-      },
-      _avg: {
-        latency: true
-      }
-    }),
-    
-    // 错误数
-    prisma.aiRequest.count({
-      where: {
-        ...where,
-        status: 'error'
-      }
-    })
-  ]);
+  const [activeRequests, recentRequests, avgLatency, errorCount] =
+    await Promise.all([
+      // 当前活跃请求数
+      prisma.aiRequest.count({
+        where: {
+          ...where,
+          status: 'processing'
+        }
+      }),
+
+      // 最近一分钟请求数
+      prisma.aiRequest.count({ where }),
+
+      // 平均延迟
+      prisma.aiRequest.aggregate({
+        where: {
+          ...where,
+          status: 'completed'
+        },
+        _avg: {
+          latency: true
+        }
+      }),
+
+      // 错误数
+      prisma.aiRequest.count({
+        where: {
+          ...where,
+          status: 'error'
+        }
+      })
+    ]);
 
   return {
     activeRequests,
@@ -1637,47 +1619,48 @@ async function getCostAnalysis(
   if (providerId) where.providerId = providerId;
   if (projectId) where.projectId = projectId;
 
-  const [totalCost, costByProvider, costByProject, costTrend] = await Promise.all([
-    // 总成本
-    prisma.aiUsage.aggregate({
-      where,
-      _sum: {
-        cost: true
-      }
-    }),
-    
-    // 按提供商分组的成本
-    prisma.aiUsage.groupBy({
-      by: ['providerId'],
-      where,
-      _sum: {
-        cost: true,
-        requests: true
-      }
-    }),
-    
-    // 按项目分组的成本
-    prisma.aiUsage.groupBy({
-      by: ['projectId'],
-      where,
-      _sum: {
-        cost: true,
-        requests: true
-      }
-    }),
-    
-    // 成本趋势
-    prisma.aiUsage.groupBy({
-      by: ['date'],
-      where,
-      _sum: {
-        cost: true
-      },
-      orderBy: {
-        date: 'asc'
-      }
-    })
-  ]);
+  const [totalCost, costByProvider, costByProject, costTrend] =
+    await Promise.all([
+      // 总成本
+      prisma.aiUsage.aggregate({
+        where,
+        _sum: {
+          cost: true
+        }
+      }),
+
+      // 按提供商分组的成本
+      prisma.aiUsage.groupBy({
+        by: ['providerId'],
+        where,
+        _sum: {
+          cost: true,
+          requests: true
+        }
+      }),
+
+      // 按项目分组的成本
+      prisma.aiUsage.groupBy({
+        by: ['projectId'],
+        where,
+        _sum: {
+          cost: true,
+          requests: true
+        }
+      }),
+
+      // 成本趋势
+      prisma.aiUsage.groupBy({
+        by: ['date'],
+        where,
+        _sum: {
+          cost: true
+        },
+        orderBy: {
+          date: 'asc'
+        }
+      })
+    ]);
 
   return {
     totalCost: totalCost._sum.cost || 0,
@@ -1707,10 +1690,7 @@ export async function POST(request: NextRequest) {
     const { configId, prompt } = await request.json();
 
     if (!configId || !prompt) {
-      return NextResponse.json(
-        { error: '缺少必填参数' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: '缺少必填参数' }, { status: 400 });
     }
 
     // 获取模型配置
@@ -1720,22 +1700,19 @@ export async function POST(request: NextRequest) {
     });
 
     if (!config) {
-      return NextResponse.json(
-        { error: '模型配置不存在' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: '模型配置不存在' }, { status: 404 });
     }
 
     // 创建AI模型服务实例
     const modelService = new AIModelService(config);
-    
+
     const startTime = Date.now();
-    
+
     try {
       // 执行测试
       const response = await modelService.generateResponse(prompt);
       const latency = Date.now() - startTime;
-      
+
       // 记录测试结果
       await prisma.aiTestResult.create({
         data: {
@@ -1747,7 +1724,7 @@ export async function POST(request: NextRequest) {
           userId: user.id
         }
       });
-      
+
       return NextResponse.json({
         response,
         latency,
@@ -1755,7 +1732,7 @@ export async function POST(request: NextRequest) {
       });
     } catch (error) {
       const latency = Date.now() - startTime;
-      
+
       // 记录失败结果
       await prisma.aiTestResult.create({
         data: {
@@ -1768,7 +1745,7 @@ export async function POST(request: NextRequest) {
           userId: user.id
         }
       });
-      
+
       return NextResponse.json({
         error: error.message,
         latency,
@@ -1777,10 +1754,7 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error('模型测试失败:', error);
-    return NextResponse.json(
-      { error: '模型测试失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '模型测试失败' }, { status: 500 });
   }
 }
 ```
@@ -1821,7 +1795,7 @@ export class AIModelService {
           frequencyPenalty: parameters.frequencyPenalty,
           presencePenalty: parameters.presencePenalty
         });
-        
+
       case 'anthropic':
         return new ChatAnthropic({
           anthropicApiKey: apiKey,
@@ -1830,7 +1804,7 @@ export class AIModelService {
           maxTokens: parameters.maxTokens,
           topP: parameters.topP
         });
-        
+
       case 'local':
         return new OpenAI({
           openAIApiKey: apiKey,
@@ -1839,7 +1813,7 @@ export class AIModelService {
           temperature: parameters.temperature,
           maxTokens: parameters.maxTokens
         });
-        
+
       default:
         throw new Error(`不支持的提供商类型: ${provider.type}`);
     }
@@ -1861,15 +1835,15 @@ export class AIModelService {
   ): Promise<string> {
     try {
       let fullResponse = '';
-      
+
       const stream = await this.model.stream(prompt);
-      
+
       for await (const chunk of stream) {
         const token = chunk.content || chunk;
         fullResponse += token;
         onToken(token);
       }
-      
+
       return fullResponse;
     } catch (error) {
       console.error('AI模型流式调用失败:', error);
@@ -1927,10 +1901,10 @@ export class AIModelManager {
 
     // 创建模型服务
     const modelService = new AIModelService(config);
-    
+
     // 缓存模型服务
     this.modelCache.set(configId, modelService);
-    
+
     return modelService;
   }
 
@@ -1968,13 +1942,13 @@ export class AIModelManager {
 
     // 根据要求筛选和排序
     let filteredConfigs = configs;
-    
+
     if (requirements) {
-      filteredConfigs = configs.filter(config => {
+      filteredConfigs = configs.filter((config) => {
         const avgLatency = this.calculateAverageLatency(config.usage);
         const avgCost = this.calculateAverageCost(config.usage);
         const quality = config.qualityScore || 0;
-        
+
         return (
           (!requirements.maxLatency || avgLatency <= requirements.maxLatency) &&
           (!requirements.maxCost || avgCost <= requirements.maxCost) &&
@@ -1989,7 +1963,7 @@ export class AIModelManager {
 
     // 负载均衡选择
     const selectedConfig = this.selectWithLoadBalancing(filteredConfigs);
-    
+
     return await this.getModel(selectedConfig.id);
   }
 
@@ -2008,18 +1982,18 @@ export class AIModelManager {
 
   private selectWithLoadBalancing(configs: any[]): any {
     // 简单的轮询负载均衡
-    const configIds = configs.map(c => c.id);
-    
+    const configIds = configs.map((c) => c.id);
+
     for (const configId of configIds) {
       if (!this.loadBalancer.has(configId)) {
         this.loadBalancer.set(configId, 0);
       }
     }
-    
+
     // 找到使用次数最少的配置
     let minUsage = Infinity;
     let selectedConfig = configs[0];
-    
+
     for (const config of configs) {
       const usage = this.loadBalancer.get(config.id) || 0;
       if (usage < minUsage) {
@@ -2027,10 +2001,10 @@ export class AIModelManager {
         selectedConfig = config;
       }
     }
-    
+
     // 增加使用计数
     this.loadBalancer.set(selectedConfig.id, minUsage + 1);
-    
+
     return selectedConfig;
   }
 
@@ -2045,7 +2019,7 @@ export class AIModelManager {
     }
   ): Promise<void> {
     const today = new Date().toISOString().split('T')[0];
-    
+
     await prisma.aiUsage.upsert({
       where: {
         configId_date: {
@@ -2064,9 +2038,11 @@ export class AIModelManager {
           increment: usage.cost
         },
         avgLatency: usage.latency,
-        errors: usage.success ? undefined : {
-          increment: 1
-        }
+        errors: usage.success
+          ? undefined
+          : {
+              increment: 1
+            }
       },
       create: {
         configId,
@@ -2078,11 +2054,23 @@ export class AIModelManager {
         errors: usage.success ? 0 : 1
       }
     });
-    
+
     // 缓存到Redis用于实时统计
-    await redis.hincrby(`ai:usage:${configId}:${today}`, 'requests', usage.requests);
-    await redis.hincrby(`ai:usage:${configId}:${today}`, 'tokens', usage.tokens);
-    await redis.hincrbyfloat(`ai:usage:${configId}:${today}`, 'cost', usage.cost);
+    await redis.hincrby(
+      `ai:usage:${configId}:${today}`,
+      'requests',
+      usage.requests
+    );
+    await redis.hincrby(
+      `ai:usage:${configId}:${today}`,
+      'tokens',
+      usage.tokens
+    );
+    await redis.hincrbyfloat(
+      `ai:usage:${configId}:${today}`,
+      'cost',
+      usage.cost
+    );
   }
 
   clearCache(): void {
@@ -2236,7 +2224,7 @@ export class AIConfigDAO {
     createdBy: string;
   }) {
     const encryptedApiKey = encrypt(data.apiKey);
-    
+
     return await prisma.aiProvider.create({
       data: {
         name: data.name,
@@ -2253,12 +2241,12 @@ export class AIConfigDAO {
   // 更新AI服务提供商
   async updateProvider(id: string, data: any, userId: string) {
     const updateData: any = { ...data };
-    
+
     if (data.apiKey) {
       updateData.encryptedApiKey = encrypt(data.apiKey);
       delete updateData.apiKey;
     }
-    
+
     return await prisma.aiProvider.update({
       where: { id },
       data: updateData
@@ -2268,7 +2256,7 @@ export class AIConfigDAO {
   // 获取AI服务提供商列表
   async getProviders(enabled?: boolean) {
     const where = enabled !== undefined ? { enabled } : {};
-    
+
     const providers = await prisma.aiProvider.findMany({
       where,
       select: {
@@ -2288,7 +2276,7 @@ export class AIConfigDAO {
         createdAt: 'desc'
       }
     });
-    
+
     return providers;
   }
 
@@ -2328,7 +2316,7 @@ export class AIConfigDAO {
     const currentConfig = await prisma.aiModelConfig.findUnique({
       where: { id }
     });
-    
+
     if (currentConfig) {
       const changes = [];
       for (const [key, value] of Object.entries(data)) {
@@ -2342,14 +2330,14 @@ export class AIConfigDAO {
           });
         }
       }
-      
+
       if (changes.length > 0) {
         await prisma.aiConfigHistory.createMany({
           data: changes
         });
       }
     }
-    
+
     return await prisma.aiModelConfig.update({
       where: { id },
       data,
@@ -2366,21 +2354,21 @@ export class AIConfigDAO {
     scenarios?: string[];
   }) {
     const where: any = {};
-    
+
     if (filters?.providerId) {
       where.providerId = filters.providerId;
     }
-    
+
     if (filters?.enabled !== undefined) {
       where.enabled = filters.enabled;
     }
-    
+
     if (filters?.scenarios && filters.scenarios.length > 0) {
       where.scenarios = {
         hasSome: filters.scenarios
       };
     }
-    
+
     return await prisma.aiModelConfig.findMany({
       where,
       include: {
@@ -2424,11 +2412,11 @@ export class AIConfigDAO {
         lte: filters.endDate
       }
     };
-    
+
     if (filters.providerId) where.providerId = filters.providerId;
     if (filters.configId) where.configId = filters.configId;
     if (filters.projectId) where.projectId = filters.projectId;
-    
+
     const [totalStats, dailyStats, providerStats] = await Promise.all([
       // 总统计
       prisma.aiUsage.aggregate({
@@ -2443,7 +2431,7 @@ export class AIConfigDAO {
           avgLatency: true
         }
       }),
-      
+
       // 按日统计
       prisma.aiUsage.groupBy({
         by: ['date'],
@@ -2458,7 +2446,7 @@ export class AIConfigDAO {
           date: 'asc'
         }
       }),
-      
+
       // 按提供商统计
       prisma.aiUsage.groupBy({
         by: ['providerId'],
@@ -2474,7 +2462,7 @@ export class AIConfigDAO {
         }
       })
     ]);
-    
+
     return {
       total: totalStats,
       daily: dailyStats,
@@ -2551,7 +2539,10 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 
 export function useAIConfigOptimization() {
   // 虚拟化大列表
-  const useVirtualizedList = (parentRef: React.RefObject<HTMLElement>, items: any[]) => {
+  const useVirtualizedList = (
+    parentRef: React.RefObject<HTMLElement>,
+    items: any[]
+  ) => {
     return useVirtualizer({
       count: items.length,
       getScrollElement: () => parentRef.current,
@@ -2566,7 +2557,7 @@ export function useAIConfigOptimization() {
       const timeoutId = setTimeout(() => {
         return searchTerm;
       }, delay);
-      
+
       return () => clearTimeout(timeoutId);
     }, [searchTerm, delay]);
   };
@@ -2582,12 +2573,18 @@ export function useAIConfigOptimization() {
           errorRate: 0
         };
       }
-      
-      const totalRequests = usage.reduce((sum, u) => sum + (u.requests || 0), 0);
+
+      const totalRequests = usage.reduce(
+        (sum, u) => sum + (u.requests || 0),
+        0
+      );
       const totalCost = usage.reduce((sum, u) => sum + (u.cost || 0), 0);
-      const totalLatency = usage.reduce((sum, u) => sum + (u.avgLatency || 0), 0);
+      const totalLatency = usage.reduce(
+        (sum, u) => sum + (u.avgLatency || 0),
+        0
+      );
       const totalErrors = usage.reduce((sum, u) => sum + (u.errors || 0), 0);
-      
+
       return {
         totalRequests,
         totalCost,
@@ -2600,23 +2597,27 @@ export function useAIConfigOptimization() {
   // 批量操作优化
   const useBatchOperations = () => {
     const [pendingOperations, setPendingOperations] = useState<any[]>([]);
-    
+
     const addOperation = useCallback((operation: any) => {
-      setPendingOperations(prev => [...prev, operation]);
+      setPendingOperations((prev) => [...prev, operation]);
     }, []);
-    
+
     const executeBatch = useCallback(async () => {
       if (pendingOperations.length === 0) return;
-      
+
       try {
-        await Promise.all(pendingOperations.map(op => op()));
+        await Promise.all(pendingOperations.map((op) => op()));
         setPendingOperations([]);
       } catch (error) {
         console.error('批量操作失败:', error);
       }
     }, [pendingOperations]);
-    
-    return { addOperation, executeBatch, pendingCount: pendingOperations.length };
+
+    return {
+      addOperation,
+      executeBatch,
+      pendingCount: pendingOperations.length
+    };
   };
 
   return {
@@ -2645,16 +2646,16 @@ export class AIConfigCache {
   // 缓存模型配置
   static async getModelConfigs(filters?: any): Promise<any[]> {
     const cacheKey = `${this.CACHE_PREFIX}models:${JSON.stringify(filters || {})}`;
-    
+
     try {
       const cached = await redis.get(cacheKey);
       if (cached) {
         return JSON.parse(cached);
       }
-      
+
       const configs = await configDAO.getModelConfigs(filters);
       await redis.setex(cacheKey, this.CACHE_TTL, JSON.stringify(configs));
-      
+
       return configs;
     } catch (error) {
       console.error('缓存获取失败，直接查询数据库:', error);
@@ -2665,16 +2666,16 @@ export class AIConfigCache {
   // 缓存提供商列表
   static async getProviders(enabled?: boolean): Promise<any[]> {
     const cacheKey = `${this.CACHE_PREFIX}providers:${enabled || 'all'}`;
-    
+
     try {
       const cached = await redis.get(cacheKey);
       if (cached) {
         return JSON.parse(cached);
       }
-      
+
       const providers = await configDAO.getProviders(enabled);
       await redis.setex(cacheKey, this.CACHE_TTL, JSON.stringify(providers));
-      
+
       return providers;
     } catch (error) {
       console.error('缓存获取失败，直接查询数据库:', error);
@@ -2685,16 +2686,16 @@ export class AIConfigCache {
   // 缓存使用统计
   static async getUsageStats(filters: any): Promise<any> {
     const cacheKey = `${this.CACHE_PREFIX}stats:${JSON.stringify(filters)}`;
-    
+
     try {
       const cached = await redis.get(cacheKey);
       if (cached) {
         return JSON.parse(cached);
       }
-      
+
       const stats = await configDAO.getUsageStats(filters);
       await redis.setex(cacheKey, 60, JSON.stringify(stats)); // 1分钟缓存
-      
+
       return stats;
     } catch (error) {
       console.error('缓存获取失败，直接查询数据库:', error);
@@ -2705,10 +2706,11 @@ export class AIConfigCache {
   // 清除相关缓存
   static async invalidateCache(type: 'models' | 'providers' | 'stats' | 'all') {
     try {
-      const pattern = type === 'all' 
-        ? `${this.CACHE_PREFIX}*`
-        : `${this.CACHE_PREFIX}${type}:*`;
-      
+      const pattern =
+        type === 'all'
+          ? `${this.CACHE_PREFIX}*`
+          : `${this.CACHE_PREFIX}${type}:*`;
+
       const keys = await redis.keys(pattern);
       if (keys.length > 0) {
         await redis.del(...keys);
@@ -2771,10 +2773,10 @@ export class AIConfigErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('AI配置页面错误:', error, errorInfo);
-    
+
     // 发送错误报告
     this.reportError(error, errorInfo);
-    
+
     this.setState({
       error,
       errorInfo
@@ -2862,7 +2864,7 @@ export class APIError extends Error {
 
 export function handleAPIError(error: any) {
   console.error('API错误:', error);
-  
+
   if (error instanceof APIError) {
     return NextResponse.json(
       {
@@ -2872,7 +2874,7 @@ export function handleAPIError(error: any) {
       { status: error.statusCode }
     );
   }
-  
+
   if (error.code === 'P2002') {
     return NextResponse.json(
       {
@@ -2882,7 +2884,7 @@ export function handleAPIError(error: any) {
       { status: 409 }
     );
   }
-  
+
   if (error.code === 'P2025') {
     return NextResponse.json(
       {
@@ -2892,7 +2894,7 @@ export function handleAPIError(error: any) {
       { status: 404 }
     );
   }
-  
+
   return NextResponse.json(
     {
       error: '服务器内部错误',
@@ -2926,13 +2928,13 @@ export class AIConfigMetrics {
   // 记录页面访问
   static async recordPageView(userId?: string) {
     const today = new Date().toISOString().split('T')[0];
-    
+
     await Promise.all([
       redis.incr(`metrics:ai_config:page_views:${today}`),
       userId && redis.sadd(`metrics:ai_config:unique_users:${today}`, userId)
     ]);
   }
-  
+
   // 记录配置操作
   static async recordConfigOperation(
     operation: 'create' | 'update' | 'delete' | 'test',
@@ -2942,14 +2944,19 @@ export class AIConfigMetrics {
   ) {
     const today = new Date().toISOString().split('T')[0];
     const key = `metrics:ai_config:operations:${today}`;
-    
+
     await Promise.all([
       redis.hincrby(key, `${operation}_${type}_total`, 1),
-      redis.hincrby(key, `${operation}_${type}_${success ? 'success' : 'error'}`, 1),
-      latency && redis.lpush(`metrics:ai_config:latency:${operation}_${type}`, latency)
+      redis.hincrby(
+        key,
+        `${operation}_${type}_${success ? 'success' : 'error'}`,
+        1
+      ),
+      latency &&
+        redis.lpush(`metrics:ai_config:latency:${operation}_${type}`, latency)
     ]);
   }
-  
+
   // 记录API调用
   static async recordAPICall(
     endpoint: string,
@@ -2959,25 +2966,28 @@ export class AIConfigMetrics {
   ) {
     const today = new Date().toISOString().split('T')[0];
     const key = `metrics:ai_config:api:${today}`;
-    
+
     await Promise.all([
       redis.hincrby(key, `${method}_${endpoint}_total`, 1),
       redis.hincrby(key, `${method}_${endpoint}_${statusCode}`, 1),
-      redis.lpush(`metrics:ai_config:api_latency:${method}_${endpoint}`, latency)
+      redis.lpush(
+        `metrics:ai_config:api_latency:${method}_${endpoint}`,
+        latency
+      )
     ]);
   }
-  
+
   // 获取监控数据
   static async getMetrics(date?: string) {
     const targetDate = date || new Date().toISOString().split('T')[0];
-    
+
     const [pageViews, uniqueUsers, operations, apiMetrics] = await Promise.all([
       redis.get(`metrics:ai_config:page_views:${targetDate}`),
       redis.scard(`metrics:ai_config:unique_users:${targetDate}`),
       redis.hgetall(`metrics:ai_config:operations:${targetDate}`),
       redis.hgetall(`metrics:ai_config:api:${targetDate}`)
     ]);
-    
+
     return {
       pageViews: parseInt(pageViews || '0'),
       uniqueUsers,
@@ -3334,7 +3344,7 @@ services:
   app:
     build: .
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - DATABASE_URL=postgresql://postgres:password@db:5432/aiconfig
       - REDIS_URL=redis://redis:6379
@@ -3363,8 +3373,8 @@ services:
   nginx:
     image: nginx:alpine
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - ./ssl:/etc/nginx/ssl
@@ -3388,11 +3398,11 @@ export function withPerformanceMonitoring(handler: Function) {
     const startTime = Date.now();
     const url = request.url;
     const method = request.method;
-    
+
     try {
       const response = await handler(request, context);
       const duration = Date.now() - startTime;
-      
+
       // 记录成功请求
       await recordMetric({
         type: 'api_request',
@@ -3402,11 +3412,11 @@ export function withPerformanceMonitoring(handler: Function) {
         duration,
         success: true
       });
-      
+
       return response;
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       // 记录失败请求
       await recordMetric({
         type: 'api_request',
@@ -3417,7 +3427,7 @@ export function withPerformanceMonitoring(handler: Function) {
         success: false,
         error: error.message
       });
-      
+
       throw error;
     }
   };
@@ -3448,18 +3458,21 @@ async function recordMetric(data: any) {
 AI模型配置页面是整个AI模块的核心管理界面，具有以下特点：
 
 ### 核心功能
+
 - **统一管理**: 集中管理所有AI服务提供商和模型配置
 - **智能优化**: 基于使用情况自动选择最优模型
 - **实时监控**: 提供详细的使用统计和性能监控
 - **安全可靠**: 加密存储API密钥，完善的权限控制
 
 ### 技术特色
+
 - **LangChain集成**: 统一的AI模型调用接口
 - **性能优化**: 缓存、虚拟化、批量操作等优化策略
 - **监控完善**: 全面的错误处理和性能监控
 - **扩展性强**: 支持多种AI服务提供商，易于扩展
 
 ### 用户体验
+
 - **直观易用**: 清晰的界面布局和操作流程
 - **实时反馈**: 即时的测试结果和状态更新
 - **智能提示**: 基于使用情况的优化建议

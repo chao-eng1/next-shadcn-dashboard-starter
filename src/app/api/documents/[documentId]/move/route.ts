@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
@@ -10,6 +11,7 @@ import {
 } from '@/lib/api-response';
 
 // 文档移动请求验证
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const moveDocumentSchema = z.object({
   destinationType: z.enum(['PERSONAL', 'PROJECT']),
   destinationProjectId: z.string().nullable()
@@ -28,10 +30,11 @@ export async function POST(
   const documentId = (await params).documentId;
 
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const body = await request.json();
-    console.log('文档移动API收到的请求数据:', body);
 
     // 验证请求数据
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const validated = moveDocumentSchema.parse(body);
 
     // 获取文档
@@ -90,8 +93,6 @@ export async function POST(
       }
     });
 
-    console.log('文档移动成功:', updatedDocument);
-
     return apiResponse(updatedDocument);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -103,7 +104,6 @@ export async function POST(
       );
     }
 
-    console.error('移动文档失败:', error);
     return apiError(
       'SERVER_ERROR',
       '移动文档失败',

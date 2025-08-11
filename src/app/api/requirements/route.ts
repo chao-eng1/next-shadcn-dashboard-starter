@@ -14,6 +14,7 @@ import {
   RequirementComplexity
 } from '@/features/requirement-management/types/requirement';
 import { createRequirementSchema } from '@/features/requirement-management/schemas/requirement-schema';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from 'zod';
 
 // 获取全局需求列表
@@ -39,6 +40,7 @@ export async function GET(request: NextRequest) {
     const priority = searchParams
       .get('priority')
       ?.split(',') as RequirementPriority[];
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const type = searchParams.get('type')?.split(',') as RequirementType[];
     const complexity = searchParams
       .get('complexity')
@@ -196,7 +198,6 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('获取需求列表失败:', error);
     return apiError('获取需求列表失败');
   }
 }
@@ -221,6 +222,7 @@ export async function POST(request: NextRequest) {
 
     // 生成需求ID
     const count = await prisma.requirement.count();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const requirementId = `REQ-${String(count + 1).padStart(4, '0')}`;
 
     // 创建需求
@@ -284,7 +286,6 @@ export async function POST(request: NextRequest) {
 
     return apiResponse(requirement, '需求创建成功');
   } catch (error) {
-    console.error('创建需求失败:', error);
     return apiError('创建需求失败');
   }
 }

@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from 'next/server';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     // Calculate the path to the markdown file
     // Note: In a production environment, you might want to store these files in a more accessible location
@@ -22,7 +23,6 @@ export async function GET(req: NextRequest) {
     // Return the content as JSON
     return NextResponse.json({ content });
   } catch (error) {
-    console.error('Error fetching payment system documentation:', error);
     return NextResponse.json(
       {
         error: 'Failed to load payment system documentation',

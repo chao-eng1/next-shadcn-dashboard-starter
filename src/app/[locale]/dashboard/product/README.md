@@ -1,9 +1,11 @@
 # Product 模块
 
 ## 模块概述
+
 产品管理模块，提供产品信息管理、版本控制、发布管理、用户反馈等功能。
 
 ## 主要功能
+
 - 📦 产品信息管理
 - 🔄 版本发布控制
 - 📊 产品数据分析
@@ -16,6 +18,7 @@
 - 🚀 发布流程管理
 
 ## 技术栈
+
 - **React**: 前端框架
 - **Prisma**: 数据库 ORM
 - **shadcn/ui**: UI 组件库
@@ -24,6 +27,7 @@
 - **Chart.js**: 数据可视化
 
 ## 文件结构
+
 ```
 product/
 ├── page.tsx                 # 产品列表页面
@@ -42,33 +46,35 @@ product/
 ```
 
 ## 数据模型
+
 ```typescript
 interface Product {
-  id: string
-  name: string
-  description: string
-  version: string
-  status: 'development' | 'testing' | 'released' | 'deprecated'
-  category: string
-  tags: string[]
-  createdAt: Date
-  updatedAt: Date
-  ownerId: string
-  teamMembers: User[]
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  status: 'development' | 'testing' | 'released' | 'deprecated';
+  category: string;
+  tags: string[];
+  createdAt: Date;
+  updatedAt: Date;
+  ownerId: string;
+  teamMembers: User[];
 }
 
 interface ProductVersion {
-  id: string
-  productId: string
-  version: string
-  releaseNotes: string
-  releaseDate: Date
-  features: Feature[]
-  bugFixes: BugFix[]
+  id: string;
+  productId: string;
+  version: string;
+  releaseNotes: string;
+  releaseDate: Date;
+  features: Feature[];
+  bugFixes: BugFix[];
 }
 ```
 
 ## API 端点
+
 - `/api/products` - 产品 CRUD 操作
 - `/api/products/[id]/versions` - 版本管理
 - `/api/products/[id]/feedback` - 用户反馈

@@ -1,6 +1,8 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/get-current-user';
 import { prisma } from '@/lib/prisma';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { apiResponse, apiUnauthorized } from '@/lib/api-response';
 
 // 获取用户的总未读消息数量
@@ -63,7 +65,6 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Failed to get unread count:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

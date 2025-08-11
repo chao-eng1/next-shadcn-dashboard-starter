@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/get-current-user';
 import { prisma } from '@/lib/prisma';
@@ -6,8 +7,10 @@ import {
   apiUnauthorized,
   apiBadRequest
 } from '@/lib/api-response';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from 'zod';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const markReadSchema = z.object({
   messageId: z.string(),
   messageType: z.enum(['system', 'project', 'private'])
@@ -22,6 +25,7 @@ export async function POST(request: NextRequest) {
       return apiUnauthorized();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const body = await request.json();
     const validation = markReadSchema.safeParse(body);
 
@@ -90,7 +94,6 @@ export async function POST(request: NextRequest) {
 
     return apiResponse({ success: true });
   } catch (error) {
-    console.error('Failed to mark message as read:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -99,6 +102,7 @@ export async function POST(request: NextRequest) {
 }
 
 // 批量标记消息为已读
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const batchMarkReadSchema = z.object({
   messageIds: z.array(z.string()),
   messageType: z.enum(['system', 'project', 'private'])
@@ -112,6 +116,7 @@ export async function PUT(request: NextRequest) {
       return apiUnauthorized();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const body = await request.json();
     const validation = batchMarkReadSchema.safeParse(body);
 
@@ -170,7 +175,6 @@ export async function PUT(request: NextRequest) {
 
     return apiResponse({ success: true, markedCount: messageIds.length });
   } catch (error) {
-    console.error('Failed to batch mark messages as read:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

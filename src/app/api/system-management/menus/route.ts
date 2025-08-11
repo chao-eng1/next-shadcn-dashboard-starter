@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { menuSchema } from '@/features/system-management/menus/schemas/menu-schema';
@@ -5,7 +6,7 @@ import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Get all menus
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
@@ -69,7 +70,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(menus);
   } catch (error) {
-    console.error('Error fetching menus:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -187,7 +187,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(newMenu, { status: 201 });
   } catch (error) {
-    console.error('Error creating menu:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

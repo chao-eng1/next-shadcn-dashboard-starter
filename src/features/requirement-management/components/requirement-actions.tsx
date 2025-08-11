@@ -62,23 +62,7 @@ interface RequirementActionsProps {
   onSortChange?: (sortBy: string, sortOrder: 'asc' | 'desc') => void;
 }
 
-const sortOptions = [
-  { value: 'title', label: 'Title' },
-  { value: 'status', label: 'Status' },
-  { value: 'priority', label: 'Priority' },
-  { value: 'createdAt', label: 'Created Date' },
-  { value: 'updatedAt', label: 'Updated Date' },
-  { value: 'dueDate', label: 'Due Date' },
-  { value: 'businessValue', label: 'Business Value' },
-  { value: 'effort', label: 'Effort' }
-];
-
-const exportFormats = [
-  { value: 'csv', label: 'CSV', icon: FileText },
-  { value: 'excel', label: 'Excel', icon: FileText },
-  { value: 'pdf', label: 'PDF', icon: FileText },
-  { value: 'json', label: 'JSON', icon: FileText }
-];
+// Move these inside the component to access translations
 
 export function RequirementActions({
   selectedRequirements = [],
@@ -94,6 +78,24 @@ export function RequirementActions({
   const t = useTranslations('requirements');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+
+  const sortOptions = [
+    { value: 'title', label: t('sortOptions.title') },
+    { value: 'status', label: t('sortOptions.status') },
+    { value: 'priority', label: t('sortOptions.priority') },
+    { value: 'createdAt', label: t('sortOptions.createdAt') },
+    { value: 'updatedAt', label: t('sortOptions.updatedAt') },
+    { value: 'dueDate', label: t('sortOptions.dueDate') },
+    { value: 'businessValue', label: t('sortOptions.businessValue') },
+    { value: 'effort', label: t('sortOptions.effort') }
+  ];
+
+  const exportFormats = [
+    { value: 'csv', label: t('exportFormats.csv'), icon: FileText },
+    { value: 'excel', label: t('exportFormats.excel'), icon: FileText },
+    { value: 'pdf', label: t('exportFormats.pdf'), icon: FileText },
+    { value: 'json', label: t('exportFormats.json'), icon: FileText }
+  ];
   const [newRequirement, setNewRequirement] = useState({
     title: '',
     description: '',

@@ -14,13 +14,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Heading } from '@/components/ui/heading';
 import PageContainer from '@/components/layout/page-container';
-import { RecentTaskList } from '@/features/project-management/components/task/recent-task-list';
 import { ProjectTaskSummary } from '@/features/project-management/components/task/project-task-summary';
 import { ProjectSprintSummary } from '@/features/project-management/components/sprint/project-sprint-summary';
 import { ProjectDocumentSummary } from '@/features/project-management/components/document/project-document-summary';
-import { PermissionGate } from '@/components/permission-gate';
 import { ProjectPermissionGate } from '@/components/project-permission-gate';
 
 import { format } from 'date-fns';
@@ -194,6 +191,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   });
 
   // 获取项目的迭代列表
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const sprints = await prisma.sprint.findMany({
     where: {
       projectId
@@ -209,6 +207,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   });
 
   // 检查任务相关权限
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const canCreateTask = await hasProjectPermission(
     projectId,
     'task.create',
@@ -233,6 +232,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     'sprint.view',
     user.id
   );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const canCreateSprint = await hasProjectPermission(
     projectId,
     'sprint.create',
@@ -245,6 +245,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     'document.view',
     user.id
   );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const canCreateDocument = await hasProjectPermission(
     projectId,
     'document.create',

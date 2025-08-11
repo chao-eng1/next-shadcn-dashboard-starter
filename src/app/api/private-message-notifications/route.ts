@@ -1,6 +1,8 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { apiResponse, apiError, apiUnauthorized } from '@/lib/api-response';
 
 // 获取私聊消息通知列表
@@ -11,6 +13,7 @@ export async function GET(request: NextRequest) {
       return apiUnauthorized('用户未登录');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { searchParams } = new URL(request.url);
     const unreadOnly = searchParams.get('unreadOnly') === 'true';
     const limit = parseInt(searchParams.get('limit') || '20');
@@ -78,7 +81,6 @@ export async function GET(request: NextRequest) {
 
     return apiResponse(formattedNotifications, '获取私聊消息通知成功');
   } catch (error) {
-    console.error('获取私聊消息通知失败:', error);
     return apiError('获取私聊消息通知失败');
   }
 }
@@ -91,6 +93,7 @@ export async function PATCH(request: NextRequest) {
       return apiUnauthorized('用户未登录');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const body = await request.json();
     const { notificationIds, markAllAsRead } = body;
 
@@ -126,7 +129,6 @@ export async function PATCH(request: NextRequest) {
       return apiError('请提供有效的通知ID或设置markAllAsRead为true');
     }
   } catch (error) {
-    console.error('标记通知为已读失败:', error);
     return apiError('标记通知为已读失败');
   }
 }

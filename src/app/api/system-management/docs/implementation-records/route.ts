@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from 'next/server';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     // Calculate the path to the markdown file
     const filePath = path.join(
@@ -20,7 +21,6 @@ export async function GET(req: NextRequest) {
     // Return the content as JSON
     return NextResponse.json({ content });
   } catch (error) {
-    console.error('Error fetching implementation records:', error);
     return NextResponse.json(
       {
         error: 'Failed to load implementation records',

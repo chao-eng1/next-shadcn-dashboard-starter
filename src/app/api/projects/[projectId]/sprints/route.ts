@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
@@ -11,6 +12,7 @@ import {
 import { hasProjectPermission } from '@/lib/permissions';
 
 // 创建迭代请求验证
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createSprintSchema = z.object({
   name: z.string().min(1, '迭代名称不能为空'),
   description: z.string().optional(),
@@ -23,6 +25,7 @@ const createSprintSchema = z.object({
 });
 
 // 查询参数验证
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getSprintsQuerySchema = z.object({
   status: z.enum(['PLANNED', 'ACTIVE', 'COMPLETED', 'CANCELLED']).optional(),
   search: z.string().optional(),
@@ -130,7 +133,6 @@ export async function GET(
       );
     }
 
-    console.error('获取迭代列表失败:', error);
     return apiError(
       'SERVER_ERROR',
       '获取迭代列表失败',
@@ -222,7 +224,6 @@ export async function POST(
       );
     }
 
-    console.error('创建迭代失败:', error);
     return apiError(
       'SERVER_ERROR',
       '创建迭代失败',

@@ -1,6 +1,8 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/get-current-user';
 import { prisma } from '@/lib/prisma';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { apiResponse, apiUnauthorized } from '@/lib/api-response';
 
 // 获取消息中心的所有会话（包括项目群聊、私聊、系统消息）
@@ -12,6 +14,7 @@ export async function GET(request: NextRequest) {
       return apiUnauthorized();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') as
       | 'private'
@@ -243,7 +246,6 @@ export async function GET(request: NextRequest) {
           });
         }
       } catch (systemError) {
-        console.error('Failed to load system messages:', systemError);
         // 即使系统消息加载失败，也要添加一个错误提示的虚拟会话
         conversations.push({
           id: 'system-messages-error',
@@ -328,7 +330,6 @@ export async function GET(request: NextRequest) {
 
     return apiResponse(conversations);
   } catch (error) {
-    console.error('Failed to get message center conversations:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
@@ -12,6 +13,7 @@ import {
 import { hasProjectPermission } from '@/lib/permissions';
 
 // 更新项目成员角色请求验证
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const updateMemberSchema = z.object({
   role: z.enum(['ADMIN', 'MEMBER', 'VIEWER'])
 });
@@ -65,7 +67,6 @@ export async function GET(
 
     return apiResponse(member);
   } catch (error) {
-    console.error('获取项目成员详情失败:', error);
     return apiError(
       'SERVER_ERROR',
       '获取项目成员详情失败',
@@ -151,7 +152,6 @@ export async function PATCH(
       );
     }
 
-    console.error('更新项目成员角色失败:', error);
     return apiError(
       'SERVER_ERROR',
       '更新项目成员角色失败',
@@ -217,7 +217,6 @@ export async function DELETE(
 
     return apiResponse({ success: true, message: '项目成员已移除' });
   } catch (error) {
-    console.error('移除项目成员失败:', error);
     return apiError(
       'SERVER_ERROR',
       '移除项目成员失败',

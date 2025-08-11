@@ -5,6 +5,7 @@
 本文档详细描述AI对话功能的前端技术实现方案，包括浮动窗口设计、React组件架构、状态管理、用户交互等核心技术要点。
 
 ### 1.1 技术栈
+
 - **框架**: Next.js 14 + React 18
 - **UI库**: shadcn/ui + Tailwind CSS
 - **状态管理**: Zustand
@@ -14,6 +15,7 @@
 - **构建工具**: Turbopack
 
 ### 1.2 核心特性
+
 - 浮动全局对话窗口
 - 响应式设计（桌面端/移动端）
 - 实时消息推送
@@ -225,7 +227,7 @@ export const FloatingChatTrigger: React.FC<FloatingChatTriggerProps> = ({
 
   const getPositionStyles = () => {
     if (customPosition) return customPosition;
-    
+
     switch (position) {
       case 'bottom-right':
         return { bottom: 24, right: 24 };
@@ -251,14 +253,14 @@ export const FloatingChatTrigger: React.FC<FloatingChatTriggerProps> = ({
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.95 }}
       initial={{ scale: 0, rotate: -180 }}
-      animate={{ 
-        scale: 1, 
-        rotate: isVisible ? 180 : 0 
+      animate={{
+        scale: 1,
+        rotate: isVisible ? 180 : 0
       }}
-      transition={{ 
-        type: "spring", 
-        stiffness: 260, 
-        damping: 20 
+      transition={{
+        type: "spring",
+        stiffness: 260,
+        damping: 20
       }}
     >
       {/* 图标切换动画 */}
@@ -272,18 +274,18 @@ export const FloatingChatTrigger: React.FC<FloatingChatTriggerProps> = ({
           <MessageCircle className="w-6 h-6 text-white" />
         )}
       </motion.div>
-      
+
       {/* 在线状态指示器 */}
-      <motion.div 
+      <motion.div
         className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"
         animate={{ scale: [1, 1.2, 1] }}
-        transition={{ 
-          duration: 2, 
-          repeat: Infinity, 
-          ease: "easeInOut" 
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut"
         }}
       />
-      
+
       {/* 未读消息计数 */}
       {unreadCount > 0 && !isVisible && (
         <motion.div
@@ -323,11 +325,11 @@ import { cn } from '@/lib/utils';
 export const FloatingChatWindow: React.FC = () => {
   const { state, actions } = useAIChat();
   const { isVisible, windowPosition, windowSize } = state;
-  
+
   const [isMaximized, setIsMaximized] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  
+
   const windowRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<HTMLDivElement>(null);
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -387,7 +389,7 @@ export const FloatingChatWindow: React.FC = () => {
 
   const currentPosition = dragPosition || windowPosition;
   const currentSize = resizeSize || windowSize;
-  
+
   const maximizedStyle = {
     left: 20,
     top: 20,
@@ -409,7 +411,7 @@ export const FloatingChatWindow: React.FC = () => {
               onClick={() => setIsMaximized(false)}
             />
           )}
-          
+
           {/* 主窗口 */}
           <motion.div
             ref={windowRef}
@@ -425,28 +427,28 @@ export const FloatingChatWindow: React.FC = () => {
               width: isMaximized ? maximizedStyle.width : currentSize.width,
               height: isMaximized ? maximizedStyle.height : currentSize.height
             }}
-            initial={{ 
-              scale: 0.8, 
+            initial={{
+              scale: 0.8,
               opacity: 0,
               x: 20,
               y: 20
             }}
-            animate={{ 
-              scale: 1, 
+            animate={{
+              scale: 1,
               opacity: 1,
               x: 0,
               y: 0
             }}
-            exit={{ 
-              scale: 0.8, 
+            exit={{
+              scale: 0.8,
               opacity: 0,
               x: 20,
               y: 20
             }}
-            transition={{ 
-              type: 'spring', 
-              damping: 25, 
-              stiffness: 300 
+            transition={{
+              type: 'spring',
+              damping: 25,
+              stiffness: 300
             }}
           >
             {/* 侧边栏 */}
@@ -461,11 +463,11 @@ export const FloatingChatWindow: React.FC = () => {
                 <ChatSidebar onClose={() => setShowSidebar(false)} />
               </motion.div>
             )}
-            
+
             {/* 主要内容区域 */}
             <div className="flex-1 flex flex-col min-w-0">
               {/* 窗口标题栏 */}
-              <div 
+              <div
                 ref={dragRef}
                 className={cn(
                   "flex items-center justify-between p-3 border-b bg-gray-50",
@@ -475,17 +477,17 @@ export const FloatingChatWindow: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Bot className="w-5 h-5 text-blue-600" />
                   <h3 className="font-medium text-gray-900">AI助手</h3>
-                  <motion.div 
+                  <motion.div
                     className="w-2 h-2 bg-green-500 rounded-full"
                     animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ 
-                      duration: 2, 
-                      repeat: Infinity, 
-                      ease: "easeInOut" 
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
                     }}
                   />
                 </div>
-                
+
                 <div className="flex items-center gap-1">
                   {/* 侧边栏切换 */}
                   <Button
@@ -498,7 +500,7 @@ export const FloatingChatWindow: React.FC = () => {
                       <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
                     </svg>
                   </Button>
-                  
+
                   {/* 最大化/还原 */}
                   <Button
                     variant="ghost"
@@ -512,7 +514,7 @@ export const FloatingChatWindow: React.FC = () => {
                       <Maximize2 className="w-4 h-4" />
                     )}
                   </Button>
-                  
+
                   {/* 关闭 */}
                   <Button
                     variant="ghost"
@@ -524,16 +526,16 @@ export const FloatingChatWindow: React.FC = () => {
                   </Button>
                 </div>
               </div>
-              
+
               {/* 消息列表 */}
               <div className="flex-1 min-h-0">
                 <ChatMessageList />
               </div>
-              
+
               {/* 输入区域 */}
               <ChatInput />
             </div>
-            
+
             {/* 调整大小手柄 */}
             {!isMaximized && (
               <div className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize opacity-50 hover:opacity-100">
@@ -564,17 +566,17 @@ interface ChatState {
   isConnected: boolean;
   isLoading: boolean;
   isTyping: boolean;
-  
+
   // 对话数据
   conversations: Conversation[];
   currentConversationId: string | null;
   messages: Record<string, Message[]>;
-  
+
   // UI状态
   windowPosition: { x: number; y: number };
   windowSize: { width: number; height: number };
   unreadCount: number;
-  
+
   // 设置
   settings: {
     theme: 'light' | 'dark' | 'auto';
@@ -591,25 +593,25 @@ interface ChatActions {
   setConnected: (connected: boolean) => void;
   setLoading: (loading: boolean) => void;
   setTyping: (typing: boolean) => void;
-  
+
   // 对话操作
   addConversation: (conversation: Conversation) => void;
   selectConversation: (id: string) => void;
   deleteConversation: (id: string) => void;
   updateConversation: (id: string, updates: Partial<Conversation>) => void;
-  
+
   // 消息操作
   addMessage: (conversationId: string, message: Message) => void;
   updateMessage: (conversationId: string, messageId: string, updates: Partial<Message>) => void;
   deleteMessage: (conversationId: string, messageId: string) => void;
   clearMessages: (conversationId: string) => void;
-  
+
   // UI操作
   updateWindowPosition: (position: { x: number; y: number }) => void;
   updateWindowSize: (size: { width: number; height: number }) => void;
   incrementUnreadCount: () => void;
   resetUnreadCount: () => void;
-  
+
   // 设置操作
   updateSettings: (settings: Partial<ChatState['settings']>) => void;
 }
@@ -636,7 +638,7 @@ export const useChatStore = create<ChatState & ChatActions>()()
           notificationsEnabled: true,
           autoScroll: true
         },
-        
+
         // 基础操作
         toggleVisibility: () => set((state) => {
           state.isVisible = !state.isVisible;
@@ -644,29 +646,29 @@ export const useChatStore = create<ChatState & ChatActions>()()
             state.unreadCount = 0;
           }
         }),
-        
+
         setConnected: (connected) => set((state) => {
           state.isConnected = connected;
         }),
-        
+
         setLoading: (loading) => set((state) => {
           state.isLoading = loading;
         }),
-        
+
         setTyping: (typing) => set((state) => {
           state.isTyping = typing;
         }),
-        
+
         // 对话操作
         addConversation: (conversation) => set((state) => {
           state.conversations.push(conversation);
           state.messages[conversation.id] = [];
         }),
-        
+
         selectConversation: (id) => set((state) => {
           state.currentConversationId = id;
         }),
-        
+
         deleteConversation: (id) => set((state) => {
           state.conversations = state.conversations.filter(c => c.id !== id);
           delete state.messages[id];
@@ -674,34 +676,34 @@ export const useChatStore = create<ChatState & ChatActions>()()
             state.currentConversationId = state.conversations[0]?.id || null;
           }
         }),
-        
+
         updateConversation: (id, updates) => set((state) => {
           const conversation = state.conversations.find(c => c.id === id);
           if (conversation) {
             Object.assign(conversation, updates);
           }
         }),
-        
+
         // 消息操作
         addMessage: (conversationId, message) => set((state) => {
           if (!state.messages[conversationId]) {
             state.messages[conversationId] = [];
           }
           state.messages[conversationId].push(message);
-          
+
           // 更新对话的最后更新时间
           const conversation = state.conversations.find(c => c.id === conversationId);
           if (conversation) {
             conversation.updatedAt = new Date();
             conversation.messageCount = state.messages[conversationId].length;
           }
-          
+
           // 如果窗口不可见且是AI消息，增加未读计数
           if (!state.isVisible && message.role === 'assistant') {
             state.unreadCount += 1;
           }
         }),
-        
+
         updateMessage: (conversationId, messageId, updates) => set((state) => {
           const messages = state.messages[conversationId];
           if (messages) {
@@ -711,35 +713,35 @@ export const useChatStore = create<ChatState & ChatActions>()()
             }
           }
         }),
-        
+
         deleteMessage: (conversationId, messageId) => set((state) => {
           const messages = state.messages[conversationId];
           if (messages) {
             state.messages[conversationId] = messages.filter(m => m.id !== messageId);
           }
         }),
-        
+
         clearMessages: (conversationId) => set((state) => {
           state.messages[conversationId] = [];
         }),
-        
+
         // UI操作
         updateWindowPosition: (position) => set((state) => {
           state.windowPosition = position;
         }),
-        
+
         updateWindowSize: (size) => set((state) => {
           state.windowSize = size;
         }),
-        
+
         incrementUnreadCount: () => set((state) => {
           state.unreadCount += 1;
         }),
-        
+
         resetUnreadCount: () => set((state) => {
           state.unreadCount = 0;
         }),
-        
+
         // 设置操作
         updateSettings: (newSettings) => set((state) => {
           Object.assign(state.settings, newSettings);
@@ -786,7 +788,7 @@ export const useWebSocket = (
     reconnectAttempts = 5,
     reconnectDelay = 1000
   } = options;
-  
+
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -813,7 +815,7 @@ export const useWebSocket = (
     newSocket.on('disconnect', (reason) => {
       setIsConnected(false);
       console.log('WebSocket disconnected:', reason);
-      
+
       // 自动重连
       if (reason === 'io server disconnect') {
         // 服务器主动断开，需要手动重连
@@ -884,7 +886,10 @@ interface UseDraggableOptions {
   nodeRef: RefObject<HTMLElement>;
   handle?: RefObject<HTMLElement>;
   disabled?: boolean;
-  bounds?: 'viewport' | 'parent' | { top: number; left: number; right: number; bottom: number };
+  bounds?:
+    | 'viewport'
+    | 'parent'
+    | { top: number; left: number; right: number; bottom: number };
   onDragStart?: (position: Position) => void;
   onDrag?: (position: Position) => void;
   onDragEnd?: (position: Position) => void;
@@ -917,7 +922,7 @@ export const useDraggable = (options: UseDraggableOptions) => {
         bottom: window.innerHeight
       };
     }
-    
+
     if (bounds === 'parent' && nodeRef.current?.parentElement) {
       const parent = nodeRef.current.parentElement;
       const rect = parent.getBoundingClientRect();
@@ -928,21 +933,21 @@ export const useDraggable = (options: UseDraggableOptions) => {
         bottom: rect.height
       };
     }
-    
+
     if (typeof bounds === 'object') {
       return bounds;
     }
-    
+
     return null;
   };
 
   const constrainPosition = (pos: Position): Position => {
     const boundsRect = getBounds();
     if (!boundsRect || !nodeRef.current) return pos;
-    
+
     const element = nodeRef.current;
     const elementRect = element.getBoundingClientRect();
-    
+
     return {
       x: Math.max(
         boundsRect.left,
@@ -957,35 +962,35 @@ export const useDraggable = (options: UseDraggableOptions) => {
 
   const handleMouseDown = (e: MouseEvent) => {
     if (disabled || !nodeRef.current) return;
-    
+
     e.preventDefault();
     setIsDragging(true);
-    
+
     const rect = nodeRef.current.getBoundingClientRect();
     dragStart.current = { x: e.clientX, y: e.clientY };
     elementStart.current = { x: rect.left, y: rect.top };
-    
+
     onDragStart?.(elementStart.current);
   };
 
   const handleMouseMove = (e: MouseEvent) => {
     if (!isDragging) return;
-    
+
     const deltaX = e.clientX - dragStart.current.x;
     const deltaY = e.clientY - dragStart.current.y;
-    
+
     const newPosition = constrainPosition({
       x: elementStart.current.x + deltaX,
       y: elementStart.current.y + deltaY
     });
-    
+
     setPosition(newPosition);
     onDrag?.(newPosition);
   };
 
   const handleMouseUp = () => {
     if (!isDragging) return;
-    
+
     setIsDragging(false);
     onDragEnd?.(position);
   };
@@ -995,7 +1000,7 @@ export const useDraggable = (options: UseDraggableOptions) => {
     if (!handleElement) return;
 
     handleElement.addEventListener('mousedown', handleMouseDown);
-    
+
     return () => {
       handleElement.removeEventListener('mousedown', handleMouseDown);
     };
@@ -1006,7 +1011,7 @@ export const useDraggable = (options: UseDraggableOptions) => {
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
-    
+
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
@@ -1059,7 +1064,7 @@ export const VirtualMessageList: React.FC<VirtualMessageListProps> = ({
     if (!scrollUpdateWasRequested) {
       const maxScrollTop = (messages.length * itemHeight) - height;
       setIsAtBottom(scrollOffset >= maxScrollTop - 50);
-      
+
       // 滚动到顶部时加载更多
       if (scrollOffset === 0 && onLoadMore) {
         onLoadMore();
@@ -1069,7 +1074,7 @@ export const VirtualMessageList: React.FC<VirtualMessageListProps> = ({
 
   const MessageItem = ({ index, style }: { index: number; style: any }) => {
     const message = messages[index];
-    
+
     return (
       <div style={style}>
         <MessageComponent
@@ -1092,7 +1097,7 @@ export const VirtualMessageList: React.FC<VirtualMessageListProps> = ({
       >
         {MessageItem}
       </List>
-      
+
       {/* 滚动到底部按钮 */}
       {!isAtBottom && (
         <button
@@ -1125,7 +1130,7 @@ interface MessageCacheOptions {
 
 export const useMessageCache = (options: MessageCacheOptions = {}) => {
   const { maxSize = 1000, ttl = 1000 * 60 * 30 } = options; // 30分钟TTL
-  
+
   const cache = useRef(
     new LRUCache<string, Message[]>({
       max: maxSize,
@@ -1133,13 +1138,19 @@ export const useMessageCache = (options: MessageCacheOptions = {}) => {
     })
   );
 
-  const getMessages = useCallback((conversationId: string): Message[] | undefined => {
-    return cache.current.get(conversationId);
-  }, []);
+  const getMessages = useCallback(
+    (conversationId: string): Message[] | undefined => {
+      return cache.current.get(conversationId);
+    },
+    []
+  );
 
-  const setMessages = useCallback((conversationId: string, messages: Message[]) => {
-    cache.current.set(conversationId, messages);
-  }, []);
+  const setMessages = useCallback(
+    (conversationId: string, messages: Message[]) => {
+      cache.current.set(conversationId, messages);
+    },
+    []
+  );
 
   const addMessage = useCallback((conversationId: string, message: Message) => {
     const existing = cache.current.get(conversationId) || [];
@@ -1147,27 +1158,29 @@ export const useMessageCache = (options: MessageCacheOptions = {}) => {
     cache.current.set(conversationId, updated);
   }, []);
 
-  const updateMessage = useCallback((
-    conversationId: string, 
-    messageId: string, 
-    updates: Partial<Message>
-  ) => {
-    const existing = cache.current.get(conversationId);
-    if (existing) {
-      const updated = existing.map(msg => 
-        msg.id === messageId ? { ...msg, ...updates } : msg
-      );
-      cache.current.set(conversationId, updated);
-    }
-  }, []);
+  const updateMessage = useCallback(
+    (conversationId: string, messageId: string, updates: Partial<Message>) => {
+      const existing = cache.current.get(conversationId);
+      if (existing) {
+        const updated = existing.map((msg) =>
+          msg.id === messageId ? { ...msg, ...updates } : msg
+        );
+        cache.current.set(conversationId, updated);
+      }
+    },
+    []
+  );
 
-  const removeMessage = useCallback((conversationId: string, messageId: string) => {
-    const existing = cache.current.get(conversationId);
-    if (existing) {
-      const updated = existing.filter(msg => msg.id !== messageId);
-      cache.current.set(conversationId, updated);
-    }
-  }, []);
+  const removeMessage = useCallback(
+    (conversationId: string, messageId: string) => {
+      const existing = cache.current.get(conversationId);
+      if (existing) {
+        const updated = existing.filter((msg) => msg.id !== messageId);
+        cache.current.set(conversationId, updated);
+      }
+    },
+    []
+  );
 
   const clearConversation = useCallback((conversationId: string) => {
     cache.current.delete(conversationId);
@@ -1221,10 +1234,10 @@ export const MobileChatInterface: React.FC<MobileChatInterfaceProps> = ({ onClos
       const windowHeight = window.innerHeight;
       setIsKeyboardOpen(viewportHeight < windowHeight * 0.75);
     };
-    
+
     window.visualViewport?.addEventListener('resize', handleResize);
     window.addEventListener('resize', handleResize);
-    
+
     return () => {
       window.visualViewport?.removeEventListener('resize', handleResize);
       window.removeEventListener('resize', handleResize);
@@ -1252,7 +1265,7 @@ export const MobileChatInterface: React.FC<MobileChatInterfaceProps> = ({ onClos
     >
       {/* 拖拽指示器 */}
       <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mt-2 mb-1" />
-      
+
       {/* 标题栏 */}
       <div className="flex items-center justify-between p-4 border-b bg-white sticky top-0 z-10">
         <div className="flex items-center gap-3">
@@ -1268,7 +1281,7 @@ export const MobileChatInterface: React.FC<MobileChatInterfaceProps> = ({ onClos
           ) : (
             <Bot className="w-6 h-6 text-blue-600" />
           )}
-          
+
           <div>
             <h2 className="font-semibold text-gray-900">
               {showSidebar ? '对话历史' : 'AI助手'}
@@ -1278,7 +1291,7 @@ export const MobileChatInterface: React.FC<MobileChatInterfaceProps> = ({ onClos
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
           {!showSidebar && (
             <Button
@@ -1290,10 +1303,10 @@ export const MobileChatInterface: React.FC<MobileChatInterfaceProps> = ({ onClos
               <MoreVertical className="w-5 h-5" />
             </Button>
           )}
-          
-          <Button 
-            variant="ghost" 
-            size="sm" 
+
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={onClose}
             className="w-10 h-10 p-0"
           >
@@ -1301,14 +1314,14 @@ export const MobileChatInterface: React.FC<MobileChatInterfaceProps> = ({ onClos
           </Button>
         </div>
       </div>
-      
+
       {/* 内容区域 */}
       <div className={cn(
         "flex-1 flex flex-col min-h-0",
         isKeyboardOpen && "pb-safe-area-inset-bottom"
       )}>
         {showSidebar ? (
-          <ChatSidebar 
+          <ChatSidebar
             onClose={() => setShowSidebar(false)}
             isMobile
           />
@@ -1318,7 +1331,7 @@ export const MobileChatInterface: React.FC<MobileChatInterfaceProps> = ({ onClos
             <div className="flex-1 min-h-0">
               <ChatMessageList isMobile />
             </div>
-            
+
             {/* 输入区域 */}
             <div className={cn(
               "border-t bg-white",
@@ -1373,10 +1386,10 @@ export class ChatErrorBoundary extends Component<Props, State> {
       error,
       errorInfo
     });
-    
+
     // 发送错误报告
     console.error('Chat Error:', error, errorInfo);
-    
+
     // 可以集成错误监控服务
     // errorReportingService.captureException(error, {
     //   extra: errorInfo
@@ -1402,7 +1415,7 @@ export class ChatErrorBoundary extends Component<Props, State> {
           <p className="text-gray-600 mb-4">
             抱歉，AI助手暂时无法正常工作。请尝试刷新或稍后再试。
           </p>
-          
+
           <div className="flex gap-2">
             <Button
               onClick={this.handleRetry}
@@ -1412,7 +1425,7 @@ export class ChatErrorBoundary extends Component<Props, State> {
               <RefreshCw className="w-4 h-4" />
               重试
             </Button>
-            
+
             <Button
               onClick={() => window.location.reload()}
               variant="default"
@@ -1420,7 +1433,7 @@ export class ChatErrorBoundary extends Component<Props, State> {
               刷新页面
             </Button>
           </div>
-          
+
           {process.env.NODE_ENV === 'development' && this.state.error && (
             <details className="mt-4 text-left">
               <summary className="cursor-pointer text-sm text-gray-500">
@@ -1466,7 +1479,7 @@ export const useErrorHandler = () => {
     } = options;
 
     const errorMessage = typeof error === 'string' ? error : error.message;
-    
+
     if (logError) {
       console.error('Chat Error:', error);
     }
@@ -1490,27 +1503,27 @@ export const useErrorHandler = () => {
     if (error.includes('Network Error') || error.includes('fetch')) {
       return '网络连接失败，请检查网络设置';
     }
-    
+
     // 认证错误
     if (error.includes('401') || error.includes('Unauthorized')) {
       return '身份验证失败，请重新登录';
     }
-    
+
     // 服务器错误
     if (error.includes('500') || error.includes('Internal Server Error')) {
       return '服务器暂时不可用，请稍后再试';
     }
-    
+
     // 限流错误
     if (error.includes('429') || error.includes('Too Many Requests')) {
       return '请求过于频繁，请稍后再试';
     }
-    
+
     // WebSocket错误
     if (error.includes('WebSocket')) {
       return '实时连接中断，正在尝试重连...';
     }
-    
+
     return error || '未知错误，请稍后再试';
   };
 
@@ -1541,7 +1554,7 @@ describe('FloatingChatTrigger', () => {
         <FloatingChatTrigger />
       </MockedProvider>
     );
-    
+
     expect(screen.getByRole('button')).toBeInTheDocument();
   });
 
@@ -1551,25 +1564,25 @@ describe('FloatingChatTrigger', () => {
       unreadCount: 5,
       isVisible: false
     };
-    
+
     render(
       <MockedProvider>
         <FloatingChatTrigger />
       </MockedProvider>
     );
-    
+
     expect(screen.getByText('5')).toBeInTheDocument();
   });
 
   it('toggles chat visibility when clicked', () => {
     const mockToggle = jest.fn();
-    
+
     render(
       <MockedProvider>
         <FloatingChatTrigger />
       </MockedProvider>
     );
-    
+
     fireEvent.click(screen.getByRole('button'));
     expect(mockToggle).toHaveBeenCalled();
   });
@@ -1580,7 +1593,7 @@ describe('FloatingChatTrigger', () => {
         <FloatingChatTrigger position="bottom-left" />
       </MockedProvider>
     );
-    
+
     const button = screen.getByRole('button');
     expect(button).toHaveStyle({ left: '24px', bottom: '24px' });
   });
@@ -1610,7 +1623,7 @@ describe('useWebSocket', () => {
       close: jest.fn(),
       connect: jest.fn()
     };
-    
+
     mockIo.mockReturnValue(mockSocket);
   });
 
@@ -1620,40 +1633,42 @@ describe('useWebSocket', () => {
 
   it('establishes connection on mount', () => {
     renderHook(() => useWebSocket('/chat'));
-    
+
     expect(mockIo).toHaveBeenCalledWith('/chat', expect.any(Object));
     expect(mockSocket.on).toHaveBeenCalledWith('connect', expect.any(Function));
   });
 
   it('handles connection events', () => {
     const { result } = renderHook(() => useWebSocket('/chat'));
-    
+
     // Simulate connection
     act(() => {
       const connectHandler = mockSocket.on.mock.calls.find(
-        call => call[0] === 'connect'
+        (call) => call[0] === 'connect'
       )[1];
       connectHandler();
     });
-    
+
     expect(result.current.isConnected).toBe(true);
   });
 
   it('emits events when connected', () => {
     const { result } = renderHook(() => useWebSocket('/chat'));
-    
+
     act(() => {
       result.current.emit('test-event', { data: 'test' });
     });
-    
-    expect(mockSocket.emit).toHaveBeenCalledWith('test-event', { data: 'test' });
+
+    expect(mockSocket.emit).toHaveBeenCalledWith('test-event', {
+      data: 'test'
+    });
   });
 
   it('cleans up on unmount', () => {
     const { unmount } = renderHook(() => useWebSocket('/chat'));
-    
+
     unmount();
-    
+
     expect(mockSocket.close).toHaveBeenCalled();
   });
 });
@@ -1672,30 +1687,30 @@ import { FloatingChatWindow } from '@/components/chat/FloatingChatWindow';
 describe('Chat Integration Flow', () => {
   it('completes full chat interaction flow', async () => {
     const user = userEvent.setup();
-    
+
     render(
       <AIChatProvider>
         <FloatingChatTrigger />
         <FloatingChatWindow />
       </AIChatProvider>
     );
-    
+
     // 1. 点击触发按钮打开聊天窗口
     await user.click(screen.getByRole('button'));
-    
+
     // 2. 验证聊天窗口已打开
     expect(screen.getByText('AI助手')).toBeInTheDocument();
-    
+
     // 3. 输入消息
     const input = screen.getByPlaceholderText('输入消息...');
     await user.type(input, 'Hello AI');
-    
+
     // 4. 发送消息
     await user.click(screen.getByText('发送'));
-    
+
     // 5. 验证消息已显示
     expect(screen.getByText('Hello AI')).toBeInTheDocument();
-    
+
     // 6. 等待AI回复
     await waitFor(() => {
       expect(screen.getByText(/AI回复/)).toBeInTheDocument();
@@ -1729,12 +1744,12 @@ const nextConfig = {
       rules: {
         '*.svg': {
           loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
-      },
-    },
+          as: '*.js'
+        }
+      }
+    }
   },
-  
+
   webpack: (config, { dev, isServer }) => {
     // 优化聊天组件的代码分割
     if (!dev && !isServer) {
@@ -1742,19 +1757,19 @@ const nextConfig = {
         name: 'chat',
         test: /[\/]components[\/]chat[\/]/,
         chunks: 'all',
-        priority: 10,
+        priority: 10
       };
     }
-    
+
     return config;
   },
-  
+
   // PWA支持
   pwa: {
     dest: 'public',
     register: true,
-    skipWaiting: true,
-  },
+    skipWaiting: true
+  }
 };
 
 module.exports = nextConfig;
@@ -1767,32 +1782,32 @@ module.exports = nextConfig;
 export class ChatPerformanceMonitor {
   private static instance: ChatPerformanceMonitor;
   private metrics: Map<string, number> = new Map();
-  
+
   static getInstance(): ChatPerformanceMonitor {
     if (!ChatPerformanceMonitor.instance) {
       ChatPerformanceMonitor.instance = new ChatPerformanceMonitor();
     }
     return ChatPerformanceMonitor.instance;
   }
-  
+
   startTiming(label: string): void {
     this.metrics.set(label, performance.now());
   }
-  
+
   endTiming(label: string): number {
     const startTime = this.metrics.get(label);
     if (startTime) {
       const duration = performance.now() - startTime;
       this.metrics.delete(label);
-      
+
       // 发送到分析服务
       this.reportMetric(label, duration);
-      
+
       return duration;
     }
     return 0;
   }
-  
+
   private reportMetric(label: string, duration: number): void {
     // 集成分析服务
     if (typeof window !== 'undefined' && window.gtag) {
@@ -1802,7 +1817,7 @@ export class ChatPerformanceMonitor {
       });
     }
   }
-  
+
   measureComponent<T extends React.ComponentType<any>>(
     Component: T,
     displayName: string
@@ -1814,19 +1829,21 @@ export class ChatPerformanceMonitor {
           this.endTiming(`${displayName}_render`);
         };
       }, []);
-      
+
       return React.createElement(Component, props);
     };
-    
+
     MeasuredComponent.displayName = `Measured(${displayName})`;
     return MeasuredComponent as T;
   }
 }
 
 // 使用示例
-export const MeasuredChatWindow = ChatPerformanceMonitor
-  .getInstance()
-  .measureComponent(FloatingChatWindow, 'ChatWindow');
+export const MeasuredChatWindow =
+  ChatPerformanceMonitor.getInstance().measureComponent(
+    FloatingChatWindow,
+    'ChatWindow'
+  );
 ```
 
 ## 10. 开发工具和调试
@@ -1844,14 +1861,14 @@ interface ChatDevToolsProps {
   enabled?: boolean;
 }
 
-export const ChatDevTools: React.FC<ChatDevToolsProps> = ({ 
-  enabled = process.env.NODE_ENV === 'development' 
+export const ChatDevTools: React.FC<ChatDevToolsProps> = ({
+  enabled = process.env.NODE_ENV === 'development'
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { state, actions } = useAIChat();
-  
+
   if (!enabled) return null;
-  
+
   return (
     <div className="fixed bottom-4 left-4 z-50">
       <Button
@@ -1862,11 +1879,11 @@ export const ChatDevTools: React.FC<ChatDevToolsProps> = ({
       >
         🛠️ Chat DevTools
       </Button>
-      
+
       {isOpen && (
         <div className="bg-white border rounded-lg shadow-lg p-4 w-80 max-h-96 overflow-auto">
           <h3 className="font-semibold mb-3">Chat State</h3>
-          
+
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span>Visible:</span>
@@ -1874,26 +1891,26 @@ export const ChatDevTools: React.FC<ChatDevToolsProps> = ({
                 {state.isVisible ? 'Yes' : 'No'}
               </Badge>
             </div>
-            
+
             <div className="flex justify-between">
               <span>Connected:</span>
               <Badge variant={state.isConnected ? 'default' : 'destructive'}>
                 {state.isConnected ? 'Yes' : 'No'}
               </Badge>
             </div>
-            
+
             <div className="flex justify-between">
               <span>Loading:</span>
               <Badge variant={state.isLoading ? 'default' : 'secondary'}>
                 {state.isLoading ? 'Yes' : 'No'}
               </Badge>
             </div>
-            
+
             <div className="flex justify-between">
               <span>Conversations:</span>
               <Badge>{state.conversations.length}</Badge>
             </div>
-            
+
             <div className="flex justify-between">
               <span>Unread:</span>
               <Badge variant={state.unreadCount > 0 ? 'destructive' : 'secondary'}>
@@ -1901,7 +1918,7 @@ export const ChatDevTools: React.FC<ChatDevToolsProps> = ({
               </Badge>
             </div>
           </div>
-          
+
           <div className="mt-4 space-y-2">
             <Button
               onClick={() => actions.createConversation()}
@@ -1910,7 +1927,7 @@ export const ChatDevTools: React.FC<ChatDevToolsProps> = ({
             >
               Create Test Conversation
             </Button>
-            
+
             <Button
               onClick={() => {
                 actions.sendMessage('Test message from DevTools');
@@ -1921,7 +1938,7 @@ export const ChatDevTools: React.FC<ChatDevToolsProps> = ({
             >
               Send Test Message
             </Button>
-            
+
             <Button
               onClick={() => {
                 console.log('Chat State:', state);
@@ -1949,15 +1966,15 @@ export const DEBUG_CONFIG = {
   LOG_WEBSOCKET_EVENTS: true,
   LOG_STATE_CHANGES: true,
   LOG_PERFORMANCE: true,
-  MOCK_AI_RESPONSES: false,
+  MOCK_AI_RESPONSES: false
 };
 
 export const debugLog = (category: string, message: string, data?: any) => {
   if (!DEBUG_CONFIG.ENABLE_LOGGING) return;
-  
+
   const timestamp = new Date().toISOString();
   const logMessage = `[${timestamp}] [${category}] ${message}`;
-  
+
   if (data) {
     console.group(logMessage);
     console.log(data);
@@ -1985,6 +2002,7 @@ export const createDebugger = (category: string) => {
 本前端技术文档详细描述了AI对话功能的完整实现方案，包括：
 
 ### 核心特性
+
 - 🎯 **浮动窗口设计**: 全局可访问的对话界面
 - 📱 **响应式适配**: 完美支持桌面端和移动端
 - ⚡ **实时通信**: WebSocket实现即时消息推送
@@ -1992,6 +2010,7 @@ export const createDebugger = (category: string) => {
 - 🔧 **高度可定制**: 支持主题、字体、布局等个性化设置
 
 ### 技术亮点
+
 - **组件化架构**: 模块化设计，易于维护和扩展
 - **状态管理**: Zustand提供高效的状态管理
 - **性能优化**: 虚拟滚动、消息缓存、代码分割
@@ -1999,6 +2018,7 @@ export const createDebugger = (category: string) => {
 - **测试覆盖**: 单元测试、集成测试、E2E测试
 
 ### 开发体验
+
 - **TypeScript**: 完整的类型安全
 - **热重载**: 快速开发迭代
 - **调试工具**: 开发者友好的调试界面

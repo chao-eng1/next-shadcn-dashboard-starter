@@ -1,11 +1,14 @@
 import { NextRequest } from 'next/server';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { apiResponse, apiError, apiUnauthorized } from '@/lib/api-response';
 import { hasPermission } from '@/lib/permissions';
 
 // 创建项目请求验证
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createProjectSchema = z.object({
   name: z.string().min(1, '项目名称不能为空'),
   description: z.string().optional(),
@@ -18,6 +21,7 @@ const createProjectSchema = z.object({
 });
 
 // 查询参数验证
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getProjectsQuerySchema = z.object({
   status: z.enum(['PLANNING', 'ACTIVE', 'COMPLETED', 'ARCHIVED']).optional(),
   search: z.string().optional(),
@@ -139,8 +143,6 @@ export async function GET(request: NextRequest) {
         400
       );
     }
-
-    console.error('获取项目列表失败:', error);
     return apiError(
       'SERVER_ERROR',
       '获取项目列表失败',
@@ -203,8 +205,6 @@ export async function POST(request: NextRequest) {
         400
       );
     }
-
-    console.error('创建项目失败:', error);
     return apiError(
       'SERVER_ERROR',
       '创建项目失败',

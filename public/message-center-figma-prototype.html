@@ -1,1160 +1,1217 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>消息中心原型设计 - 项目管理系统</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
-            min-height: 100vh;
-        }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          'Helvetica Neue', Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #333;
+        min-height: 100vh;
+      }
 
+      .app-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: white;
+        min-height: 100vh;
+        display: flex;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+      }
+
+      /* 左侧边栏 */
+      .sidebar {
+        width: 320px;
+        background: #ffffff;
+        border-right: 1px solid #e5e7eb;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .sidebar-header {
+        padding: 20px;
+        border-bottom: 1px solid #e5e7eb;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .sidebar-header h1 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .user-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        opacity: 0.9;
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #10b981;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      /* 搜索和过滤 */
+      .search-section {
+        padding: 16px;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 14px;
+        background: #f9fafb;
+        transition: all 0.2s;
+      }
+
+      .search-input:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .filter-tabs {
+        display: flex;
+        gap: 4px;
+        margin-top: 12px;
+      }
+
+      .filter-tab {
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: #f3f4f6;
+        color: #6b7280;
+      }
+
+      .filter-tab.active {
+        background: #667eea;
+        color: white;
+      }
+
+      .filter-tab:hover {
+        background: #e5e7eb;
+      }
+
+      .filter-tab.active:hover {
+        background: #5a67d8;
+      }
+
+      /* 会话列表 */
+      .conversation-list {
+        flex: 1;
+        overflow-y: auto;
+      }
+
+      .conversation-item {
+        padding: 16px;
+        border-bottom: 1px solid #f3f4f6;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+      }
+
+      .conversation-item:hover {
+        background: #f9fafb;
+      }
+
+      .conversation-item.active {
+        background: #eff6ff;
+        border-right: 3px solid #667eea;
+      }
+
+      .conversation-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+      }
+
+      .conversation-name {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        color: #111827;
+      }
+
+      .message-type {
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 500;
+        text-transform: uppercase;
+      }
+
+      .type-private {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+
+      .type-group {
+        background: #d1fae5;
+        color: #065f46;
+      }
+
+      .type-system {
+        background: #fed7aa;
+        color: #9a3412;
+      }
+
+      .type-project {
+        background: #e9d5ff;
+        color: #7c3aed;
+      }
+
+      .conversation-time {
+        font-size: 12px;
+        color: #6b7280;
+      }
+
+      .conversation-preview {
+        font-size: 13px;
+        color: #6b7280;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .unread-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: #ef4444;
+        color: white;
+        border-radius: 10px;
+        padding: 2px 6px;
+        font-size: 11px;
+        font-weight: 600;
+        min-width: 18px;
+        text-align: center;
+      }
+
+      .priority-indicator {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        margin-right: 4px;
+      }
+
+      .priority-urgent {
+        background: #ef4444;
+      }
+
+      .priority-important {
+        background: #f59e0b;
+      }
+
+      .priority-normal {
+        background: #3b82f6;
+      }
+
+      /* 主内容区域 */
+      .main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #ffffff;
+      }
+
+      /* 消息概览页面 */
+      .message-overview {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      }
+
+      .overview-header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .overview-header h2 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 12px;
+      }
+
+      .overview-header p {
+        font-size: 16px;
+        color: #6b7280;
+        max-width: 500px;
+      }
+
+      .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        width: 100%;
+        max-width: 800px;
+      }
+
+      .action-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s;
+        cursor: pointer;
+        border: 1px solid #e5e7eb;
+      }
+
+      .action-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+      }
+
+      .action-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+        font-size: 24px;
+      }
+
+      .action-private {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        color: white;
+      }
+
+      .action-group {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+      }
+
+      .action-system {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+      }
+
+      .action-project {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        color: white;
+      }
+
+      .action-card h3 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 8px;
+      }
+
+      .action-card p {
+        font-size: 14px;
+        color: #6b7280;
+        line-height: 1.5;
+      }
+
+      /* 聊天界面 */
+      .chat-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chat-header {
+        padding: 16px 24px;
+        border-bottom: 1px solid #e5e7eb;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .chat-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .chat-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+      }
+
+      .chat-details h3 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+
+      .chat-details p {
+        font-size: 13px;
+        color: #6b7280;
+      }
+
+      .chat-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .chat-action-btn {
+        padding: 8px;
+        border: none;
+        background: #f3f4f6;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: #6b7280;
+      }
+
+      .chat-action-btn:hover {
+        background: #e5e7eb;
+        color: #374151;
+      }
+
+      .chat-messages {
+        flex: 1;
+        padding: 24px;
+        overflow-y: auto;
+        background: #f9fafb;
+      }
+
+      .message-group {
+        margin-bottom: 24px;
+      }
+
+      .message-date {
+        text-align: center;
+        margin-bottom: 16px;
+        font-size: 12px;
+        color: #6b7280;
+      }
+
+      .message {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .message.own {
+        flex-direction: row-reverse;
+      }
+
+      .message-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
+        font-weight: 600;
+        flex-shrink: 0;
+      }
+
+      .message-content {
+        max-width: 70%;
+      }
+
+      .message-bubble {
+        padding: 12px 16px;
+        border-radius: 18px;
+        font-size: 14px;
+        line-height: 1.4;
+        word-wrap: break-word;
+      }
+
+      .message:not(.own) .message-bubble {
+        background: white;
+        color: #1f2937;
+        border-bottom-left-radius: 4px;
+      }
+
+      .message.own .message-bubble {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-bottom-right-radius: 4px;
+      }
+
+      .message-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 4px;
+        font-size: 11px;
+        color: #9ca3af;
+      }
+
+      .message.own .message-meta {
+        justify-content: flex-end;
+      }
+
+      .message-input-container {
+        padding: 16px 24px;
+        border-top: 1px solid #e5e7eb;
+        background: white;
+      }
+
+      .message-input-wrapper {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+      }
+
+      .message-input {
+        flex: 1;
+        min-height: 40px;
+        max-height: 120px;
+        padding: 10px 16px;
+        border: 1px solid #d1d5db;
+        border-radius: 20px;
+        font-size: 14px;
+        resize: none;
+        outline: none;
+        transition: all 0.2s;
+      }
+
+      .message-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .send-button {
+        width: 40px;
+        height: 40px;
+        border: none;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .send-button:hover {
+        transform: scale(1.05);
+      }
+
+      .send-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* 系统消息页面 */
+      .system-messages {
+        flex: 1;
+        padding: 24px;
+        overflow-y: auto;
+      }
+
+      .system-message-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid #667eea;
+        transition: all 0.2s;
+      }
+
+      .system-message-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .system-message-card.urgent {
+        border-left-color: #ef4444;
+      }
+
+      .system-message-card.important {
+        border-left-color: #f59e0b;
+      }
+
+      .system-message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+      }
+
+      .system-message-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+
+      .system-message-time {
+        font-size: 12px;
+        color: #6b7280;
+      }
+
+      .system-message-content {
+        font-size: 14px;
+        color: #4b5563;
+        line-height: 1.6;
+      }
+
+      /* 项目通知页面 */
+      .project-notifications {
+        flex: 1;
+        padding: 24px;
+        overflow-y: auto;
+      }
+
+      .notification-filters {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+      }
+
+      .notification-filter {
+        padding: 8px 16px;
+        border: 1px solid #d1d5db;
+        border-radius: 20px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: white;
+      }
+
+      .notification-filter.active {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+      }
+
+      .notification-item {
+        background: white;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+        border: 1px solid #e5e7eb;
+        transition: all 0.2s;
+      }
+
+      .notification-item:hover {
+        border-color: #667eea;
+      }
+
+      .notification-item.unread {
+        border-left: 4px solid #667eea;
+        background: #f8fafc;
+      }
+
+      /* 响应式设计 */
+      @media (max-width: 768px) {
         .app-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            min-height: 100vh;
-            display: flex;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+          flex-direction: column;
         }
 
-        /* 左侧边栏 */
         .sidebar {
-            width: 320px;
-            background: #ffffff;
-            border-right: 1px solid #e5e7eb;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar-header {
-            padding: 20px;
-            border-bottom: 1px solid #e5e7eb;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .sidebar-header h1 {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .user-status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10b981;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        /* 搜索和过滤 */
-        .search-section {
-            padding: 16px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 14px;
-            background: #f9fafb;
-            transition: all 0.2s;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .filter-tabs {
-            display: flex;
-            gap: 4px;
-            margin-top: 12px;
-        }
-
-        .filter-tab {
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: #f3f4f6;
-            color: #6b7280;
-        }
-
-        .filter-tab.active {
-            background: #667eea;
-            color: white;
-        }
-
-        .filter-tab:hover {
-            background: #e5e7eb;
-        }
-
-        .filter-tab.active:hover {
-            background: #5a67d8;
-        }
-
-        /* 会话列表 */
-        .conversation-list {
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .conversation-item {
-            padding: 16px;
-            border-bottom: 1px solid #f3f4f6;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-        }
-
-        .conversation-item:hover {
-            background: #f9fafb;
-        }
-
-        .conversation-item.active {
-            background: #eff6ff;
-            border-right: 3px solid #667eea;
-        }
-
-        .conversation-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 8px;
-        }
-
-        .conversation-name {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            font-size: 14px;
-            color: #111827;
-        }
-
-        .message-type {
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 500;
-            text-transform: uppercase;
-        }
-
-        .type-private {
-            background: #dbeafe;
-            color: #1d4ed8;
-        }
-
-        .type-group {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .type-system {
-            background: #fed7aa;
-            color: #9a3412;
-        }
-
-        .type-project {
-            background: #e9d5ff;
-            color: #7c3aed;
-        }
-
-        .conversation-time {
-            font-size: 12px;
-            color: #6b7280;
-        }
-
-        .conversation-preview {
-            font-size: 13px;
-            color: #6b7280;
-            line-height: 1.4;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .unread-badge {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: #ef4444;
-            color: white;
-            border-radius: 10px;
-            padding: 2px 6px;
-            font-size: 11px;
-            font-weight: 600;
-            min-width: 18px;
-            text-align: center;
-        }
-
-        .priority-indicator {
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            margin-right: 4px;
-        }
-
-        .priority-urgent {
-            background: #ef4444;
-        }
-
-        .priority-important {
-            background: #f59e0b;
-        }
-
-        .priority-normal {
-            background: #3b82f6;
-        }
-
-        /* 主内容区域 */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: #ffffff;
-        }
-
-        /* 消息概览页面 */
-        .message-overview {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        }
-
-        .overview-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .overview-header h2 {
-            font-size: 28px;
-            font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 12px;
-        }
-
-        .overview-header p {
-            font-size: 16px;
-            color: #6b7280;
-            max-width: 500px;
+          width: 100%;
+          height: auto;
         }
 
         .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            width: 100%;
-            max-width: 800px;
+          grid-template-columns: 1fr;
         }
+      }
 
-        .action-card {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s;
-            cursor: pointer;
-            border: 1px solid #e5e7eb;
+      /* 滚动条样式 */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+      }
+
+      /* 动画效果 */
+      .fade-in {
+        animation: fadeIn 0.3s ease-in;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
         }
-
-        .action-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
+      }
 
-        .action-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 16px;
-            font-size: 24px;
+      .slide-in {
+        animation: slideIn 0.3s ease-out;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(-20px);
+          opacity: 0;
         }
-
-        .action-private {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: white;
+        to {
+          transform: translateX(0);
+          opacity: 1;
         }
-
-        .action-group {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-        }
-
-        .action-system {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: white;
-        }
-
-        .action-project {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
-        }
-
-        .action-card h3 {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 8px;
-        }
-
-        .action-card p {
-            font-size: 14px;
-            color: #6b7280;
-            line-height: 1.5;
-        }
-
-        /* 聊天界面 */
-        .chat-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-header {
-            padding: 16px 24px;
-            border-bottom: 1px solid #e5e7eb;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .chat-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .chat-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-        }
-
-        .chat-details h3 {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1f2937;
-        }
-
-        .chat-details p {
-            font-size: 13px;
-            color: #6b7280;
-        }
-
-        .chat-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .chat-action-btn {
-            padding: 8px;
-            border: none;
-            background: #f3f4f6;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: #6b7280;
-        }
-
-        .chat-action-btn:hover {
-            background: #e5e7eb;
-            color: #374151;
-        }
-
-        .chat-messages {
-            flex: 1;
-            padding: 24px;
-            overflow-y: auto;
-            background: #f9fafb;
-        }
-
-        .message-group {
-            margin-bottom: 24px;
-        }
-
-        .message-date {
-            text-align: center;
-            margin-bottom: 16px;
-            font-size: 12px;
-            color: #6b7280;
-        }
-
-        .message {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .message.own {
-            flex-direction: row-reverse;
-        }
-
-        .message-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 12px;
-            font-weight: 600;
-            flex-shrink: 0;
-        }
-
-        .message-content {
-            max-width: 70%;
-        }
-
-        .message-bubble {
-            padding: 12px 16px;
-            border-radius: 18px;
-            font-size: 14px;
-            line-height: 1.4;
-            word-wrap: break-word;
-        }
-
-        .message:not(.own) .message-bubble {
-            background: white;
-            color: #1f2937;
-            border-bottom-left-radius: 4px;
-        }
-
-        .message.own .message-bubble {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border-bottom-right-radius: 4px;
-        }
-
-        .message-meta {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 4px;
-            font-size: 11px;
-            color: #9ca3af;
-        }
-
-        .message.own .message-meta {
-            justify-content: flex-end;
-        }
-
-        .message-input-container {
-            padding: 16px 24px;
-            border-top: 1px solid #e5e7eb;
-            background: white;
-        }
-
-        .message-input-wrapper {
-            display: flex;
-            gap: 12px;
-            align-items: flex-end;
-        }
-
-        .message-input {
-            flex: 1;
-            min-height: 40px;
-            max-height: 120px;
-            padding: 10px 16px;
-            border: 1px solid #d1d5db;
-            border-radius: 20px;
-            font-size: 14px;
-            resize: none;
-            outline: none;
-            transition: all 0.2s;
-        }
-
-        .message-input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .send-button {
-            width: 40px;
-            height: 40px;
-            border: none;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .send-button:hover {
-            transform: scale(1.05);
-        }
-
-        .send-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* 系统消息页面 */
-        .system-messages {
-            flex: 1;
-            padding: 24px;
-            overflow-y: auto;
-        }
-
-        .system-message-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            border-left: 4px solid #667eea;
-            transition: all 0.2s;
-        }
-
-        .system-message-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .system-message-card.urgent {
-            border-left-color: #ef4444;
-        }
-
-        .system-message-card.important {
-            border-left-color: #f59e0b;
-        }
-
-        .system-message-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-        }
-
-        .system-message-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1f2937;
-        }
-
-        .system-message-time {
-            font-size: 12px;
-            color: #6b7280;
-        }
-
-        .system-message-content {
-            font-size: 14px;
-            color: #4b5563;
-            line-height: 1.6;
-        }
-
-        /* 项目通知页面 */
-        .project-notifications {
-            flex: 1;
-            padding: 24px;
-            overflow-y: auto;
-        }
-
-        .notification-filters {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
-
-        .notification-filter {
-            padding: 8px 16px;
-            border: 1px solid #d1d5db;
-            border-radius: 20px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: white;
-        }
-
-        .notification-filter.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-
-        .notification-item {
-            background: white;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 12px;
-            border: 1px solid #e5e7eb;
-            transition: all 0.2s;
-        }
-
-        .notification-item:hover {
-            border-color: #667eea;
-        }
-
-        .notification-item.unread {
-            border-left: 4px solid #667eea;
-            background: #f8fafc;
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .app-container {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100%;
-                height: auto;
-            }
-
-            .quick-actions {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* 滚动条样式 */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 3px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
-        }
-
-        /* 动画效果 */
-        .fade-in {
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .slide-in {
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(-20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="app-container">
-        <!-- 左侧会话列表 -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h1>💬 消息中心</h1>
-                <div class="user-status">
-                    <div class="status-dot"></div>
-                    <span>在线</span>
-                </div>
-            </div>
-            
-            <div class="search-section">
-                <input type="text" class="search-input" placeholder="搜索会话..." id="searchInput">
-                <div class="filter-tabs">
-                    <div class="filter-tab active" data-type="all">全部</div>
-                    <div class="filter-tab" data-type="private">私聊</div>
-                    <div class="filter-tab" data-type="group">群聊</div>
-                    <div class="filter-tab" data-type="system">系统</div>
-                    <div class="filter-tab" data-type="project">项目</div>
-                </div>
-            </div>
-            
-            <div class="conversation-list" id="conversationList">
-                <div class="conversation-item active" data-type="project">
-                    <div class="conversation-header">
-                        <div class="conversation-name">
-                            <div class="priority-indicator priority-important"></div>
-                            <span class="message-type type-project">项目</span>
-                            项目管理系统开发组
-                        </div>
-                        <div class="conversation-time">14:30</div>
-                    </div>
-                    <div class="conversation-preview">张三: 今天的需求评审会议安排在下午3点，请大家准时参加</div>
-                    <div class="unread-badge">3</div>
-                </div>
-                
-                <div class="conversation-item" data-type="private">
-                    <div class="conversation-header">
-                        <div class="conversation-name">
-                            <div class="priority-indicator priority-normal"></div>
-                            <span class="message-type type-private">私聊</span>
-                            李四
-                        </div>
-                        <div class="conversation-time">13:45</div>
-                    </div>
-                    <div class="conversation-preview">关于数据库设计的问题，我们需要讨论一下</div>
-                    <div class="unread-badge">1</div>
-                </div>
-                
-                <div class="conversation-item" data-type="system">
-                    <div class="conversation-header">
-                        <div class="conversation-name">
-                            <div class="priority-indicator priority-urgent"></div>
-                            <span class="message-type type-system">系统</span>
-                            系统通知
-                        </div>
-                        <div class="conversation-time">12:00</div>
-                    </div>
-                    <div class="conversation-preview">系统将于今晚22:00进行维护更新，预计持续2小时</div>
-                    <div class="unread-badge">2</div>
-                </div>
-                
-                <div class="conversation-item" data-type="group">
-                    <div class="conversation-header">
-                        <div class="conversation-name">
-                            <div class="priority-indicator priority-normal"></div>
-                            <span class="message-type type-group">群聊</span>
-                            前端开发小组
-                        </div>
-                        <div class="conversation-time">11:30</div>
-                    </div>
-                    <div class="conversation-preview">王五: 新的UI组件库已经更新，大家可以开始使用了</div>
-                </div>
-                
-                <div class="conversation-item" data-type="project">
-                    <div class="conversation-header">
-                        <div class="conversation-name">
-                            <div class="priority-indicator priority-important"></div>
-                            <span class="message-type type-project">项目</span>
-                            移动端项目组
-                        </div>
-                        <div class="conversation-time">10:15</div>
-                    </div>
-                    <div class="conversation-preview">赵六: APP的新版本已经提交到应用商店审核</div>
-                    <div class="unread-badge">5</div>
-                </div>
-                
-                <div class="conversation-item" data-type="private">
-                    <div class="conversation-header">
-                        <div class="conversation-name">
-                            <div class="priority-indicator priority-normal"></div>
-                            <span class="message-type type-private">私聊</span>
-                            产品经理
-                        </div>
-                        <div class="conversation-time">昨天</div>
-                    </div>
-                    <div class="conversation-preview">下周的产品规划会议需要准备一下演示文档</div>
-                </div>
-            </div>
+      <!-- 左侧会话列表 -->
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <h1>💬 消息中心</h1>
+          <div class="user-status">
+            <div class="status-dot"></div>
+            <span>在线</span>
+          </div>
         </div>
 
-        <!-- 主内容区域 -->
-        <div class="main-content">
-            <!-- 消息概览页面 -->
-            <div class="message-overview fade-in" id="messageOverview">
-                <div class="overview-header">
-                    <h2>欢迎使用消息中心</h2>
-                    <p>统一的项目协作通信平台，整合私聊、群聊、系统消息和项目通知，提升团队协作效率</p>
-                </div>
-                
-                <div class="quick-actions">
-                    <div class="action-card" onclick="showChat('private')">
-                        <div class="action-icon action-private">💬</div>
-                        <h3>新建私聊</h3>
-                        <p>开始一对一私密对话，支持端到端加密和文件传输</p>
-                    </div>
-                    
-                    <div class="action-card" onclick="showChat('group')">
-                        <div class="action-icon action-group">👥</div>
-                        <h3>项目群聊</h3>
-                        <p>查看项目团队讨论，实时协作和信息共享</p>
-                    </div>
-                    
-                    <div class="action-card" onclick="showSystemMessages()">
-                        <div class="action-icon action-system">🔔</div>
-                        <h3>系统消息</h3>
-                        <p>查看系统通知和重要公告，及时获取平台动态</p>
-                    </div>
-                    
-                    <div class="action-card" onclick="showProjectNotifications()">
-                        <div class="action-icon action-project">📋</div>
-                        <h3>项目通知</h3>
-                        <p>管理项目相关通知，跟踪任务进度和团队动态</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 聊天界面 -->
-            <div class="chat-container" id="chatContainer" style="display: none;">
-                <div class="chat-header">
-                    <div class="chat-info">
-                        <div class="chat-avatar">项</div>
-                        <div class="chat-details">
-                            <h3>项目管理系统开发组</h3>
-                            <p>8名成员 · 3人在线</p>
-                        </div>
-                    </div>
-                    <div class="chat-actions">
-                        <button class="chat-action-btn" title="语音通话">📞</button>
-                        <button class="chat-action-btn" title="视频通话">📹</button>
-                        <button class="chat-action-btn" title="更多选项">⋯</button>
-                    </div>
-                </div>
-                
-                <div class="chat-messages">
-                    <div class="message-group">
-                        <div class="message-date">今天</div>
-                        
-                        <div class="message">
-                            <div class="message-avatar">张</div>
-                            <div class="message-content">
-                                <div class="message-bubble">
-                                    大家好，今天下午3点我们开需求评审会议，请大家准时参加。会议室在A座3楼会议室1。
-                                </div>
-                                <div class="message-meta">
-                                    <span>张三</span>
-                                    <span>14:30</span>
-                                    <span>已读</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="message">
-                            <div class="message-avatar">李</div>
-                            <div class="message-content">
-                                <div class="message-bubble">
-                                    收到，我会准时参加的。需要准备什么材料吗？
-                                </div>
-                                <div class="message-meta">
-                                    <span>李四</span>
-                                    <span>14:32</span>
-                                    <span>已读</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="message own">
-                            <div class="message-avatar">我</div>
-                            <div class="message-content">
-                                <div class="message-bubble">
-                                    好的，我也会参加。建议大家提前看一下需求文档。
-                                </div>
-                                <div class="message-meta">
-                                    <span>14:35</span>
-                                    <span>已发送</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="message">
-                            <div class="message-avatar">王</div>
-                            <div class="message-content">
-                                <div class="message-bubble">
-                                    我可能会晚几分钟，正在处理一个紧急bug。
-                                </div>
-                                <div class="message-meta">
-                                    <span>王五</span>
-                                    <span>14:38</span>
-                                    <span>已读</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="message-input-container">
-                    <div class="message-input-wrapper">
-                        <textarea class="message-input" placeholder="输入消息..." rows="1"></textarea>
-                        <button class="send-button" title="发送消息">➤</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 系统消息页面 -->
-            <div class="system-messages" id="systemMessages" style="display: none;">
-                <div class="system-message-card urgent">
-                    <div class="system-message-header">
-                        <div class="system-message-title">🚨 系统维护通知</div>
-                        <div class="system-message-time">2小时前</div>
-                    </div>
-                    <div class="system-message-content">
-                        系统将于今晚22:00-24:00进行维护更新，期间可能会影响部分功能的使用。维护内容包括数据库优化、安全补丁更新等。请大家提前保存工作内容。
-                    </div>
-                </div>
-                
-                <div class="system-message-card important">
-                    <div class="system-message-header">
-                        <div class="system-message-title">📢 新功能发布</div>
-                        <div class="system-message-time">1天前</div>
-                    </div>
-                    <div class="system-message-content">
-                        消息中心新增了项目通知功能，现在您可以更好地跟踪项目进度和团队动态。同时优化了实时通信性能，消息推送更加及时。
-                    </div>
-                </div>
-                
-                <div class="system-message-card">
-                    <div class="system-message-header">
-                        <div class="system-message-title">🎉 平台升级完成</div>
-                        <div class="system-message-time">3天前</div>
-                    </div>
-                    <div class="system-message-content">
-                        平台已成功升级到v2.0版本，新增了多项功能：改进的用户界面、更强的安全性、更好的移动端体验。感谢大家的耐心等待！
-                    </div>
-                </div>
-            </div>
-
-            <!-- 项目通知页面 -->
-            <div class="project-notifications" id="projectNotifications" style="display: none;">
-                <div class="notification-filters">
-                    <div class="notification-filter active">全部通知</div>
-                    <div class="notification-filter">任务更新</div>
-                    <div class="notification-filter">项目进度</div>
-                    <div class="notification-filter">成员变动</div>
-                    <div class="notification-filter">截止提醒</div>
-                </div>
-                
-                <div class="notification-item unread">
-                    <div class="system-message-header">
-                        <div class="system-message-title">📋 任务「用户认证模块」已完成</div>
-                        <div class="system-message-time">30分钟前</div>
-                    </div>
-                    <div class="system-message-content">
-                        开发者：李四 已完成任务「用户认证模块开发」，当前项目进度：75%。请相关人员进行代码审查。
-                    </div>
-                </div>
-                
-                <div class="notification-item unread">
-                    <div class="system-message-header">
-                        <div class="system-message-title">👥 新成员加入项目</div>
-                        <div class="system-message-time">1小时前</div>
-                    </div>
-                    <div class="system-message-content">
-                        赵六 已加入「项目管理系统开发」项目，担任前端开发工程师。请大家欢迎新同事！
-                    </div>
-                </div>
-                
-                <div class="notification-item">
-                    <div class="system-message-header">
-                        <div class="system-message-title">⏰ 里程碑即将到期</div>
-                        <div class="system-message-time">2小时前</div>
-                    </div>
-                    <div class="system-message-content">
-                        项目里程碑「MVP版本发布」将在3天后到期，当前完成度78%。请相关团队加快进度。
-                    </div>
-                </div>
-                
-                <div class="notification-item">
-                    <div class="system-message-header">
-                        <div class="system-message-title">📝 需求文档已更新</div>
-                        <div class="system-message-time">4小时前</div>
-                    </div>
-                    <div class="system-message-content">
-                        产品经理 更新了「用户管理模块」需求文档，新增了权限管理相关需求。请开发团队查看最新版本。
-                    </div>
-                </div>
-            </div>
+        <div class="search-section">
+          <input
+            type="text"
+            class="search-input"
+            placeholder="搜索会话..."
+            id="searchInput"
+          />
+          <div class="filter-tabs">
+            <div class="filter-tab active" data-type="all">全部</div>
+            <div class="filter-tab" data-type="private">私聊</div>
+            <div class="filter-tab" data-type="group">群聊</div>
+            <div class="filter-tab" data-type="system">系统</div>
+            <div class="filter-tab" data-type="project">项目</div>
+          </div>
         </div>
+
+        <div class="conversation-list" id="conversationList">
+          <div class="conversation-item active" data-type="project">
+            <div class="conversation-header">
+              <div class="conversation-name">
+                <div class="priority-indicator priority-important"></div>
+                <span class="message-type type-project">项目</span>
+                项目管理系统开发组
+              </div>
+              <div class="conversation-time">14:30</div>
+            </div>
+            <div class="conversation-preview">
+              张三: 今天的需求评审会议安排在下午3点，请大家准时参加
+            </div>
+            <div class="unread-badge">3</div>
+          </div>
+
+          <div class="conversation-item" data-type="private">
+            <div class="conversation-header">
+              <div class="conversation-name">
+                <div class="priority-indicator priority-normal"></div>
+                <span class="message-type type-private">私聊</span>
+                李四
+              </div>
+              <div class="conversation-time">13:45</div>
+            </div>
+            <div class="conversation-preview">
+              关于数据库设计的问题，我们需要讨论一下
+            </div>
+            <div class="unread-badge">1</div>
+          </div>
+
+          <div class="conversation-item" data-type="system">
+            <div class="conversation-header">
+              <div class="conversation-name">
+                <div class="priority-indicator priority-urgent"></div>
+                <span class="message-type type-system">系统</span>
+                系统通知
+              </div>
+              <div class="conversation-time">12:00</div>
+            </div>
+            <div class="conversation-preview">
+              系统将于今晚22:00进行维护更新，预计持续2小时
+            </div>
+            <div class="unread-badge">2</div>
+          </div>
+
+          <div class="conversation-item" data-type="group">
+            <div class="conversation-header">
+              <div class="conversation-name">
+                <div class="priority-indicator priority-normal"></div>
+                <span class="message-type type-group">群聊</span>
+                前端开发小组
+              </div>
+              <div class="conversation-time">11:30</div>
+            </div>
+            <div class="conversation-preview">
+              王五: 新的UI组件库已经更新，大家可以开始使用了
+            </div>
+          </div>
+
+          <div class="conversation-item" data-type="project">
+            <div class="conversation-header">
+              <div class="conversation-name">
+                <div class="priority-indicator priority-important"></div>
+                <span class="message-type type-project">项目</span>
+                移动端项目组
+              </div>
+              <div class="conversation-time">10:15</div>
+            </div>
+            <div class="conversation-preview">
+              赵六: APP的新版本已经提交到应用商店审核
+            </div>
+            <div class="unread-badge">5</div>
+          </div>
+
+          <div class="conversation-item" data-type="private">
+            <div class="conversation-header">
+              <div class="conversation-name">
+                <div class="priority-indicator priority-normal"></div>
+                <span class="message-type type-private">私聊</span>
+                产品经理
+              </div>
+              <div class="conversation-time">昨天</div>
+            </div>
+            <div class="conversation-preview">
+              下周的产品规划会议需要准备一下演示文档
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 主内容区域 -->
+      <div class="main-content">
+        <!-- 消息概览页面 -->
+        <div class="message-overview fade-in" id="messageOverview">
+          <div class="overview-header">
+            <h2>欢迎使用消息中心</h2>
+            <p>
+              统一的项目协作通信平台，整合私聊、群聊、系统消息和项目通知，提升团队协作效率
+            </p>
+          </div>
+
+          <div class="quick-actions">
+            <div class="action-card" onclick="showChat('private')">
+              <div class="action-icon action-private">💬</div>
+              <h3>新建私聊</h3>
+              <p>开始一对一私密对话，支持端到端加密和文件传输</p>
+            </div>
+
+            <div class="action-card" onclick="showChat('group')">
+              <div class="action-icon action-group">👥</div>
+              <h3>项目群聊</h3>
+              <p>查看项目团队讨论，实时协作和信息共享</p>
+            </div>
+
+            <div class="action-card" onclick="showSystemMessages()">
+              <div class="action-icon action-system">🔔</div>
+              <h3>系统消息</h3>
+              <p>查看系统通知和重要公告，及时获取平台动态</p>
+            </div>
+
+            <div class="action-card" onclick="showProjectNotifications()">
+              <div class="action-icon action-project">📋</div>
+              <h3>项目通知</h3>
+              <p>管理项目相关通知，跟踪任务进度和团队动态</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 聊天界面 -->
+        <div class="chat-container" id="chatContainer" style="display: none">
+          <div class="chat-header">
+            <div class="chat-info">
+              <div class="chat-avatar">项</div>
+              <div class="chat-details">
+                <h3>项目管理系统开发组</h3>
+                <p>8名成员 · 3人在线</p>
+              </div>
+            </div>
+            <div class="chat-actions">
+              <button class="chat-action-btn" title="语音通话">📞</button>
+              <button class="chat-action-btn" title="视频通话">📹</button>
+              <button class="chat-action-btn" title="更多选项">⋯</button>
+            </div>
+          </div>
+
+          <div class="chat-messages">
+            <div class="message-group">
+              <div class="message-date">今天</div>
+
+              <div class="message">
+                <div class="message-avatar">张</div>
+                <div class="message-content">
+                  <div class="message-bubble">
+                    大家好，今天下午3点我们开需求评审会议，请大家准时参加。会议室在A座3楼会议室1。
+                  </div>
+                  <div class="message-meta">
+                    <span>张三</span>
+                    <span>14:30</span>
+                    <span>已读</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="message">
+                <div class="message-avatar">李</div>
+                <div class="message-content">
+                  <div class="message-bubble">
+                    收到，我会准时参加的。需要准备什么材料吗？
+                  </div>
+                  <div class="message-meta">
+                    <span>李四</span>
+                    <span>14:32</span>
+                    <span>已读</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="message own">
+                <div class="message-avatar">我</div>
+                <div class="message-content">
+                  <div class="message-bubble">
+                    好的，我也会参加。建议大家提前看一下需求文档。
+                  </div>
+                  <div class="message-meta">
+                    <span>14:35</span>
+                    <span>已发送</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="message">
+                <div class="message-avatar">王</div>
+                <div class="message-content">
+                  <div class="message-bubble">
+                    我可能会晚几分钟，正在处理一个紧急bug。
+                  </div>
+                  <div class="message-meta">
+                    <span>王五</span>
+                    <span>14:38</span>
+                    <span>已读</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="message-input-container">
+            <div class="message-input-wrapper">
+              <textarea
+                class="message-input"
+                placeholder="输入消息..."
+                rows="1"
+              ></textarea>
+              <button class="send-button" title="发送消息">➤</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 系统消息页面 -->
+        <div class="system-messages" id="systemMessages" style="display: none">
+          <div class="system-message-card urgent">
+            <div class="system-message-header">
+              <div class="system-message-title">🚨 系统维护通知</div>
+              <div class="system-message-time">2小时前</div>
+            </div>
+            <div class="system-message-content">
+              系统将于今晚22:00-24:00进行维护更新，期间可能会影响部分功能的使用。维护内容包括数据库优化、安全补丁更新等。请大家提前保存工作内容。
+            </div>
+          </div>
+
+          <div class="system-message-card important">
+            <div class="system-message-header">
+              <div class="system-message-title">📢 新功能发布</div>
+              <div class="system-message-time">1天前</div>
+            </div>
+            <div class="system-message-content">
+              消息中心新增了项目通知功能，现在您可以更好地跟踪项目进度和团队动态。同时优化了实时通信性能，消息推送更加及时。
+            </div>
+          </div>
+
+          <div class="system-message-card">
+            <div class="system-message-header">
+              <div class="system-message-title">🎉 平台升级完成</div>
+              <div class="system-message-time">3天前</div>
+            </div>
+            <div class="system-message-content">
+              平台已成功升级到v2.0版本，新增了多项功能：改进的用户界面、更强的安全性、更好的移动端体验。感谢大家的耐心等待！
+            </div>
+          </div>
+        </div>
+
+        <!-- 项目通知页面 -->
+        <div
+          class="project-notifications"
+          id="projectNotifications"
+          style="display: none"
+        >
+          <div class="notification-filters">
+            <div class="notification-filter active">全部通知</div>
+            <div class="notification-filter">任务更新</div>
+            <div class="notification-filter">项目进度</div>
+            <div class="notification-filter">成员变动</div>
+            <div class="notification-filter">截止提醒</div>
+          </div>
+
+          <div class="notification-item unread">
+            <div class="system-message-header">
+              <div class="system-message-title">
+                📋 任务「用户认证模块」已完成
+              </div>
+              <div class="system-message-time">30分钟前</div>
+            </div>
+            <div class="system-message-content">
+              开发者：李四
+              已完成任务「用户认证模块开发」，当前项目进度：75%。请相关人员进行代码审查。
+            </div>
+          </div>
+
+          <div class="notification-item unread">
+            <div class="system-message-header">
+              <div class="system-message-title">👥 新成员加入项目</div>
+              <div class="system-message-time">1小时前</div>
+            </div>
+            <div class="system-message-content">
+              赵六
+              已加入「项目管理系统开发」项目，担任前端开发工程师。请大家欢迎新同事！
+            </div>
+          </div>
+
+          <div class="notification-item">
+            <div class="system-message-header">
+              <div class="system-message-title">⏰ 里程碑即将到期</div>
+              <div class="system-message-time">2小时前</div>
+            </div>
+            <div class="system-message-content">
+              项目里程碑「MVP版本发布」将在3天后到期，当前完成度78%。请相关团队加快进度。
+            </div>
+          </div>
+
+          <div class="notification-item">
+            <div class="system-message-header">
+              <div class="system-message-title">📝 需求文档已更新</div>
+              <div class="system-message-time">4小时前</div>
+            </div>
+            <div class="system-message-content">
+              产品经理
+              更新了「用户管理模块」需求文档，新增了权限管理相关需求。请开发团队查看最新版本。
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-        // 页面交互逻辑
-        document.addEventListener('DOMContentLoaded', function() {
-            // 会话列表点击事件
-            const conversationItems = document.querySelectorAll('.conversation-item');
-            conversationItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    // 移除其他项的active状态
-                    conversationItems.forEach(i => i.classList.remove('active'));
-                    // 添加当前项的active状态
-                    this.classList.add('active');
-                    
-                    // 显示对应的聊天界面
-                    const type = this.dataset.type;
-                    if (type === 'system') {
-                        showSystemMessages();
-                    } else if (type === 'project' && this.textContent.includes('项目管理系统开发组')) {
-                        showChat('project');
-                    } else {
-                        showChat(type);
-                    }
-                });
-            });
+      // 页面交互逻辑
+      document.addEventListener('DOMContentLoaded', function () {
+        // 会话列表点击事件
+        const conversationItems =
+          document.querySelectorAll('.conversation-item');
+        conversationItems.forEach((item) => {
+          item.addEventListener('click', function () {
+            // 移除其他项的active状态
+            conversationItems.forEach((i) => i.classList.remove('active'));
+            // 添加当前项的active状态
+            this.classList.add('active');
 
-            // 过滤标签点击事件
-            const filterTabs = document.querySelectorAll('.filter-tab');
-            filterTabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    // 移除其他标签的active状态
-                    filterTabs.forEach(t => t.classList.remove('active'));
-                    // 添加当前标签的active状态
-                    this.classList.add('active');
-                    
-                    // 过滤会话列表
-                    const filterType = this.dataset.type;
-                    filterConversations(filterType);
-                });
-            });
-
-            // 搜索功能
-            const searchInput = document.getElementById('searchInput');
-            searchInput.addEventListener('input', function() {
-                const query = this.value.toLowerCase();
-                filterConversations(null, query);
-            });
-
-            // 消息输入框自动调整高度
-            const messageInput = document.querySelector('.message-input');
-            if (messageInput) {
-                messageInput.addEventListener('input', function() {
-                    this.style.height = 'auto';
-                    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-                });
-
-                // 发送消息
-                messageInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        sendMessage();
-                    }
-                });
+            // 显示对应的聊天界面
+            const type = this.dataset.type;
+            if (type === 'system') {
+              showSystemMessages();
+            } else if (
+              type === 'project' &&
+              this.textContent.includes('项目管理系统开发组')
+            ) {
+              showChat('project');
+            } else {
+              showChat(type);
             }
-
-            // 发送按钮点击事件
-            const sendButton = document.querySelector('.send-button');
-            if (sendButton) {
-                sendButton.addEventListener('click', sendMessage);
-            }
+          });
         });
 
-        // 显示聊天界面
-        function showChat(type) {
-            document.getElementById('messageOverview').style.display = 'none';
-            document.getElementById('systemMessages').style.display = 'none';
-            document.getElementById('projectNotifications').style.display = 'none';
-            document.getElementById('chatContainer').style.display = 'flex';
-        }
+        // 过滤标签点击事件
+        const filterTabs = document.querySelectorAll('.filter-tab');
+        filterTabs.forEach((tab) => {
+          tab.addEventListener('click', function () {
+            // 移除其他标签的active状态
+            filterTabs.forEach((t) => t.classList.remove('active'));
+            // 添加当前标签的active状态
+            this.classList.add('active');
 
-        // 显示系统消息
-        function showSystemMessages() {
-            document.getElementById('messageOverview').style.display = 'none';
-            document.getElementById('chatContainer').style.display = 'none';
-            document.getElementById('projectNotifications').style.display = 'none';
-            document.getElementById('systemMessages').style.display = 'block';
-        }
+            // 过滤会话列表
+            const filterType = this.dataset.type;
+            filterConversations(filterType);
+          });
+        });
 
-        // 显示项目通知
-        function showProjectNotifications() {
-            document.getElementById('messageOverview').style.display = 'none';
-            document.getElementById('chatContainer').style.display = 'none';
-            document.getElementById('systemMessages').style.display = 'none';
-            document.getElementById('projectNotifications').style.display = 'block';
-        }
+        // 搜索功能
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', function () {
+          const query = this.value.toLowerCase();
+          filterConversations(null, query);
+        });
 
-        // 过滤会话列表
-        function filterConversations(type, query = '') {
-            const conversationItems = document.querySelectorAll('.conversation-item');
-            
-            conversationItems.forEach(item => {
-                const itemType = item.dataset.type;
-                const itemText = item.textContent.toLowerCase();
-                
-                let showItem = true;
-                
-                // 类型过滤
-                if (type && type !== 'all' && itemType !== type) {
-                    showItem = false;
-                }
-                
-                // 搜索过滤
-                if (query && !itemText.includes(query)) {
-                    showItem = false;
-                }
-                
-                item.style.display = showItem ? 'block' : 'none';
-            });
-        }
+        // 消息输入框自动调整高度
+        const messageInput = document.querySelector('.message-input');
+        if (messageInput) {
+          messageInput.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+          });
 
-        // 发送消息
-        function sendMessage() {
-            const messageInput = document.querySelector('.message-input');
-            const message = messageInput.value.trim();
-            
-            if (message) {
-                // 这里可以添加发送消息的逻辑
-                console.log('发送消息:', message);
-                messageInput.value = '';
-                messageInput.style.height = 'auto';
-                
-                // 模拟添加消息到聊天界面
-                addMessageToChat(message, true);
+          // 发送消息
+          messageInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              sendMessage();
             }
+          });
         }
 
-        // 添加消息到聊天界面
-        function addMessageToChat(content, isOwn = false) {
-            const chatMessages = document.querySelector('.chat-messages');
-            const messageGroup = chatMessages.querySelector('.message-group');
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isOwn ? 'own' : ''}`;
-            
-            const now = new Date();
-            const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
-                              now.getMinutes().toString().padStart(2, '0');
-            
-            messageDiv.innerHTML = `
+        // 发送按钮点击事件
+        const sendButton = document.querySelector('.send-button');
+        if (sendButton) {
+          sendButton.addEventListener('click', sendMessage);
+        }
+      });
+
+      // 显示聊天界面
+      function showChat(type) {
+        document.getElementById('messageOverview').style.display = 'none';
+        document.getElementById('systemMessages').style.display = 'none';
+        document.getElementById('projectNotifications').style.display = 'none';
+        document.getElementById('chatContainer').style.display = 'flex';
+      }
+
+      // 显示系统消息
+      function showSystemMessages() {
+        document.getElementById('messageOverview').style.display = 'none';
+        document.getElementById('chatContainer').style.display = 'none';
+        document.getElementById('projectNotifications').style.display = 'none';
+        document.getElementById('systemMessages').style.display = 'block';
+      }
+
+      // 显示项目通知
+      function showProjectNotifications() {
+        document.getElementById('messageOverview').style.display = 'none';
+        document.getElementById('chatContainer').style.display = 'none';
+        document.getElementById('systemMessages').style.display = 'none';
+        document.getElementById('projectNotifications').style.display = 'block';
+      }
+
+      // 过滤会话列表
+      function filterConversations(type, query = '') {
+        const conversationItems =
+          document.querySelectorAll('.conversation-item');
+
+        conversationItems.forEach((item) => {
+          const itemType = item.dataset.type;
+          const itemText = item.textContent.toLowerCase();
+
+          let showItem = true;
+
+          // 类型过滤
+          if (type && type !== 'all' && itemType !== type) {
+            showItem = false;
+          }
+
+          // 搜索过滤
+          if (query && !itemText.includes(query)) {
+            showItem = false;
+          }
+
+          item.style.display = showItem ? 'block' : 'none';
+        });
+      }
+
+      // 发送消息
+      function sendMessage() {
+        const messageInput = document.querySelector('.message-input');
+        const message = messageInput.value.trim();
+
+        if (message) {
+          // 这里可以添加发送消息的逻辑
+          console.log('发送消息:', message);
+          messageInput.value = '';
+          messageInput.style.height = 'auto';
+
+          // 模拟添加消息到聊天界面
+          addMessageToChat(message, true);
+        }
+      }
+
+      // 添加消息到聊天界面
+      function addMessageToChat(content, isOwn = false) {
+        const chatMessages = document.querySelector('.chat-messages');
+        const messageGroup = chatMessages.querySelector('.message-group');
+
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isOwn ? 'own' : ''}`;
+
+        const now = new Date();
+        const timeString =
+          now.getHours().toString().padStart(2, '0') +
+          ':' +
+          now.getMinutes().toString().padStart(2, '0');
+
+        messageDiv.innerHTML = `
                 <div class="message-avatar">${isOwn ? '我' : '用'}</div>
                 <div class="message-content">
                     <div class="message-bubble">${content}</div>
@@ -1165,22 +1222,24 @@
                     </div>
                 </div>
             `;
-            
-            messageGroup.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
 
-        // 通知过滤器
-        document.addEventListener('DOMContentLoaded', function() {
-            const notificationFilters = document.querySelectorAll('.notification-filter');
-            notificationFilters.forEach(filter => {
-                filter.addEventListener('click', function() {
-                    notificationFilters.forEach(f => f.classList.remove('active'));
-                    this.classList.add('active');
-                    // 这里可以添加过滤逻辑
-                });
-            });
+        messageGroup.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      // 通知过滤器
+      document.addEventListener('DOMContentLoaded', function () {
+        const notificationFilters = document.querySelectorAll(
+          '.notification-filter'
+        );
+        notificationFilters.forEach((filter) => {
+          filter.addEventListener('click', function () {
+            notificationFilters.forEach((f) => f.classList.remove('active'));
+            this.classList.add('active');
+            // 这里可以添加过滤逻辑
+          });
         });
+      });
     </script>
-</body>
+  </body>
 </html>

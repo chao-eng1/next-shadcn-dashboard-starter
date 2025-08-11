@@ -7,6 +7,7 @@ AI分析仪表盘是项目管理平台的智能分析中心，通过AI技术对�
 ## 2. 功能需求
 
 ### 2.1 核心功能
+
 - **项目分析**: 分析项目进度、团队效率、风险预警等关键指标
 - **数据可视化**: 展示项目数据的图表分析，包括燃尽图预测、工作量分布等
 - **趋势预测**: 基于历史数据预测项目完成时间、资源需求等关键信息
@@ -14,6 +15,7 @@ AI分析仪表盘是项目管理平台的智能分析中心，通过AI技术对�
 - **实时监控**: 实时更新项目状态和关键指标
 
 ### 2.2 用户角色权限
+
 - **普通用户**: 查看个人相关的项目分析数据
 - **项目管理员**: 查看完整的项目分析报告，配置分析参数
 - **系统管理员**: 查看全局分析数据，管理分析模型配置
@@ -50,6 +52,7 @@ interface DashboardLayout {
 ### 3.2 UI组件设计
 
 #### 3.2.1 概览卡片组件
+
 ```typescript
 // OverviewCard.tsx
 interface OverviewCardProps {
@@ -97,19 +100,19 @@ const OverviewCard: React.FC<OverviewCardProps> = ({
           </div>
           <h3 className="text-sm font-medium text-gray-600">{title}</h3>
         </div>
-        
+
         {trend && (
           <div className="w-16 h-8">
             <MiniChart data={trend.data} color={trend.color} />
           </div>
         )}
       </div>
-      
+
       <div className="space-y-2">
         <div className="text-2xl font-bold text-gray-900">
           {typeof value === 'number' ? formatNumber(value) : value}
         </div>
-        
+
         {change && (
           <div className="flex items-center gap-1 text-sm">
             {change.type === 'increase' ? (
@@ -137,6 +140,7 @@ const OverviewCard: React.FC<OverviewCardProps> = ({
 ```
 
 #### 3.2.2 图表网格组件
+
 ```typescript
 // ChartsGrid.tsx
 interface ChartConfig {
@@ -186,8 +190,8 @@ const ChartsGrid: React.FC<ChartsGridProps> = ({
   return (
     <div className="grid grid-cols-3 gap-6">
       {charts.map((chart) => (
-        <Card 
-          key={chart.id} 
+        <Card
+          key={chart.id}
           className={cn(
             "p-6 cursor-pointer hover:shadow-lg transition-shadow",
             getGridCols(chart.size)
@@ -200,9 +204,9 @@ const ChartsGrid: React.FC<ChartsGridProps> = ({
               <MoreHorizontal className="w-4 h-4" />
             </Button>
           </div>
-          
+
           <div className="h-64">
-            <ChartRenderer 
+            <ChartRenderer
               type={chart.type}
               data={chart.data}
               options={chart.options}
@@ -216,6 +220,7 @@ const ChartsGrid: React.FC<ChartsGridProps> = ({
 ```
 
 #### 3.2.3 智能洞察面板
+
 ```typescript
 // InsightsPanel.tsx
 interface Insight {
@@ -280,7 +285,7 @@ const InsightsPanel: React.FC<InsightsPanelProps> = ({
         <Brain className="w-5 h-5 text-purple-500" />
         <h3 className="text-lg font-semibold">AI智能洞察</h3>
       </div>
-      
+
       <div className="space-y-4">
         {insights.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
@@ -310,7 +315,7 @@ const InsightsPanel: React.FC<InsightsPanelProps> = ({
                   <p className="text-sm text-gray-600 mb-2">
                     {insight.description}
                   </p>
-                  
+
                   {insight.actionable && insight.actions && (
                     <div className="flex gap-2">
                       {insight.actions.map((action, index) => (
@@ -337,6 +342,7 @@ const InsightsPanel: React.FC<InsightsPanelProps> = ({
 ```
 
 #### 3.2.4 图表渲染器
+
 ```typescript
 // ChartRenderer.tsx
 import {
@@ -401,17 +407,17 @@ const ChartRenderer: React.FC<ChartRendererProps> = ({
             <YAxis />
             {showTooltip && <Tooltip />}
             {showLegend && <Legend />}
-            <Line 
-              type="monotone" 
-              dataKey={yAxisKey} 
-              stroke={colors[0]} 
+            <Line
+              type="monotone"
+              dataKey={yAxisKey}
+              stroke={colors[0]}
               strokeWidth={2}
               dot={{ fill: colors[0], strokeWidth: 2, r: 4 }}
               activeDot={{ r: 6 }}
             />
           </LineChart>
         );
-        
+
       case 'bar':
         return (
           <BarChart {...commonProps}>
@@ -423,7 +429,7 @@ const ChartRenderer: React.FC<ChartRendererProps> = ({
             <Bar dataKey={yAxisKey} fill={colors[0]} radius={[4, 4, 0, 0]} />
           </BarChart>
         );
-        
+
       case 'pie':
         return (
           <PieChart {...commonProps}>
@@ -444,7 +450,7 @@ const ChartRenderer: React.FC<ChartRendererProps> = ({
             </Pie>
           </PieChart>
         );
-        
+
       case 'area':
         return (
           <AreaChart {...commonProps}>
@@ -453,16 +459,16 @@ const ChartRenderer: React.FC<ChartRendererProps> = ({
             <YAxis />
             {showTooltip && <Tooltip />}
             {showLegend && <Legend />}
-            <Area 
-              type="monotone" 
-              dataKey={yAxisKey} 
-              stroke={colors[0]} 
+            <Area
+              type="monotone"
+              dataKey={yAxisKey}
+              stroke={colors[0]}
               fill={colors[0]}
               fillOpacity={0.3}
             />
           </AreaChart>
         );
-        
+
       case 'scatter':
         return (
           <ScatterChart {...commonProps}>
@@ -474,7 +480,7 @@ const ChartRenderer: React.FC<ChartRendererProps> = ({
             <Scatter dataKey={yAxisKey} fill={colors[0]} />
           </ScatterChart>
         );
-        
+
       default:
         return <div>不支持的图表类型</div>;
     }
@@ -525,50 +531,120 @@ interface DashboardActions {
   generateReport: () => Promise<void>;
 }
 
-export const useDashboardStore = create<DashboardState & DashboardActions>((set, get) => ({
-  selectedProject: null,
-  timeRange: {
-    start: subDays(new Date(), 30),
-    end: new Date()
-  },
-  metrics: {
-    overview: [],
-    charts: [],
-    insights: []
-  },
-  loading: {
-    overview: false,
-    charts: false,
-    insights: false
-  },
-  error: null,
-  filters: {
-    teamMembers: [],
-    taskTypes: [],
-    priorities: []
-  },
+export const useDashboardStore = create<DashboardState & DashboardActions>(
+  (set, get) => ({
+    selectedProject: null,
+    timeRange: {
+      start: subDays(new Date(), 30),
+      end: new Date()
+    },
+    metrics: {
+      overview: [],
+      charts: [],
+      insights: []
+    },
+    loading: {
+      overview: false,
+      charts: false,
+      insights: false
+    },
+    error: null,
+    filters: {
+      teamMembers: [],
+      taskTypes: [],
+      priorities: []
+    },
 
-  setSelectedProject: (project) => {
-    set({ selectedProject: project });
-    get().loadDashboardData();
-  },
+    setSelectedProject: (project) => {
+      set({ selectedProject: project });
+      get().loadDashboardData();
+    },
 
-  setTimeRange: (range) => {
-    set({ timeRange: range });
-    get().loadDashboardData();
-  },
+    setTimeRange: (range) => {
+      set({ timeRange: range });
+      get().loadDashboardData();
+    },
 
-  loadDashboardData: async () => {
-    const { selectedProject, timeRange, filters } = get();
-    if (!selectedProject) return;
+    loadDashboardData: async () => {
+      const { selectedProject, timeRange, filters } = get();
+      if (!selectedProject) return;
 
-    try {
-      set(state => ({
-        loading: { ...state.loading, overview: true, charts: true, insights: true }
+      try {
+        set((state) => ({
+          loading: {
+            ...state.loading,
+            overview: true,
+            charts: true,
+            insights: true
+          }
+        }));
+
+        const [overviewRes, chartsRes, insightsRes] = await Promise.all([
+          fetch('/api/ai/analytics/overview', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              projectId: selectedProject.id,
+              timeRange,
+              filters
+            })
+          }),
+          fetch('/api/ai/analytics/charts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              projectId: selectedProject.id,
+              timeRange,
+              filters
+            })
+          }),
+          fetch('/api/ai/analytics/insights', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              projectId: selectedProject.id,
+              timeRange,
+              filters
+            })
+          })
+        ]);
+
+        const [overview, charts, insights] = await Promise.all([
+          overviewRes.json(),
+          chartsRes.json(),
+          insightsRes.json()
+        ]);
+
+        set({
+          metrics: { overview, charts, insights },
+          loading: { overview: false, charts: false, insights: false },
+          error: null
+        });
+      } catch (error) {
+        set({
+          error: '加载仪表盘数据失败',
+          loading: { overview: false, charts: false, insights: false }
+        });
+      }
+    },
+
+    refreshData: async () => {
+      await get().loadDashboardData();
+    },
+
+    updateFilters: (newFilters) => {
+      set((state) => ({
+        filters: { ...state.filters, ...newFilters }
       }));
+      get().loadDashboardData();
+    },
 
-      const [overviewRes, chartsRes, insightsRes] = await Promise.all([
-        fetch('/api/ai/analytics/overview', {
+    generateReport: async () => {
+      const { selectedProject, timeRange, filters } = get();
+      if (!selectedProject) return;
+
+      try {
+        const response = await fetch('/api/ai/analytics/report', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -576,84 +652,21 @@ export const useDashboardStore = create<DashboardState & DashboardActions>((set,
             timeRange,
             filters
           })
-        }),
-        fetch('/api/ai/analytics/charts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            projectId: selectedProject.id,
-            timeRange,
-            filters
-          })
-        }),
-        fetch('/api/ai/analytics/insights', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            projectId: selectedProject.id,
-            timeRange,
-            filters
-          })
-        })
-      ]);
+        });
 
-      const [overview, charts, insights] = await Promise.all([
-        overviewRes.json(),
-        chartsRes.json(),
-        insightsRes.json()
-      ]);
-
-      set({
-        metrics: { overview, charts, insights },
-        loading: { overview: false, charts: false, insights: false },
-        error: null
-      });
-    } catch (error) {
-      set({
-        error: '加载仪表盘数据失败',
-        loading: { overview: false, charts: false, insights: false }
-      });
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `项目分析报告_${selectedProject.name}_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('生成报告失败:', error);
+      }
     }
-  },
-
-  refreshData: async () => {
-    await get().loadDashboardData();
-  },
-
-  updateFilters: (newFilters) => {
-    set(state => ({
-      filters: { ...state.filters, ...newFilters }
-    }));
-    get().loadDashboardData();
-  },
-
-  generateReport: async () => {
-    const { selectedProject, timeRange, filters } = get();
-    if (!selectedProject) return;
-
-    try {
-      const response = await fetch('/api/ai/analytics/report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          projectId: selectedProject.id,
-          timeRange,
-          filters
-        })
-      });
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `项目分析报告_${selectedProject.name}_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('生成报告失败:', error);
-    }
-  }
-}));
+  })
+);
 ```
 
 ### 3.4 实时数据更新
@@ -671,12 +684,12 @@ export const useRealtimeDashboard = (projectId?: string) => {
     socket.emit('join_project_analytics', { projectId });
 
     // 监听实时数据更新
-    socket.on('analytics_data_updated', (data: {
-      type: 'overview' | 'charts' | 'insights';
-      data: any;
-    }) => {
-      updateMetrics(data.type, data.data);
-    });
+    socket.on(
+      'analytics_data_updated',
+      (data: { type: 'overview' | 'charts' | 'insights'; data: any }) => {
+        updateMetrics(data.type, data.data);
+      }
+    );
 
     // 监听项目状态变化
     socket.on('project_status_changed', () => {
@@ -685,10 +698,13 @@ export const useRealtimeDashboard = (projectId?: string) => {
     });
 
     // 监听任务状态变化
-    socket.on('task_status_changed', (data: { taskId: string; status: string }) => {
-      // 增量更新相关指标
-      updateTaskMetrics(data.taskId, data.status);
-    });
+    socket.on(
+      'task_status_changed',
+      (data: { taskId: string; status: string }) => {
+        // 增量更新相关指标
+        updateTaskMetrics(data.taskId, data.status);
+      }
+    );
 
     return () => {
       socket.off('analytics_data_updated');
@@ -707,6 +723,7 @@ export const useRealtimeDashboard = (projectId?: string) => {
 ### 4.1 API接口定义
 
 #### 4.1.1 概览数据接口
+
 ```typescript
 // /api/ai/analytics/overview - POST
 export async function POST(request: NextRequest) {
@@ -719,8 +736,12 @@ export async function POST(request: NextRequest) {
     await checkProjectAccess(user.id, projectId);
 
     // 获取项目基础数据
-    const projectData = await getProjectAnalyticsData(projectId, timeRange, filters);
-    
+    const projectData = await getProjectAnalyticsData(
+      projectId,
+      timeRange,
+      filters
+    );
+
     // 使用AI分析生成概览指标
     const analysisChain = new ProjectAnalysisChain();
     const overview = await analysisChain.generateOverview(projectData);
@@ -736,6 +757,7 @@ export async function POST(request: NextRequest) {
 ```
 
 #### 4.1.2 图表数据接口
+
 ```typescript
 // /api/ai/analytics/charts - POST
 export async function POST(request: NextRequest) {
@@ -766,6 +788,7 @@ export async function POST(request: NextRequest) {
 ```
 
 #### 4.1.3 智能洞察接口
+
 ```typescript
 // /api/ai/analytics/insights - POST
 export async function POST(request: NextRequest) {
@@ -798,6 +821,7 @@ export async function POST(request: NextRequest) {
 ### 4.2 LangChain分析链
 
 #### 4.2.1 项目分析链
+
 ```typescript
 // lib/ai/project-analysis-chain.ts
 import { LLMChain, SequentialChain } from 'langchain/chains';
@@ -894,7 +918,7 @@ export class ProjectAnalysisChain {
 
       const metrics = JSON.parse(result.processedMetrics);
       const trends = JSON.parse(result.trendAnalysis);
-      
+
       return this.formatOverviewMetrics(metrics, trends);
     } catch (error) {
       console.error('生成概览数据失败:', error);
@@ -910,8 +934,12 @@ export class ProjectAnalysisChain {
         value: `${metrics.progressPercentage}%`,
         change: {
           value: trends.progressChange || 0,
-          type: trends.progressTrend === 'up' ? 'increase' : 
-                trends.progressTrend === 'down' ? 'decrease' : 'neutral',
+          type:
+            trends.progressTrend === 'up'
+              ? 'increase'
+              : trends.progressTrend === 'down'
+                ? 'decrease'
+                : 'neutral',
           period: '上周'
         },
         icon: 'progress',
@@ -923,8 +951,12 @@ export class ProjectAnalysisChain {
         value: `${metrics.teamEfficiency}%`,
         change: {
           value: trends.efficiencyChange || 0,
-          type: trends.efficiencyTrend === 'up' ? 'increase' : 
-                trends.efficiencyTrend === 'down' ? 'decrease' : 'neutral',
+          type:
+            trends.efficiencyTrend === 'up'
+              ? 'increase'
+              : trends.efficiencyTrend === 'down'
+                ? 'decrease'
+                : 'neutral',
           period: '上周'
         },
         icon: 'efficiency',
@@ -936,8 +968,12 @@ export class ProjectAnalysisChain {
         value: `${metrics.completionRate}%`,
         change: {
           value: trends.completionChange || 0,
-          type: trends.completionTrend === 'up' ? 'increase' : 
-                trends.completionTrend === 'down' ? 'decrease' : 'neutral',
+          type:
+            trends.completionTrend === 'up'
+              ? 'increase'
+              : trends.completionTrend === 'down'
+                ? 'decrease'
+                : 'neutral',
           period: '上周'
         },
         icon: 'completion',
@@ -949,8 +985,12 @@ export class ProjectAnalysisChain {
         value: metrics.riskLevel || '低',
         change: {
           value: trends.riskChange || 0,
-          type: trends.riskTrend === 'up' ? 'decrease' : 
-                trends.riskTrend === 'down' ? 'increase' : 'neutral',
+          type:
+            trends.riskTrend === 'up'
+              ? 'decrease'
+              : trends.riskTrend === 'down'
+                ? 'increase'
+                : 'neutral',
           period: '上周'
         },
         icon: 'risk',
@@ -962,6 +1002,7 @@ export class ProjectAnalysisChain {
 ```
 
 #### 4.2.2 图表数据生成器
+
 ```typescript
 // lib/ai/chart-data-generator.ts
 export class ChartDataGenerator {
@@ -983,7 +1024,7 @@ export class ChartDataGenerator {
     try {
       // 获取原始数据
       const rawData = await this.getRawProjectData(params);
-      
+
       // 生成不同类型的图表
       const charts = await Promise.all([
         this.generateBurndownChart(rawData),
@@ -994,7 +1035,7 @@ export class ChartDataGenerator {
         this.generateRiskTrendChart(rawData)
       ]);
 
-      return charts.filter(chart => chart !== null);
+      return charts.filter((chart) => chart !== null);
     } catch (error) {
       console.error('生成图表数据失败:', error);
       throw new Error('图表生成失败');
@@ -1003,7 +1044,7 @@ export class ChartDataGenerator {
 
   private async generateBurndownChart(data: any): Promise<ChartConfig> {
     const burndownData = this.calculateBurndownData(data);
-    
+
     return {
       id: 'burndown',
       title: '燃尽图',
@@ -1022,7 +1063,7 @@ export class ChartDataGenerator {
 
   private async generateVelocityChart(data: any): Promise<ChartConfig> {
     const velocityData = this.calculateVelocityData(data);
-    
+
     return {
       id: 'velocity',
       title: '团队速度',
@@ -1039,7 +1080,7 @@ export class ChartDataGenerator {
 
   private async generateWorkloadDistribution(data: any): Promise<ChartConfig> {
     const workloadData = this.calculateWorkloadData(data);
-    
+
     return {
       id: 'workload',
       title: '工作量分布',
@@ -1054,7 +1095,7 @@ export class ChartDataGenerator {
 
   private async getRawProjectData(params: any) {
     const { projectId, timeRange } = params;
-    
+
     return await prisma.project.findUnique({
       where: { id: projectId },
       include: {
@@ -1091,20 +1132,25 @@ export class ChartDataGenerator {
   private calculateBurndownData(data: any) {
     // 计算燃尽图数据的逻辑
     const tasks = data.tasks || [];
-    const totalStoryPoints = tasks.reduce((sum: number, task: any) => 
-      sum + (task.storyPoints || 1), 0
+    const totalStoryPoints = tasks.reduce(
+      (sum: number, task: any) => sum + (task.storyPoints || 1),
+      0
     );
-    
+
     // 按日期分组计算剩余工作量
     const dailyData = this.groupTasksByDate(tasks);
     let remaining = totalStoryPoints;
-    
+
     return dailyData.map((day: any) => {
       remaining -= day.completedPoints;
       return {
         date: day.date,
         remaining,
-        ideal: this.calculateIdealBurndown(day.dayIndex, totalStoryPoints, dailyData.length)
+        ideal: this.calculateIdealBurndown(
+          day.dayIndex,
+          totalStoryPoints,
+          dailyData.length
+        )
       };
     });
   }
@@ -1112,16 +1158,18 @@ export class ChartDataGenerator {
   private calculateVelocityData(data: any) {
     // 计算团队速度数据的逻辑
     const sprints = data.sprints || [];
-    
+
     return sprints.map((sprint: any) => {
-      const completedTasks = data.tasks.filter((task: any) => 
-        task.sprintId === sprint.id && task.status === 'COMPLETED'
+      const completedTasks = data.tasks.filter(
+        (task: any) =>
+          task.sprintId === sprint.id && task.status === 'COMPLETED'
       );
-      
-      const velocity = completedTasks.reduce((sum: number, task: any) => 
-        sum + (task.storyPoints || 1), 0
+
+      const velocity = completedTasks.reduce(
+        (sum: number, task: any) => sum + (task.storyPoints || 1),
+        0
       );
-      
+
       return {
         sprint: sprint.name,
         velocity,
@@ -1133,20 +1181,21 @@ export class ChartDataGenerator {
   private calculateWorkloadData(data: any) {
     // 计算工作量分布数据的逻辑
     const members = data.members || [];
-    
+
     return members.map((member: any) => {
-      const memberTasks = data.tasks.filter((task: any) => 
-        task.assigneeId === member.userId
+      const memberTasks = data.tasks.filter(
+        (task: any) => task.assigneeId === member.userId
       );
-      
-      const workload = memberTasks.reduce((sum: number, task: any) => 
-        sum + (task.storyPoints || 1), 0
+
+      const workload = memberTasks.reduce(
+        (sum: number, task: any) => sum + (task.storyPoints || 1),
+        0
       );
-      
+
       return {
         name: member.user.name,
         value: workload,
-        percentage: (workload / data.tasks.length * 100).toFixed(1)
+        percentage: ((workload / data.tasks.length) * 100).toFixed(1)
       };
     });
   }
@@ -1156,7 +1205,8 @@ export class ChartDataGenerator {
 ### 4.3 LangGraph智能洞察工作流
 
 #### 4.3.1 项目洞察智能体
-```python
+
+````python
 # lib/ai/project-insights-agent.py
 from typing import Dict, List, TypedDict
 from langgraph import StateGraph
@@ -1177,134 +1227,134 @@ class ProjectInsightsAgent:
     def __init__(self):
         self.llm = ChatOpenAI(model="gpt-4", temperature=0.3)
         self.workflow = self.create_workflow()
-    
+
     def create_workflow(self) -> StateGraph:
         workflow = StateGraph(ProjectInsightsState)
-        
+
         # 添加工作流节点
         workflow.add_node("analyze_risks", self.analyze_risks)
         workflow.add_node("analyze_performance", self.analyze_performance)
         workflow.add_node("analyze_trends", self.analyze_trends)
         workflow.add_node("generate_insights", self.generate_insights)
         workflow.add_node("prioritize_insights", self.prioritize_insights)
-        
+
         # 定义工作流路径
         workflow.set_entry_point("analyze_risks")
         workflow.add_edge("analyze_risks", "analyze_performance")
         workflow.add_edge("analyze_performance", "analyze_trends")
         workflow.add_edge("analyze_trends", "generate_insights")
         workflow.add_edge("generate_insights", "prioritize_insights")
-        
+
         return workflow.compile()
-    
+
     def analyze_risks(self, state: ProjectInsightsState) -> ProjectInsightsState:
         """分析项目风险"""
         prompt = ChatPromptTemplate.from_template("""
         分析以下项目数据中的潜在风险：
-        
+
         项目数据：{project_data}
         时间范围：{time_range}
-        
+
         请识别以下类型的风险：
         1. 进度风险（延期可能性）
         2. 资源风险（人员不足、技能缺口）
         3. 质量风险（缺陷率、测试覆盖率）
         4. 技术风险（技术债务、架构问题）
         5. 沟通风险（团队协作问题）
-        
+
         对每个风险评估：
         - 风险等级（高/中/低）
         - 影响程度（1-10）
         - 发生概率（1-10）
         - 建议的缓解措施
-        
+
         返回JSON格式的风险分析结果。
         """)
-        
+
         response = self.llm.invoke(prompt.format(
             project_data=state["project_data"],
             time_range=state["time_range"]
         ))
-        
+
         risk_analysis = self.parse_json_response(response.content)
         state["risk_analysis"] = risk_analysis
-        
+
         return state
-    
+
     def analyze_performance(self, state: ProjectInsightsState) -> ProjectInsightsState:
         """分析团队绩效"""
         prompt = ChatPromptTemplate.from_template("""
         分析以下项目的团队绩效表现：
-        
+
         项目数据：{project_data}
-        
+
         请分析：
         1. 个人绩效指标（任务完成率、质量、效率）
         2. 团队协作效果（沟通频率、协作质量）
         3. 技能匹配度（任务分配是否合理）
         4. 工作负载平衡（是否存在过载或闲置）
         5. 学习成长情况（技能提升、知识分享）
-        
+
         对每个方面提供：
         - 当前状态评分（1-10）
         - 改进空间识别
         - 具体改进建议
-        
+
         返回JSON格式的绩效分析结果。
         """)
-        
+
         response = self.llm.invoke(prompt.format(
             project_data=state["project_data"]
         ))
-        
+
         performance_analysis = self.parse_json_response(response.content)
         state["performance_analysis"] = performance_analysis
-        
+
         return state
-    
+
     def analyze_trends(self, state: ProjectInsightsState) -> ProjectInsightsState:
         """分析发展趋势"""
         prompt = ChatPromptTemplate.from_template("""
         基于历史数据分析项目发展趋势：
-        
+
         项目数据：{project_data}
         时间范围：{time_range}
-        
+
         请分析以下趋势：
         1. 进度趋势（加速/减速/稳定）
         2. 质量趋势（提升/下降/稳定）
         3. 效率趋势（改善/恶化/持平）
         4. 团队士气趋势（提升/下降/稳定）
         5. 技术债务趋势（增加/减少/稳定）
-        
+
         对每个趋势提供：
         - 趋势方向和强度
         - 关键影响因素
         - 未来1-2周预测
         - 建议的应对策略
-        
+
         返回JSON格式的趋势分析结果。
         """)
-        
+
         response = self.llm.invoke(prompt.format(
             project_data=state["project_data"],
             time_range=state["time_range"]
         ))
-        
+
         trend_analysis = self.parse_json_response(response.content)
         state["trend_analysis"] = trend_analysis
-        
+
         return state
-    
+
     def generate_insights(self, state: ProjectInsightsState) -> ProjectInsightsState:
         """生成智能洞察"""
         prompt = ChatPromptTemplate.from_template("""
         基于以下分析结果，生成具体的项目洞察：
-        
+
         风险分析：{risk_analysis}
         绩效分析：{performance_analysis}
         趋势分析：{trend_analysis}
-        
+
         请生成5-8个具体的洞察，每个洞察包含：
         1. 洞察标题（简洁明了）
         2. 详细描述（问题或机会的具体说明）
@@ -1313,38 +1363,38 @@ class ProjectInsightsAgent:
         5. 是否可执行（true/false）
         6. 建议的行动方案（如果可执行）
         7. 预期影响（高/中/低）
-        
+
         优先关注：
         - 高风险问题
         - 明显的改进机会
         - 异常的趋势变化
         - 可立即采取行动的问题
-        
+
         返回JSON格式的洞察列表。
         """)
-        
+
         response = self.llm.invoke(prompt.format(
             risk_analysis=state["risk_analysis"],
             performance_analysis=state["performance_analysis"],
             trend_analysis=state["trend_analysis"]
         ))
-        
+
         insights = self.parse_json_response(response.content)
         state["raw_insights"] = insights
-        
+
         return state
-    
+
     def prioritize_insights(self, state: ProjectInsightsState) -> ProjectInsightsState:
         """优先级排序和最终处理"""
         raw_insights = state["raw_insights"]
-        
+
         # 按照置信度和影响程度排序
         prioritized_insights = sorted(
             raw_insights,
             key=lambda x: (x.get("confidence", 0) * self.get_impact_score(x.get("impact", "low"))),
             reverse=True
         )
-        
+
         # 格式化为前端需要的格式
         final_insights = []
         for insight in prioritized_insights[:6]:  # 只取前6个最重要的洞察
@@ -1358,10 +1408,10 @@ class ProjectInsightsAgent:
                 "actions": insight.get("actions", []),
                 "timestamp": datetime.now().isoformat()
             })
-        
+
         state["final_insights"] = final_insights
         return state
-    
+
     def get_impact_score(self, impact: str) -> float:
         """将影响等级转换为数值分数"""
         impact_scores = {
@@ -1370,7 +1420,7 @@ class ProjectInsightsAgent:
             "low": 0.3
         }
         return impact_scores.get(impact.lower(), 0.3)
-    
+
     def parse_json_response(self, response: str) -> Dict:
         """解析LLM返回的JSON响应"""
         try:
@@ -1380,12 +1430,12 @@ class ProjectInsightsAgent:
                 json_str = response.split("```json")[1].split("```")[0]
             else:
                 json_str = response
-            
+
             return json.loads(json_str.strip())
         except Exception as e:
             print(f"JSON解析失败: {e}")
             return {}
-    
+
     async def generate_insights(self, params: Dict) -> List[Dict]:
         """生成项目洞察的主入口"""
         initial_state = {
@@ -1398,10 +1448,10 @@ class ProjectInsightsAgent:
             "trend_analysis": {},
             "final_insights": []
         }
-        
+
         final_state = await self.workflow.ainvoke(initial_state)
         return final_state["final_insights"]
-```
+````
 
 ## 5. 数据库设计
 
@@ -1420,10 +1470,10 @@ model ProjectAnalysisReport {
   createdBy   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   creator     User     @relation(fields: [createdBy], references: [id])
-  
+
   @@map("project_analysis_reports")
 }
 
@@ -1442,7 +1492,7 @@ model AnalysisCache {
   data        Json
   expiresAt   DateTime
   createdAt   DateTime @default(now())
-  
+
   @@map("analysis_cache")
 }
 
@@ -1454,9 +1504,9 @@ model ProjectMetricHistory {
   value       Float
   metadata    Json?
   recordedAt  DateTime @default(now())
-  
+
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  
+
   @@map("project_metric_history")
 }
 
@@ -1469,9 +1519,9 @@ model InsightFeedback {
   helpful     Boolean
   comment     String?
   createdAt   DateTime @default(now())
-  
+
   user        User     @relation(fields: [userId], references: [id])
-  
+
   @@map("insight_feedback")
 }
 ```
@@ -1547,11 +1597,11 @@ export class AnalyticsRepository {
     const cached = await prisma.analysisCache.findUnique({
       where: { cacheKey }
     });
-    
+
     if (!cached || cached.expiresAt < new Date()) {
       return null;
     }
-    
+
     return cached.data;
   }
 
@@ -1561,7 +1611,7 @@ export class AnalyticsRepository {
     ttlMinutes: number = 30
   ) {
     const expiresAt = new Date(Date.now() + ttlMinutes * 60 * 1000);
-    
+
     return prisma.analysisCache.upsert({
       where: { cacheKey },
       update: {
@@ -1591,12 +1641,14 @@ export class AnalyticsRepository {
     const feedback = await prisma.insightFeedback.findMany({
       where: { insightId }
     });
-    
+
     return {
       totalCount: feedback.length,
-      averageRating: feedback.reduce((sum, f) => sum + f.rating, 0) / feedback.length,
-      helpfulCount: feedback.filter(f => f.helpful).length,
-      helpfulPercentage: (feedback.filter(f => f.helpful).length / feedback.length) * 100
+      averageRating:
+        feedback.reduce((sum, f) => sum + f.rating, 0) / feedback.length,
+      helpfulCount: feedback.filter((f) => f.helpful).length,
+      helpfulPercentage:
+        (feedback.filter((f) => f.helpful).length / feedback.length) * 100
     };
   }
 }
@@ -1611,7 +1663,7 @@ export class AnalyticsRepository {
 const VirtualizedChartList = React.memo(({ charts }: { charts: ChartConfig[] }) => {
   const [visibleCharts, setVisibleCharts] = useState<ChartConfig[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -1627,10 +1679,10 @@ const VirtualizedChartList = React.memo(({ charts }: { charts: ChartConfig[] }) 
       },
       { threshold: 0.1 }
     );
-    
+
     return () => observer.disconnect();
   }, [charts, visibleCharts]);
-  
+
   return (
     <div ref={containerRef} className="grid grid-cols-3 gap-6">
       {charts.map((chart) => (
@@ -1649,7 +1701,7 @@ const VirtualizedChartList = React.memo(({ charts }: { charts: ChartConfig[] }) 
 // 数据预加载和缓存
 const useDashboardCache = () => {
   const cache = useRef(new Map());
-  
+
   const getCachedData = useCallback((key: string) => {
     const cached = cache.current.get(key);
     if (cached && Date.now() - cached.timestamp < 5 * 60 * 1000) { // 5分钟缓存
@@ -1657,14 +1709,14 @@ const useDashboardCache = () => {
     }
     return null;
   }, []);
-  
+
   const setCachedData = useCallback((key: string, data: any) => {
     cache.current.set(key, {
       data,
       timestamp: Date.now()
     });
   }, []);
-  
+
   return { getCachedData, setCachedData };
 };
 ```
@@ -1675,11 +1727,11 @@ const useDashboardCache = () => {
 // Redis缓存层
 export class AnalyticsCacheService {
   private redis: Redis;
-  
+
   constructor() {
     this.redis = new Redis(process.env.REDIS_URL!);
   }
-  
+
   async getAnalyticsData(key: string): Promise<any | null> {
     try {
       const cached = await this.redis.get(`analytics:${key}`);
@@ -1689,15 +1741,19 @@ export class AnalyticsCacheService {
       return null;
     }
   }
-  
-  async setAnalyticsData(key: string, data: any, ttl: number = 300): Promise<void> {
+
+  async setAnalyticsData(
+    key: string,
+    data: any,
+    ttl: number = 300
+  ): Promise<void> {
     try {
       await this.redis.setex(`analytics:${key}`, ttl, JSON.stringify(data));
     } catch (error) {
       console.error('Redis set error:', error);
     }
   }
-  
+
   async invalidatePattern(pattern: string): Promise<void> {
     try {
       const keys = await this.redis.keys(`analytics:${pattern}`);
@@ -1733,7 +1789,7 @@ export class OptimizedAnalyticsRepository {
         })
       }
     };
-    
+
     // 并行查询优化
     const [tasks, timeEntries, comments] = await Promise.all([
       prisma.task.findMany({
@@ -1779,7 +1835,7 @@ export class OptimizedAnalyticsRepository {
         }
       })
     ]);
-    
+
     return { tasks, timeEntries, comments };
   }
 }
@@ -1799,18 +1855,18 @@ class DashboardErrorBoundary extends React.Component<
     super(props);
     this.state = { hasError: false };
   }
-  
+
   static getDerivedStateFromError(error: Error) {
     return { hasError: true, error };
   }
-  
+
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Dashboard error:', error, errorInfo);
-    
+
     // 发送错误报告
     this.reportError(error, errorInfo);
   }
-  
+
   reportError = async (error: Error, errorInfo: React.ErrorInfo) => {
     try {
       await fetch('/api/errors/report', {
@@ -1835,7 +1891,7 @@ class DashboardErrorBoundary extends React.Component<
       console.error('Failed to report error:', reportError);
     }
   };
-  
+
   render() {
     if (this.state.hasError) {
       return (
@@ -1846,13 +1902,13 @@ class DashboardErrorBoundary extends React.Component<
             抱歉，仪表盘遇到了一些问题。我们已经记录了这个错误。
           </p>
           <div className="space-x-2">
-            <Button 
+            <Button
               onClick={() => window.location.reload()}
               variant="outline"
             >
               刷新页面
             </Button>
-            <Button 
+            <Button
               onClick={() => this.setState({ hasError: false })}
             >
               重试
@@ -1861,7 +1917,7 @@ class DashboardErrorBoundary extends React.Component<
         </Card>
       );
     }
-    
+
     return this.props.children;
   }
 }
@@ -1879,10 +1935,10 @@ export class APIErrorHandler {
       context,
       timestamp: new Date().toISOString()
     };
-    
+
     // 记录错误日志
     console.error(`Analytics API Error [${context}]:`, errorInfo);
-    
+
     // 根据错误类型返回适当的响应
     if (error.name === 'ValidationError') {
       return NextResponse.json(
@@ -1890,26 +1946,20 @@ export class APIErrorHandler {
         { status: 400 }
       );
     }
-    
+
     if (error.name === 'UnauthorizedError') {
-      return NextResponse.json(
-        { error: '权限不足' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: '权限不足' }, { status: 403 });
     }
-    
+
     if (error.name === 'RateLimitError') {
       return NextResponse.json(
         { error: '请求过于频繁，请稍后再试' },
         { status: 429 }
       );
     }
-    
+
     // 默认服务器错误
-    return NextResponse.json(
-      { error: '服务器内部错误' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '服务器内部错误' }, { status: 500 });
   }
 }
 ```
@@ -1931,7 +1981,7 @@ export class DashboardMetrics {
       })
     });
   }
-  
+
   static async recordChartRender(chartType: string, renderTime: number) {
     await fetch('/api/metrics/chart-render', {
       method: 'POST',
@@ -1944,7 +1994,7 @@ export class DashboardMetrics {
       })
     });
   }
-  
+
   static async recordInsightGeneration(duration: number, success: boolean) {
     await fetch('/api/metrics/insight-generation', {
       method: 'POST',
@@ -1984,26 +2034,26 @@ describe('OverviewCard', () => {
       color: '#3B82F6'
     }
   };
-  
+
   it('should render card with correct data', () => {
     render(<OverviewCard {...mockProps} />);
-    
+
     expect(screen.getByText('项目进度')).toBeInTheDocument();
     expect(screen.getByText('75%')).toBeInTheDocument();
     expect(screen.getByText('5%')).toBeInTheDocument();
     expect(screen.getByText('vs 上周')).toBeInTheDocument();
   });
-  
+
   it('should show loading state', () => {
     render(<OverviewCard {...mockProps} loading={true} />);
-    
+
     expect(screen.getByTestId('overview-card-skeleton')).toBeInTheDocument();
   });
-  
+
   it('should handle missing change data', () => {
     const propsWithoutChange = { ...mockProps, change: undefined };
     render(<OverviewCard {...propsWithoutChange} />);
-    
+
     expect(screen.getByText('项目进度')).toBeInTheDocument();
     expect(screen.getByText('75%')).toBeInTheDocument();
     expect(screen.queryByText('vs 上周')).not.toBeInTheDocument();
@@ -2039,21 +2089,24 @@ jest.mock('@/lib/ai/project-analysis-chain', () => ({
 
 describe('/api/ai/analytics/overview', () => {
   it('should return overview data for valid request', async () => {
-    const request = new NextRequest('http://localhost/api/ai/analytics/overview', {
-      method: 'POST',
-      body: JSON.stringify({
-        projectId: 'test-project-id',
-        timeRange: {
-          start: '2024-01-01',
-          end: '2024-01-31'
-        },
-        filters: {}
-      })
-    });
-    
+    const request = new NextRequest(
+      'http://localhost/api/ai/analytics/overview',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          projectId: 'test-project-id',
+          timeRange: {
+            start: '2024-01-01',
+            end: '2024-01-31'
+          },
+          filters: {}
+        })
+      }
+    );
+
     const response = await POST(request);
     const data = await response.json();
-    
+
     expect(response.status).toBe(200);
     expect(data).toHaveLength(1);
     expect(data[0]).toMatchObject({
@@ -2062,18 +2115,23 @@ describe('/api/ai/analytics/overview', () => {
       value: '75%'
     });
   });
-  
+
   it('should handle unauthorized access', async () => {
     // Mock unauthorized user
-    require('@/lib/auth').getCurrentUser.mockRejectedValue(new Error('Unauthorized'));
-    
-    const request = new NextRequest('http://localhost/api/ai/analytics/overview', {
-      method: 'POST',
-      body: JSON.stringify({ projectId: 'test-project-id' })
-    });
-    
+    require('@/lib/auth').getCurrentUser.mockRejectedValue(
+      new Error('Unauthorized')
+    );
+
+    const request = new NextRequest(
+      'http://localhost/api/ai/analytics/overview',
+      {
+        method: 'POST',
+        body: JSON.stringify({ projectId: 'test-project-id' })
+      }
+    );
+
     const response = await POST(request);
-    
+
     expect(response.status).toBe(500);
   });
 });
@@ -2140,39 +2198,49 @@ CMD ["npm", "start"]
 export class PerformanceMonitor {
   static startTimer(name: string): () => void {
     const start = performance.now();
-    
+
     return () => {
       const duration = performance.now() - start;
       this.recordMetric(name, duration);
     };
   }
-  
-  static recordMetric(name: string, value: number, tags?: Record<string, string>) {
+
+  static recordMetric(
+    name: string,
+    value: number,
+    tags?: Record<string, string>
+  ) {
     // 发送到监控系统
     if (typeof window !== 'undefined') {
       // 客户端监控
-      navigator.sendBeacon('/api/metrics', JSON.stringify({
-        name,
-        value,
-        tags,
-        timestamp: Date.now()
-      }));
+      navigator.sendBeacon(
+        '/api/metrics',
+        JSON.stringify({
+          name,
+          value,
+          tags,
+          timestamp: Date.now()
+        })
+      );
     } else {
       // 服务端监控
       console.log(`Metric: ${name} = ${value}`, tags);
     }
   }
-  
-  static monitorAPICall<T>(apiCall: () => Promise<T>, name: string): Promise<T> {
+
+  static monitorAPICall<T>(
+    apiCall: () => Promise<T>,
+    name: string
+  ): Promise<T> {
     const endTimer = this.startTimer(`api_call_${name}`);
-    
+
     return apiCall()
-      .then(result => {
+      .then((result) => {
         endTimer();
         this.recordMetric(`api_success_${name}`, 1);
         return result;
       })
-      .catch(error => {
+      .catch((error) => {
         endTimer();
         this.recordMetric(`api_error_${name}`, 1);
         throw error;

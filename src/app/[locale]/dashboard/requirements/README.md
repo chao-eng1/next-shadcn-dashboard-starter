@@ -1,9 +1,11 @@
 # Requirements 模块
 
 ## 模块概述
+
 需求管理模块，提供需求收集、分析、跟踪、验证等完整的需求工程功能。
 
 ## 主要功能
+
 - 📝 需求创建和编辑
 - 🏷️ 需求分类和标签
 - 🔗 需求关联和依赖
@@ -16,6 +18,7 @@
 - 📊 需求统计分析
 
 ## 技术栈
+
 - **React**: 前端框架
 - **Prisma**: 数据库 ORM
 - **React Hook Form**: 表单管理
@@ -24,6 +27,7 @@
 - **React Query**: 数据获取
 
 ## 文件结构
+
 ```
 requirements/
 ├── page.tsx                    # 需求列表页面
@@ -42,27 +46,35 @@ requirements/
 ```
 
 ## 数据模型
+
 ```typescript
 interface Requirement {
-  id: string
-  title: string
-  description: string
-  type: 'functional' | 'non-functional' | 'business' | 'technical'
-  priority: 'low' | 'medium' | 'high' | 'critical'
-  status: 'draft' | 'review' | 'approved' | 'implemented' | 'tested' | 'rejected'
-  category: string
-  tags: string[]
-  acceptanceCriteria: string[]
-  dependencies: string[]
-  assigneeId?: string
-  reviewerId?: string
-  projectId: string
-  createdAt: Date
-  updatedAt: Date
+  id: string;
+  title: string;
+  description: string;
+  type: 'functional' | 'non-functional' | 'business' | 'technical';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  status:
+    | 'draft'
+    | 'review'
+    | 'approved'
+    | 'implemented'
+    | 'tested'
+    | 'rejected';
+  category: string;
+  tags: string[];
+  acceptanceCriteria: string[];
+  dependencies: string[];
+  assigneeId?: string;
+  reviewerId?: string;
+  projectId: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 ```
 
 ## API 端点
+
 - `/api/requirements` - 需求 CRUD 操作
 - `/api/requirements/[id]/review` - 需求评审
 - `/api/requirements/[id]/history` - 变更历史

@@ -7,11 +7,13 @@
 ## 问题分析
 
 ### 1. 缺少必要配置
+
 - 项目中没有 `.env` 或 `.env.local` 文件
 - 缺少 `FIGMA_ACCESS_TOKEN` 环境变量
 - 没有有效的 Figma 文件 key
 
 ### 2. 错误信息
+
 ```
 Error fetching file: Failed to make request to Figma API endpoint '/files/[fileKey]': Fetch failed with status 404: Not Found
 ```
@@ -44,6 +46,7 @@ echo "FIGMA_FILE_KEY=your_figma_file_key_here" >> .env.local
 ### 步骤 3: 获取 Figma 文件 Key
 
 从 Figma 文件 URL 中提取文件 key：
+
 ```
 https://www.figma.com/file/[FILE_KEY]/[FILE_NAME]
                         ^^^^^^^^^
@@ -57,22 +60,23 @@ https://www.figma.com/file/[FILE_KEY]/[FILE_NAME]
 ```javascript
 // 测试获取文件数据
 const figmaData = await getFigmaData({
-  fileKey: "your-actual-file-key",
-  nodeId: "0:1", // 可选，根节点
+  fileKey: 'your-actual-file-key',
+  nodeId: '0:1', // 可选，根节点
   depth: 2 // 可选，遍历深度
 });
 
 // 测试下载图像
 const downloadResult = await downloadFigmaImages({
-  fileKey: "your-actual-file-key",
+  fileKey: 'your-actual-file-key',
   nodes: [
     {
-      nodeId: "1:2",
-      fileName: "test-icon.svg",
+      nodeId: '1:2',
+      fileName: 'test-icon.svg',
       needsCropping: false
     }
   ],
-  localPath: "/Users/chao/Documents/llmProject/next-shadcn-dashboard-starter/public/assets",
+  localPath:
+    '/Users/chao/Documents/llmProject/next-shadcn-dashboard-starter/public/assets',
   pngScale: 2
 });
 ```
@@ -110,10 +114,12 @@ FIGMA_FILE_KEY=your_actual_file_key_here
 配置完成后，可以测试以下功能：
 
 1. **基础连接测试**
+
    - 获取文件基本信息
    - 验证访问权限
 
 2. **数据提取测试**
+
    - 获取页面结构
    - 提取组件信息
    - 获取样式数据

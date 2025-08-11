@@ -88,45 +88,7 @@ interface RequirementKanbanProps {
   onRequirementDelete?: (requirementId: string) => void;
 }
 
-const statusConfig = {
-  draft: {
-    label: 'Draft',
-    color: 'bg-gray-100 text-gray-800 border-gray-200',
-    icon: Clock
-  },
-  review: {
-    label: 'Review',
-    color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    icon: AlertCircle
-  },
-  approved: {
-    label: 'Approved',
-    color: 'bg-green-100 text-green-800 border-green-200',
-    icon: CheckCircle2
-  },
-  in_progress: {
-    label: 'In Progress',
-    color: 'bg-blue-100 text-blue-800 border-blue-200',
-    icon: Clock
-  },
-  completed: {
-    label: 'Completed',
-    color: 'bg-green-100 text-green-800 border-green-200',
-    icon: CheckCircle2
-  },
-  rejected: {
-    label: 'Rejected',
-    color: 'bg-red-100 text-red-800 border-red-200',
-    icon: AlertCircle
-  }
-};
-
-const priorityConfig = {
-  low: { label: 'Low', color: 'bg-gray-100 text-gray-800' },
-  medium: { label: 'Medium', color: 'bg-yellow-100 text-yellow-800' },
-  high: { label: 'High', color: 'bg-orange-100 text-orange-800' },
-  critical: { label: 'Critical', color: 'bg-red-100 text-red-800' }
-};
+// Move config objects inside component to access translations
 
 // Mock data for demonstration
 const mockRequirements: Requirement[] = [
@@ -244,48 +206,73 @@ export function RequirementKanban({
     useState<Requirement | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
+  const statusConfig = {
+    draft: { label: t('statuses.draft'), color: 'border-gray-200' },
+    review: { label: t('statuses.review'), color: 'border-yellow-200' },
+    approved: { label: t('statuses.approved'), color: 'border-purple-200' },
+    in_progress: { label: t('statuses.inProgress'), color: 'border-blue-200' },
+    completed: { label: t('statuses.completed'), color: 'border-green-200' },
+    rejected: { label: t('statuses.rejected'), color: 'border-red-200' }
+  };
+
+  const priorityConfig = {
+    low: { label: t('priorities.low'), color: 'bg-gray-100 text-gray-800' },
+    medium: {
+      label: t('priorities.medium'),
+      color: 'bg-yellow-100 text-yellow-800'
+    },
+    high: {
+      label: t('priorities.high'),
+      color: 'bg-orange-100 text-orange-800'
+    },
+    critical: {
+      label: t('priorities.critical'),
+      color: 'bg-red-100 text-red-800'
+    }
+  };
+
   // Group requirements by status
   const columns: KanbanColumn[] = [
     {
       id: 'draft',
-      title: 'Draft',
+      title: statusConfig.draft.label,
       status: 'draft',
-      color: 'border-gray-200',
+      color: statusConfig.draft.color,
       requirements: requirements.filter((req) => req.status === 'draft')
     },
     {
       id: 'review',
-      title: 'Review',
+      title: statusConfig.review.label,
       status: 'review',
-      color: 'border-yellow-200',
+      color: statusConfig.review.color,
       requirements: requirements.filter((req) => req.status === 'review')
     },
     {
       id: 'approved',
-      title: 'Approved',
+      title: statusConfig.approved.label,
       status: 'approved',
-      color: 'border-green-200',
+      color: statusConfig.approved.color,
       requirements: requirements.filter((req) => req.status === 'approved')
     },
     {
       id: 'in_progress',
-      title: 'In Progress',
+      title: statusConfig.in_progress.label,
       status: 'in_progress',
-      color: 'border-blue-200',
+      color: statusConfig.in_progress.color,
       requirements: requirements.filter((req) => req.status === 'in_progress')
     },
     {
       id: 'completed',
-      title: 'Completed',
+      title: statusConfig.completed.label,
       status: 'completed',
-      color: 'border-green-200',
+      color: statusConfig.completed.color,
       requirements: requirements.filter((req) => req.status === 'completed')
     },
     {
       id: 'rejected',
-      title: 'Rejected',
+      title: statusConfig.rejected.label,
       status: 'rejected',
-      color: 'border-red-200',
+      color: statusConfig.rejected.color,
       requirements: requirements.filter((req) => req.status === 'rejected')
     }
   ];

@@ -5,12 +5,14 @@
 AI知识库页面是一个智能化的知识管理系统，集成了LangChain和LangGraph技术，为用户提供智能文档管理、知识检索、内容生成和知识图谱构建等功能。该页面旨在帮助团队高效地组织、管理和利用知识资产。
 
 ### 1.1 核心价值
+
 - **智能检索**: 基于语义理解的智能搜索和推荐
 - **知识图谱**: 自动构建知识之间的关联关系
 - **内容生成**: AI辅助的文档创建和内容优化
 - **协作共享**: 团队知识的协作编辑和共享机制
 
 ### 1.2 目标用户
+
 - **知识工作者**: 需要管理大量文档和资料的专业人员
 - **研究团队**: 需要协作整理和分享研究成果的团队
 - **项目经理**: 需要维护项目知识库的管理人员
@@ -19,30 +21,35 @@ AI知识库页面是一个智能化的知识管理系统，集成了LangChain和
 ## 2. 功能需求
 
 ### 2.1 智能文档管理
+
 - **文档上传**: 支持多种格式文档的批量上传和解析
 - **自动分类**: AI自动识别文档类型和主题进行分类
 - **版本控制**: 文档版本管理和变更追踪
 - **权限管理**: 细粒度的文档访问和编辑权限控制
 
 ### 2.2 智能检索系统
+
 - **语义搜索**: 基于内容理解的智能搜索
 - **相关推荐**: 根据用户行为和内容相似性推荐相关文档
 - **快速预览**: 搜索结果的快速预览和高亮显示
 - **搜索历史**: 个人搜索历史和常用查询管理
 
 ### 2.3 AI内容助手
+
 - **智能摘要**: 自动生成文档摘要和关键信息提取
 - **内容生成**: AI辅助的文档创建和内容扩展
 - **翻译服务**: 多语言文档的智能翻译
 - **质量检查**: 文档质量评估和改进建议
 
 ### 2.4 知识图谱
+
 - **关系发现**: 自动发现文档和概念之间的关联
 - **可视化展示**: 知识关系的图形化展示
 - **路径分析**: 知识点之间的关联路径分析
 - **图谱导航**: 基于知识图谱的导航和探索
 
 ### 2.5 协作功能
+
 - **实时编辑**: 多人协作的实时文档编辑
 - **评论系统**: 文档评论和讨论功能
 - **分享机制**: 灵活的文档分享和权限设置
@@ -50,12 +57,12 @@ AI知识库页面是一个智能化的知识管理系统，集成了LangChain和
 
 ### 2.6 用户角色权限
 
-| 角色 | 权限描述 |
-|------|----------|
+| 角色       | 权限描述                                     |
+| ---------- | -------------------------------------------- |
 | 知识管理员 | 全部权限：管理知识库结构、用户权限、系统配置 |
-| 内容编辑者 | 创建、编辑、删除文档，管理分类和标签 |
-| 协作者 | 编辑指定文档，添加评论，参与协作 |
-| 查看者 | 浏览和搜索文档，查看公开内容 |
+| 内容编辑者 | 创建、编辑、删除文档，管理分类和标签         |
+| 协作者     | 编辑指定文档，添加评论，参与协作             |
+| 查看者     | 浏览和搜索文档，查看公开内容                 |
 
 ## 3. 前端设计
 
@@ -132,7 +139,7 @@ export const KnowledgeBasePage: React.FC<KnowledgeBasePageProps> = ({
               <Plus className="w-4 h-4 mr-2" />
               新建文档
             </Button>
-            
+
             <Button
               onClick={() => setShowAIAssistant(!showAIAssistant)}
               variant="outline"
@@ -155,7 +162,7 @@ export const KnowledgeBasePage: React.FC<KnowledgeBasePageProps> = ({
               <h1 className="text-xl font-semibold text-gray-900">
                 知识库
               </h1>
-              
+
               <div className="flex items-center space-x-2">
                 <Button
                   variant={activeView === 'grid' ? 'default' : 'outline'}
@@ -164,7 +171,7 @@ export const KnowledgeBasePage: React.FC<KnowledgeBasePageProps> = ({
                 >
                   <Grid className="w-4 h-4" />
                 </Button>
-                
+
                 <Button
                   variant={activeView === 'list' ? 'default' : 'outline'}
                   size="sm"
@@ -172,7 +179,7 @@ export const KnowledgeBasePage: React.FC<KnowledgeBasePageProps> = ({
                 >
                   <List className="w-4 h-4" />
                 </Button>
-                
+
                 <Button
                   variant={activeView === 'graph' ? 'default' : 'outline'}
                   size="sm"
@@ -188,7 +195,7 @@ export const KnowledgeBasePage: React.FC<KnowledgeBasePageProps> = ({
                 filters={filters}
                 onFiltersChange={setFilters}
               />
-              
+
               <Button size="sm">
                 <Plus className="w-4 h-4 mr-2" />
                 上传文档
@@ -217,7 +224,7 @@ export const KnowledgeBasePage: React.FC<KnowledgeBasePageProps> = ({
                   onDocumentSelect={setSelectedDocument}
                 />
               </TabsContent>
-              
+
               <TabsContent value="list" className="h-full">
                 <DocumentList
                   projectId={projectId}
@@ -226,7 +233,7 @@ export const KnowledgeBasePage: React.FC<KnowledgeBasePageProps> = ({
                   onDocumentSelect={setSelectedDocument}
                 />
               </TabsContent>
-              
+
               <TabsContent value="graph" className="h-full">
                 <KnowledgeGraph
                   projectId={projectId}
@@ -265,6 +272,7 @@ export const KnowledgeBasePage: React.FC<KnowledgeBasePageProps> = ({
 ### 3.2 UI组件设计
 
 #### 3.2.1 智能搜索组件
+
 ```typescript
 // components/KnowledgeSearchBar.tsx
 import React, { useState, useRef, useEffect } from 'react';
@@ -292,7 +300,7 @@ export const KnowledgeSearchBar: React.FC<KnowledgeSearchBarProps> = ({
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const debouncedQuery = useDebounce(value, 300);
-  
+
   const {
     suggestions,
     loading: suggestionsLoading
@@ -308,12 +316,12 @@ export const KnowledgeSearchBar: React.FC<KnowledgeSearchBarProps> = ({
 
   const handleSearch = (query: string) => {
     if (!query.trim()) return;
-    
+
     // 添加到搜索历史
     const newRecentSearches = [query, ...recentSearches.filter(s => s !== query)].slice(0, 5);
     setRecentSearches(newRecentSearches);
     localStorage.setItem('knowledge_recent_searches', JSON.stringify(newRecentSearches));
-    
+
     onSearch(query);
     setShowSuggestions(false);
   };
@@ -426,6 +434,7 @@ export const KnowledgeSearchBar: React.FC<KnowledgeSearchBarProps> = ({
 ```
 
 #### 3.2.2 文档卡片组件
+
 ```typescript
 // components/DocumentCard.tsx
 import React, { useState } from 'react';
@@ -508,13 +517,13 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
 
   const highlightText = (text: string, highlights: string[]) => {
     if (!highlights.length) return text;
-    
+
     let highlightedText = text;
     highlights.forEach(highlight => {
       const regex = new RegExp(`(${highlight})`, 'gi');
       highlightedText = highlightedText.replace(regex, '<mark>$1</mark>');
     });
-    
+
     return <span dangerouslySetInnerHTML={{ __html: highlightedText }} />;
   };
 
@@ -524,21 +533,21 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
         <div className="flex items-start justify-between">
           <div className="flex items-start space-x-3 flex-1">
             <div className="text-2xl">{getFileIcon(document.fileType)}</div>
-            
+
             <div className="flex-1 min-w-0">
-              <h3 
+              <h3
                 className="font-medium text-gray-900 truncate hover:text-blue-600 transition-colors"
                 onClick={() => onSelect(document.id)}
               >
                 {highlightText(document.title, highlighted)}
               </h3>
-              
+
               {document.description && (
                 <p className="text-sm text-gray-600 mt-1 line-clamp-2">
                   {highlightText(document.description, highlighted)}
                 </p>
               )}
-              
+
               {/* AI摘要 */}
               {showAISummary && document.aiSummary && (
                 <div className="mt-2 p-2 bg-blue-50 rounded-md">
@@ -547,8 +556,8 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
                     AI摘要
                   </div>
                   <p className="text-sm text-gray-700">
-                    {showFullSummary 
-                      ? document.aiSummary 
+                    {showFullSummary
+                      ? document.aiSummary
                       : `${document.aiSummary.slice(0, 100)}${document.aiSummary.length > 100 ? '...' : ''}`
                     }
                     {document.aiSummary.length > 100 && (
@@ -608,7 +617,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
               </Avatar>
               <span>{document.author.name}</span>
             </div>
-            
+
             <div className="flex items-center">
               <Clock className="w-3 h-3 mr-1" />
               <span>
@@ -619,7 +628,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
               </span>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <span>{formatFileSize(document.fileSize)}</span>
             <span>•</span>
@@ -644,7 +653,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
             >
               <Edit className="w-3 h-3" />
             </Button>
-            
+
             <Button
               variant="ghost"
               size="sm"
@@ -656,7 +665,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
             >
               <Share className="w-3 h-3" />
             </Button>
-            
+
             <Button
               variant="ghost"
               size="sm"
@@ -668,7 +677,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
             >
               <Download className="w-3 h-3" />
             </Button>
-            
+
             <Button
               variant="ghost"
               size="sm"
@@ -681,7 +690,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
               <Trash2 className="w-3 h-3" />
             </Button>
           </div>
-          
+
           <Badge variant="outline" className="text-xs">
             {document.category}
           </Badge>
@@ -693,6 +702,7 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
 ```
 
 #### 3.2.3 知识图谱组件
+
 ```typescript
 // components/KnowledgeGraph.tsx
 import React, { useEffect, useRef, useState } from 'react';
@@ -734,7 +744,7 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1);
-  
+
   const {
     nodes,
     links,
@@ -748,7 +758,7 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
 
     const svg = d3.select(svgRef.current);
     const width = svgRef.current.clientWidth;
-    
+
     // 清除之前的内容
     svg.selectAll('*').remove();
 
@@ -839,7 +849,7 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
         });
 
         node.style('opacity', n => connectedNodes.has(n.id) ? 1 : 0.3);
-        link.style('opacity', l => 
+        link.style('opacity', l =>
           l.source === d.id || l.target === d.id ? 1 : 0.1
         );
       })
@@ -889,11 +899,11 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
     // 搜索高亮
     if (searchTerm) {
       node.select('circle')
-        .attr('stroke', d => 
-          d.label.toLowerCase().includes(searchTerm.toLowerCase()) 
+        .attr('stroke', d =>
+          d.label.toLowerCase().includes(searchTerm.toLowerCase())
             ? '#ff6b6b' : '#fff'
         )
-        .attr('stroke-width', d => 
+        .attr('stroke-width', d =>
           d.label.toLowerCase().includes(searchTerm.toLowerCase()) ? 3 : 2
         );
     }
@@ -964,7 +974,7 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
             className="w-40 h-8"
           />
         </div>
-        
+
         <div className="flex items-center space-x-1">
           <Button
             variant="outline"
@@ -974,7 +984,7 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
           >
             <ZoomIn className="w-4 h-4" />
           </Button>
-          
+
           <Button
             variant="outline"
             size="sm"
@@ -983,7 +993,7 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
           >
             <ZoomOut className="w-4 h-4" />
           </Button>
-          
+
           <Button
             variant="outline"
             size="sm"
@@ -993,7 +1003,7 @@ export const KnowledgeGraph: React.FC<KnowledgeGraphProps> = ({
             <RotateCcw className="w-4 h-4" />
           </Button>
         </div>
-        
+
         <div className="text-xs text-gray-500">
           缩放: {Math.round(zoomLevel * 100)}%
         </div>
@@ -1107,23 +1117,23 @@ interface KnowledgeActions {
   createDocument: (document: Partial<Document>) => Promise<void>;
   updateDocument: (documentId: string, updates: Partial<Document>) => Promise<void>;
   deleteDocument: (documentId: string) => Promise<void>;
-  
+
   // 搜索功能
   search: (query: string, filters?: Partial<SearchFilters>) => Promise<void>;
   setSearchQuery: (query: string) => void;
   setFilters: (filters: Partial<SearchFilters>) => void;
   clearSearch: () => void;
-  
+
   // 文档操作
   selectDocument: (documentId: string | null) => void;
   incrementViewCount: (documentId: string) => void;
   incrementDownloadCount: (documentId: string) => void;
-  
+
   // AI功能
   generateSummary: (documentId: string) => Promise<void>;
   generateTags: (documentId: string) => Promise<void>;
   findSimilarDocuments: (documentId: string) => Promise<Document[]>;
-  
+
   // 分类和标签
   loadCategories: (projectId: string) => Promise<void>;
   loadTags: (projectId: string) => Promise<void>;
@@ -1165,9 +1175,9 @@ export const useKnowledgeStore = create<KnowledgeState & KnowledgeActions>()
         try {
           const response = await fetch(`/api/projects/${projectId}/documents`);
           if (!response.ok) throw new Error('加载文档失败');
-          
+
           const documents = await response.json();
-          
+
           set((state) => {
             state.documents = documents;
             state.loading.documents = false;
@@ -1194,11 +1204,11 @@ export const useKnowledgeStore = create<KnowledgeState & KnowledgeActions>()
             },
             body: JSON.stringify(document)
           });
-          
+
           if (!response.ok) throw new Error('创建文档失败');
-          
+
           const newDocument = await response.json();
-          
+
           set((state) => {
             state.documents.unshift(newDocument);
             state.loading.upload = false;
@@ -1220,17 +1230,17 @@ export const useKnowledgeStore = create<KnowledgeState & KnowledgeActions>()
             },
             body: JSON.stringify(updates)
           });
-          
+
           if (!response.ok) throw new Error('更新文档失败');
-          
+
           const updatedDocument = await response.json();
-          
+
           set((state) => {
             const index = state.documents.findIndex(doc => doc.id === documentId);
             if (index !== -1) {
               state.documents[index] = updatedDocument;
             }
-            
+
             // 更新搜索结果中的文档
             const searchIndex = state.searchResults.findIndex(doc => doc.id === documentId);
             if (searchIndex !== -1) {
@@ -1249,13 +1259,13 @@ export const useKnowledgeStore = create<KnowledgeState & KnowledgeActions>()
           const response = await fetch(`/api/documents/${documentId}`, {
             method: 'DELETE'
           });
-          
+
           if (!response.ok) throw new Error('删除文档失败');
-          
+
           set((state) => {
             state.documents = state.documents.filter(doc => doc.id !== documentId);
             state.searchResults = state.searchResults.filter(doc => doc.id !== documentId);
-            
+
             if (state.selectedDocument === documentId) {
               state.selectedDocument = null;
             }
@@ -1273,7 +1283,7 @@ export const useKnowledgeStore = create<KnowledgeState & KnowledgeActions>()
           state.loading.search = true;
           state.error = null;
           state.searchQuery = query;
-          
+
           if (filters) {
             state.filters = { ...state.filters, ...filters };
           }
@@ -1292,12 +1302,12 @@ export const useKnowledgeStore = create<KnowledgeState & KnowledgeActions>()
               return acc;
             }, {} as Record<string, string>)
           });
-          
+
           const response = await fetch(`/api/documents/search?${searchParams}`);
           if (!response.ok) throw new Error('搜索失败');
-          
+
           const results = await response.json();
-          
+
           set((state) => {
             state.searchResults = results;
             state.loading.search = false;
@@ -1348,13 +1358,13 @@ export const useKnowledgeStore = create<KnowledgeState & KnowledgeActions>()
           await fetch(`/api/documents/${documentId}/view`, {
             method: 'POST'
           });
-          
+
           set((state) => {
             const document = state.documents.find(doc => doc.id === documentId);
             if (document) {
               document.viewCount += 1;
             }
-            
+
             const searchResult = state.searchResults.find(doc => doc.id === documentId);
             if (searchResult) {
               searchResult.viewCount += 1;
@@ -1370,13 +1380,13 @@ export const useKnowledgeStore = create<KnowledgeState & KnowledgeActions>()
           await fetch(`/api/documents/${documentId}/download`, {
             method: 'POST'
           });
-          
+
           set((state) => {
             const document = state.documents.find(doc => doc.id === documentId);
             if (document) {
               document.downloadCount += 1;
             }
-            
+
             const searchResult = state.searchResults.find(doc => doc.id === documentId);
             if (searchResult) {
               searchResult.downloadCount += 1;
@@ -1393,17 +1403,17 @@ export const useKnowledgeStore = create<KnowledgeState & KnowledgeActions>()
           const response = await fetch(`/api/documents/${documentId}/ai/summary`, {
             method: 'POST'
           });
-          
+
           if (!response.ok) throw new Error('生成摘要失败');
-          
+
           const { summary } = await response.json();
-          
+
           set((state) => {
             const document = state.documents.find(doc => doc.id === documentId);
             if (document) {
               document.aiSummary = summary;
             }
-            
+
             const searchResult = state.searchResults.find(doc => doc.id === documentId);
             if (searchResult) {
               searchResult.aiSummary = summary;
@@ -1421,17 +1431,17 @@ export const useKnowledgeStore = create<KnowledgeState & KnowledgeActions>()
           const response = await fetch(`/api/documents/${documentId}/ai/tags`, {
             method: 'POST'
           });
-          
+
           if (!response.ok) throw new Error('生成标签失败');
-          
+
           const { tags } = await response.json();
-          
+
           set((state) => {
             const document = state.documents.find(doc => doc.id === documentId);
             if (document) {
               document.tags = [...new Set([...document.tags, ...tags])];
             }
-            
+
             const searchResult = state.searchResults.find(doc => doc.id === documentId);
             if (searchResult) {
               searchResult.tags = [...new Set([...searchResult.tags, ...tags])];
@@ -1448,7 +1458,7 @@ export const useKnowledgeStore = create<KnowledgeState & KnowledgeActions>()
         try {
           const response = await fetch(`/api/documents/${documentId}/similar`);
           if (!response.ok) throw new Error('查找相似文档失败');
-          
+
           return await response.json();
         } catch (error) {
           set((state) => {
@@ -1463,9 +1473,9 @@ export const useKnowledgeStore = create<KnowledgeState & KnowledgeActions>()
         try {
           const response = await fetch(`/api/projects/${projectId}/categories`);
           if (!response.ok) throw new Error('加载分类失败');
-          
+
           const categories = await response.json();
-          
+
           set((state) => {
             state.categories = categories;
           });
@@ -1480,9 +1490,9 @@ export const useKnowledgeStore = create<KnowledgeState & KnowledgeActions>()
         try {
           const response = await fetch(`/api/projects/${projectId}/tags`);
           if (!response.ok) throw new Error('加载标签失败');
-          
+
           const tags = await response.json();
-          
+
           set((state) => {
             state.tags = tags;
           });
@@ -1502,9 +1512,9 @@ export const useKnowledgeStore = create<KnowledgeState & KnowledgeActions>()
             },
             body: JSON.stringify({ name })
           });
-          
+
           if (!response.ok) throw new Error('创建分类失败');
-          
+
           set((state) => {
             if (!state.categories.includes(name)) {
               state.categories.push(name);
@@ -1526,9 +1536,9 @@ export const useKnowledgeStore = create<KnowledgeState & KnowledgeActions>()
             },
             body: JSON.stringify({ name })
           });
-          
+
           if (!response.ok) throw new Error('创建标签失败');
-          
+
           set((state) => {
             if (!state.tags.includes(name)) {
               state.tags.push(name);
@@ -1589,7 +1599,7 @@ export default async function handler(
           search: search as string,
           userId: session.user.id
         });
-        
+
         res.status(200).json(documents);
       } catch (error) {
         res.status(500).json({ error: '获取文档失败' });
@@ -1599,22 +1609,23 @@ export default async function handler(
     case 'POST':
       try {
         const documentData = req.body;
-        
+
         // 创建文档
         const document = await documentService.createDocument({
           ...documentData,
           authorId: session.user.id
         });
-        
+
         // AI处理：生成摘要和标签
-        const aiEnhancements = await documentProcessor.processDocument(document);
-        
+        const aiEnhancements =
+          await documentProcessor.processDocument(document);
+
         // 更新文档
         const enhancedDocument = await documentService.updateDocument(
           document.id,
           aiEnhancements
         );
-        
+
         res.status(201).json(enhancedDocument);
       } catch (error) {
         res.status(500).json({ error: '创建文档失败' });
@@ -1653,32 +1664,40 @@ export default async function handler(
 
   try {
     const { q: query, projectId, ...filters } = req.query;
-    
+
     if (!query || typeof query !== 'string') {
       return res.status(400).json({ error: '搜索查询不能为空' });
     }
 
     const searchEngine = new LangChainSearchEngine();
     const documentService = new DocumentService();
-    
+
     // 执行语义搜索
     const searchResults = await searchEngine.semanticSearch({
       query,
       projectId: projectId as string,
       filters: {
-        category: filters.category ? (filters.category as string).split(',') : [],
+        category: filters.category
+          ? (filters.category as string).split(',')
+          : [],
         tags: filters.tags ? (filters.tags as string).split(',') : [],
         author: filters.author ? (filters.author as string).split(',') : [],
-        fileType: filters.fileType ? (filters.fileType as string).split(',') : [],
+        fileType: filters.fileType
+          ? (filters.fileType as string).split(',')
+          : [],
         dateRange: {
-          start: filters.dateRange_start ? new Date(filters.dateRange_start as string) : null,
-          end: filters.dateRange_end ? new Date(filters.dateRange_end as string) : null
+          start: filters.dateRange_start
+            ? new Date(filters.dateRange_start as string)
+            : null,
+          end: filters.dateRange_end
+            ? new Date(filters.dateRange_end as string)
+            : null
         }
       },
       userId: session.user.id,
       limit: 50
     });
-    
+
     // 记录搜索历史
     await documentService.recordSearchHistory({
       userId: session.user.id,
@@ -1686,7 +1705,7 @@ export default async function handler(
       projectId: projectId as string,
       resultCount: searchResults.length
     });
-    
+
     res.status(200).json(searchResults);
   } catch (error) {
     console.error('搜索失败:', error);
@@ -1720,17 +1739,17 @@ export default async function handler(
 
   try {
     const { id: documentId } = req.query;
-    
+
     const documentService = new DocumentService();
     const document = await documentService.getDocumentById(
       documentId as string,
       session.user.id
     );
-    
+
     if (!document) {
       return res.status(404).json({ error: '文档不存在' });
     }
-    
+
     // 使用LangChain生成摘要
     const summaryChain = new LangChainSummaryChain();
     const summary = await summaryChain.generateSummary({
@@ -1741,12 +1760,12 @@ export default async function handler(
         tags: document.tags
       }
     });
-    
+
     // 更新文档摘要
     await documentService.updateDocument(documentId as string, {
       aiSummary: summary
     });
-    
+
     res.status(200).json({ summary });
   } catch (error) {
     console.error('生成摘要失败:', error);
@@ -1800,19 +1819,19 @@ export class DocumentProcessingChain extends BaseChain {
 
   constructor() {
     super();
-    
+
     this.llm = new OpenAI({
       temperature: 0.3,
       modelName: 'gpt-3.5-turbo'
     });
-    
+
     this.embeddings = new OpenAIEmbeddings();
-    
+
     this.textSplitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000,
       chunkOverlap: 200
     });
-    
+
     // 摘要生成链
     const summaryPrompt = PromptTemplate.fromTemplate(`
       请为以下文档生成一个简洁的摘要（不超过200字）：
@@ -1823,12 +1842,12 @@ export class DocumentProcessingChain extends BaseChain {
       
       摘要：
     `);
-    
+
     this.summaryChain = new LLMChain({
       llm: this.llm,
       prompt: summaryPrompt
     });
-    
+
     // 标签生成链
     const tagPrompt = PromptTemplate.fromTemplate(`
       请为以下文档生成5-8个相关标签，标签应该简洁且具有代表性：
@@ -1839,12 +1858,12 @@ export class DocumentProcessingChain extends BaseChain {
       
       请以JSON数组格式返回标签：["标签1", "标签2", ...]
     `);
-    
+
     this.tagChain = new LLMChain({
       llm: this.llm,
       prompt: tagPrompt
     });
-    
+
     // 关键点提取链
     const keyPointsPrompt = PromptTemplate.fromTemplate(`
       请从以下文档中提取3-5个关键点：
@@ -1854,7 +1873,7 @@ export class DocumentProcessingChain extends BaseChain {
       
       请以JSON数组格式返回关键点：["关键点1", "关键点2", ...]
     `);
-    
+
     this.keyPointsChain = new LLMChain({
       llm: this.llm,
       prompt: keyPointsPrompt
@@ -1873,9 +1892,11 @@ export class DocumentProcessingChain extends BaseChain {
     return ['summary', 'tags', 'keyPoints', 'embeddings', 'chunks'];
   }
 
-  async _call(values: DocumentProcessingInput): Promise<DocumentProcessingOutput> {
+  async _call(
+    values: DocumentProcessingInput
+  ): Promise<DocumentProcessingOutput> {
     const { content, title, metadata } = values;
-    
+
     try {
       // 并行执行多个AI任务
       const [summaryResult, tagResult, keyPointsResult] = await Promise.all([
@@ -1894,39 +1915,42 @@ export class DocumentProcessingChain extends BaseChain {
           content: content.slice(0, 2000)
         })
       ]);
-      
+
       // 解析标签和关键点
       let tags: string[] = [];
       let keyPoints: string[] = [];
-      
+
       try {
         tags = JSON.parse(tagResult.text);
       } catch {
         // 如果解析失败，尝试简单的分割
-        tags = tagResult.text.split(',').map((tag: string) => tag.trim()).filter(Boolean);
+        tags = tagResult.text
+          .split(',')
+          .map((tag: string) => tag.trim())
+          .filter(Boolean);
       }
-      
+
       try {
         keyPoints = JSON.parse(keyPointsResult.text);
       } catch {
         keyPoints = keyPointsResult.text.split('\n').filter(Boolean);
       }
-      
+
       // 文档分块
       const chunks = await this.textSplitter.createDocuments(
         [content],
         [{ title, ...metadata }]
       );
-      
+
       // 生成嵌入向量
       const embeddings = await this.embeddings.embedQuery(content);
-      
+
       return {
         summary: summaryResult.text.trim(),
         tags: tags.slice(0, 8), // 限制标签数量
         keyPoints: keyPoints.slice(0, 5), // 限制关键点数量
         embeddings,
-        chunks: chunks.map(chunk => ({
+        chunks: chunks.map((chunk) => ({
           content: chunk.pageContent,
           metadata: chunk.metadata
         }))
@@ -1990,7 +2014,7 @@ export class LangChainSearchEngine {
     this.embeddings = new OpenAIEmbeddings();
     this.llm = new OpenAI({ temperature: 0.1 });
     this.documentService = new DocumentService();
-    
+
     // 查询增强链
     const queryEnhancementPrompt = PromptTemplate.fromTemplate(`
       用户搜索查询：{query}
@@ -2000,7 +2024,7 @@ export class LangChainSearchEngine {
       原查询：{query}
       增强关键词：
     `);
-    
+
     this.queryEnhancementChain = new LLMChain({
       llm: this.llm,
       prompt: queryEnhancementPrompt
@@ -2009,20 +2033,20 @@ export class LangChainSearchEngine {
 
   async semanticSearch(options: SearchOptions): Promise<SearchResult[]> {
     const { query, projectId, filters, userId, limit } = options;
-    
+
     try {
       // 1. 查询增强
       const enhancedQuery = await this.enhanceQuery(query);
-      
+
       // 2. 生成查询向量
       const queryEmbedding = await this.embeddings.embedQuery(enhancedQuery);
-      
+
       // 3. 向量搜索
       const vectorResults = await this.vectorStore.similaritySearchWithScore(
         enhancedQuery,
         limit * 2 // 获取更多结果用于后续过滤
       );
-      
+
       // 4. 应用过滤器
       const filteredResults = await this.applyFilters(
         vectorResults,
@@ -2030,20 +2054,20 @@ export class LangChainSearchEngine {
         projectId,
         userId
       );
-      
+
       // 5. 重新排序和评分
       const rankedResults = await this.rankResults(
         filteredResults,
         query,
         enhancedQuery
       );
-      
+
       // 6. 生成高亮
       const resultsWithHighlights = await this.generateHighlights(
         rankedResults.slice(0, limit),
         query
       );
-      
+
       return resultsWithHighlights;
     } catch (error) {
       console.error('语义搜索失败:', error);
@@ -2073,44 +2097,56 @@ export class LangChainSearchEngine {
       documentIds,
       userId
     );
-    
-    const documentMap = new Map(documents.map(doc => [doc.id, doc]));
-    
+
+    const documentMap = new Map(documents.map((doc) => [doc.id, doc]));
+
     return vectorResults.filter(([doc, score]) => {
       const document = documentMap.get(doc.metadata.documentId);
       if (!document || document.projectId !== projectId) return false;
-      
+
       // 应用分类过滤
-      if (filters.category.length > 0 && !filters.category.includes(document.category)) {
+      if (
+        filters.category.length > 0 &&
+        !filters.category.includes(document.category)
+      ) {
         return false;
       }
-      
+
       // 应用标签过滤
       if (filters.tags.length > 0) {
-        const hasMatchingTag = filters.tags.some(tag => 
+        const hasMatchingTag = filters.tags.some((tag) =>
           document.tags.includes(tag)
         );
         if (!hasMatchingTag) return false;
       }
-      
+
       // 应用作者过滤
-      if (filters.author.length > 0 && !filters.author.includes(document.authorId)) {
+      if (
+        filters.author.length > 0 &&
+        !filters.author.includes(document.authorId)
+      ) {
         return false;
       }
-      
+
       // 应用文件类型过滤
-      if (filters.fileType.length > 0 && !filters.fileType.includes(document.fileType)) {
+      if (
+        filters.fileType.length > 0 &&
+        !filters.fileType.includes(document.fileType)
+      ) {
         return false;
       }
-      
+
       // 应用日期范围过滤
-      if (filters.dateRange.start && document.createdAt < filters.dateRange.start) {
+      if (
+        filters.dateRange.start &&
+        document.createdAt < filters.dateRange.start
+      ) {
         return false;
       }
       if (filters.dateRange.end && document.createdAt > filters.dateRange.end) {
         return false;
       }
-      
+
       return true;
     });
   }
@@ -2122,26 +2158,31 @@ export class LangChainSearchEngine {
   ): Promise<SearchResult[]> {
     const documentIds = results.map(([doc]) => doc.metadata.documentId);
     const documents = await this.documentService.getDocumentsByIds(documentIds);
-    const documentMap = new Map(documents.map(doc => [doc.id, doc]));
-    
+    const documentMap = new Map(documents.map((doc) => [doc.id, doc]));
+
     return results
       .map(([doc, vectorScore]) => {
         const document = documentMap.get(doc.metadata.documentId);
         if (!document) return null;
-        
+
         // 计算综合相关性评分
-        const titleMatch = this.calculateTextMatch(originalQuery, document.title);
-        const contentMatch = this.calculateTextMatch(originalQuery, doc.pageContent);
+        const titleMatch = this.calculateTextMatch(
+          originalQuery,
+          document.title
+        );
+        const contentMatch = this.calculateTextMatch(
+          originalQuery,
+          doc.pageContent
+        );
         const tagMatch = this.calculateTagMatch(originalQuery, document.tags);
-        
+
         // 综合评分
-        const relevanceScore = (
+        const relevanceScore =
           vectorScore * 0.4 +
           titleMatch * 0.3 +
           contentMatch * 0.2 +
-          tagMatch * 0.1
-        );
-        
+          tagMatch * 0.1;
+
         return {
           id: document.id,
           title: document.title,
@@ -2162,24 +2203,25 @@ export class LangChainSearchEngine {
   private calculateTextMatch(query: string, text: string): number {
     const queryWords = query.toLowerCase().split(/\s+/);
     const textWords = text.toLowerCase().split(/\s+/);
-    
+
     let matches = 0;
-    queryWords.forEach(queryWord => {
-      if (textWords.some(textWord => textWord.includes(queryWord))) {
+    queryWords.forEach((queryWord) => {
+      if (textWords.some((textWord) => textWord.includes(queryWord))) {
         matches++;
       }
     });
-    
+
     return matches / queryWords.length;
   }
 
   private calculateTagMatch(query: string, tags: string[]): number {
     const queryLower = query.toLowerCase();
-    const matchingTags = tags.filter(tag => 
-      tag.toLowerCase().includes(queryLower) || 
-      queryLower.includes(tag.toLowerCase())
+    const matchingTags = tags.filter(
+      (tag) =>
+        tag.toLowerCase().includes(queryLower) ||
+        queryLower.includes(tag.toLowerCase())
     );
-    
+
     return matchingTags.length / Math.max(tags.length, 1);
   }
 
@@ -2188,24 +2230,24 @@ export class LangChainSearchEngine {
     query: string
   ): Promise<SearchResult[]> {
     const queryWords = query.toLowerCase().split(/\s+/);
-    
-    return results.map(result => {
+
+    return results.map((result) => {
       const highlights: string[] = [];
-      
+
       // 在标题中查找高亮
-      queryWords.forEach(word => {
+      queryWords.forEach((word) => {
         if (result.title.toLowerCase().includes(word)) {
           highlights.push(word);
         }
       });
-      
+
       // 在内容中查找高亮片段
       const contentHighlights = this.extractHighlightSnippets(
         result.content,
         queryWords
       );
       highlights.push(...contentHighlights);
-      
+
       return {
         ...result,
         highlights: [...new Set(highlights)] // 去重
@@ -2213,19 +2255,22 @@ export class LangChainSearchEngine {
     });
   }
 
-  private extractHighlightSnippets(content: string, queryWords: string[]): string[] {
+  private extractHighlightSnippets(
+    content: string,
+    queryWords: string[]
+  ): string[] {
     const snippets: string[] = [];
     const sentences = content.split(/[.!?]+/);
-    
-    sentences.forEach(sentence => {
+
+    sentences.forEach((sentence) => {
       const sentenceLower = sentence.toLowerCase();
-      const hasMatch = queryWords.some(word => sentenceLower.includes(word));
-      
+      const hasMatch = queryWords.some((word) => sentenceLower.includes(word));
+
       if (hasMatch && sentence.trim().length > 10) {
         snippets.push(sentence.trim().slice(0, 150));
       }
     });
-    
+
     return snippets.slice(0, 3); // 最多返回3个片段
   }
 }
@@ -2317,7 +2362,9 @@ export class KnowledgeGraphWorkflow {
     return workflow;
   }
 
-  private async extractEntities(state: KnowledgeGraphState): Promise<Partial<KnowledgeGraphState>> {
+  private async extractEntities(
+    state: KnowledgeGraphState
+  ): Promise<Partial<KnowledgeGraphState>> {
     try {
       const entityPrompt = PromptTemplate.fromTemplate(`
         从以下文档中提取关键实体（人物、概念、技术、项目等）：
@@ -2337,7 +2384,7 @@ export class KnowledgeGraphWorkflow {
       `);
 
       const allEntities = [];
-      
+
       for (const doc of state.documents) {
         const result = await this.llm.call(
           await entityPrompt.format({
@@ -2346,11 +2393,13 @@ export class KnowledgeGraphWorkflow {
             content: doc.content.slice(0, 2000) // 限制长度
           })
         );
-        
+
         try {
           const entities = JSON.parse(result);
           entities.forEach((entity: any) => {
-            const existingEntity = allEntities.find(e => e.name === entity.name);
+            const existingEntity = allEntities.find(
+              (e) => e.name === entity.name
+            );
             if (existingEntity) {
               existingEntity.documentIds.push(doc.id);
             } else {
@@ -2364,7 +2413,7 @@ export class KnowledgeGraphWorkflow {
           console.error('解析实体失败:', error);
         }
       }
-      
+
       return {
         entities: allEntities,
         currentStep: 'extract_entities_completed'
@@ -2377,7 +2426,9 @@ export class KnowledgeGraphWorkflow {
     }
   }
 
-  private async findRelationships(state: KnowledgeGraphState): Promise<Partial<KnowledgeGraphState>> {
+  private async findRelationships(
+    state: KnowledgeGraphState
+  ): Promise<Partial<KnowledgeGraphState>> {
     try {
       const relationshipPrompt = PromptTemplate.fromTemplate(`
         分析以下实体之间的关系：
@@ -2396,20 +2447,20 @@ export class KnowledgeGraphWorkflow {
         ]
       `);
 
-      const entityNames = state.entities.map(e => e.name).join(', ');
+      const entityNames = state.entities.map((e) => e.name).join(', ');
       const result = await this.llm.call(
         await relationshipPrompt.format({
           entities: entityNames
         })
       );
-      
+
       let relationships = [];
       try {
         relationships = JSON.parse(result);
       } catch (error) {
         console.error('解析关系失败:', error);
       }
-      
+
       return {
         relationships,
         currentStep: 'find_relationships_completed'
@@ -2422,21 +2473,24 @@ export class KnowledgeGraphWorkflow {
     }
   }
 
-  private async validateGraph(state: KnowledgeGraphState): Promise<Partial<KnowledgeGraphState>> {
+  private async validateGraph(
+    state: KnowledgeGraphState
+  ): Promise<Partial<KnowledgeGraphState>> {
     try {
       // 验证实体和关系的有效性
-      const validEntities = state.entities.filter(entity => 
-        entity.name && entity.type && entity.documentIds.length > 0
+      const validEntities = state.entities.filter(
+        (entity) => entity.name && entity.type && entity.documentIds.length > 0
       );
-      
-      const entityNames = new Set(validEntities.map(e => e.name));
-      const validRelationships = state.relationships.filter(rel => 
-        entityNames.has(rel.source) && 
-        entityNames.has(rel.target) &&
-        rel.source !== rel.target &&
-        rel.weight > 0.1 // 过滤弱关系
+
+      const entityNames = new Set(validEntities.map((e) => e.name));
+      const validRelationships = state.relationships.filter(
+        (rel) =>
+          entityNames.has(rel.source) &&
+          entityNames.has(rel.target) &&
+          rel.source !== rel.target &&
+          rel.weight > 0.1 // 过滤弱关系
       );
-      
+
       return {
         entities: validEntities,
         relationships: validRelationships,
@@ -2450,24 +2504,26 @@ export class KnowledgeGraphWorkflow {
     }
   }
 
-  private async optimizeGraph(state: KnowledgeGraphState): Promise<Partial<KnowledgeGraphState>> {
+  private async optimizeGraph(
+    state: KnowledgeGraphState
+  ): Promise<Partial<KnowledgeGraphState>> {
     try {
       // 优化图谱结构
       const optimizedRelationships = state.relationships
         .sort((a, b) => b.weight - a.weight)
         .slice(0, 100); // 限制关系数量
-      
+
       // 移除孤立节点
       const connectedEntityNames = new Set();
-      optimizedRelationships.forEach(rel => {
+      optimizedRelationships.forEach((rel) => {
         connectedEntityNames.add(rel.source);
         connectedEntityNames.add(rel.target);
       });
-      
-      const optimizedEntities = state.entities.filter(entity => 
+
+      const optimizedEntities = state.entities.filter((entity) =>
         connectedEntityNames.has(entity.name)
       );
-      
+
       return {
         entities: optimizedEntities,
         relationships: optimizedRelationships,
@@ -2491,13 +2547,13 @@ export class KnowledgeGraphWorkflow {
       relationships: [],
       currentStep: 'start'
     };
-    
+
     const result = await this.workflow.invoke(initialState);
-    
+
     if (result.error) {
       throw new Error(result.error);
     }
-    
+
     return {
       entities: result.entities,
       relationships: result.relationships
@@ -2651,44 +2707,50 @@ export class DocumentDAO {
 
   async createDocument(document: Partial<Document>): Promise<Document> {
     const client = await this.pool.connect();
-    
+
     try {
       await client.query('BEGIN');
-      
+
       // 插入文档
-      const documentResult = await client.query(`
+      const documentResult = await client.query(
+        `
         INSERT INTO documents (
           title, description, content, category, file_type, file_size, 
           file_path, project_id, author_id, ai_summary
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         RETURNING *
-      `, [
-        document.title,
-        document.description,
-        document.content,
-        document.category,
-        document.fileType,
-        document.fileSize,
-        document.filePath,
-        document.projectId,
-        document.authorId,
-        document.aiSummary
-      ]);
-      
+      `,
+        [
+          document.title,
+          document.description,
+          document.content,
+          document.category,
+          document.fileType,
+          document.fileSize,
+          document.filePath,
+          document.projectId,
+          document.authorId,
+          document.aiSummary
+        ]
+      );
+
       const newDocument = documentResult.rows[0];
-      
+
       // 插入标签
       if (document.tags && document.tags.length > 0) {
         for (const tag of document.tags) {
-          await client.query(`
+          await client.query(
+            `
             INSERT INTO document_tags (document_id, tag_name)
             VALUES ($1, $2)
-          `, [newDocument.id, tag]);
+          `,
+            [newDocument.id, tag]
+          );
         }
       }
-      
+
       await client.query('COMMIT');
-      
+
       return await this.getDocumentById(newDocument.id);
     } catch (error) {
       await client.query('ROLLBACK');
@@ -2698,8 +2760,12 @@ export class DocumentDAO {
     }
   }
 
-  async getDocumentById(documentId: string, userId?: string): Promise<Document | null> {
-    const result = await this.pool.query(`
+  async getDocumentById(
+    documentId: string,
+    userId?: string
+  ): Promise<Document | null> {
+    const result = await this.pool.query(
+      `
       SELECT 
         d.*,
         u.name as author_name,
@@ -2710,17 +2776,19 @@ export class DocumentDAO {
       LEFT JOIN document_tags dt ON d.id = dt.document_id
       WHERE d.id = $1 AND d.deleted_at IS NULL
       GROUP BY d.id, u.name, u.avatar
-    `, [documentId]);
-    
+    `,
+      [documentId]
+    );
+
     if (result.rows.length === 0) return null;
-    
+
     const doc = result.rows[0];
-    
+
     // 增加浏览次数
     if (userId) {
       await this.incrementViewCount(documentId);
     }
-    
+
     return this.mapRowToDocument(doc);
   }
 
@@ -2736,28 +2804,28 @@ export class DocumentDAO {
       LEFT JOIN document_tags dt ON d.id = dt.document_id
       WHERE d.deleted_at IS NULL
     `;
-    
+
     const params: any[] = [];
     let paramIndex = 1;
-    
+
     if (filters.projectId) {
       query += ` AND d.project_id = $${paramIndex}`;
       params.push(filters.projectId);
       paramIndex++;
     }
-    
+
     if (filters.category) {
       query += ` AND d.category = $${paramIndex}`;
       params.push(filters.category);
       paramIndex++;
     }
-    
+
     if (filters.authorId) {
       query += ` AND d.author_id = $${paramIndex}`;
       params.push(filters.authorId);
       paramIndex++;
     }
-    
+
     if (filters.search) {
       query += ` AND (
         to_tsvector('chinese', d.title) @@ plainto_tsquery('chinese', $${paramIndex})
@@ -2766,94 +2834,100 @@ export class DocumentDAO {
       params.push(filters.search);
       paramIndex++;
     }
-    
+
     query += ` GROUP BY d.id, u.name, u.avatar`;
-    
+
     // 标签过滤（需要在GROUP BY之后）
     if (filters.tags && filters.tags.length > 0) {
       query += ` HAVING ARRAY_AGG(DISTINCT dt.tag_name) && $${paramIndex}`;
       params.push(filters.tags);
       paramIndex++;
     }
-    
+
     query += ` ORDER BY d.updated_at DESC`;
-    
+
     if (filters.limit) {
       query += ` LIMIT $${paramIndex}`;
       params.push(filters.limit);
       paramIndex++;
     }
-    
+
     if (filters.offset) {
       query += ` OFFSET $${paramIndex}`;
       params.push(filters.offset);
     }
-    
+
     const result = await this.pool.query(query, params);
-    
-    return result.rows.map(row => this.mapRowToDocument(row));
+
+    return result.rows.map((row) => this.mapRowToDocument(row));
   }
 
-  async updateDocument(documentId: string, updates: Partial<Document>): Promise<Document> {
+  async updateDocument(
+    documentId: string,
+    updates: Partial<Document>
+  ): Promise<Document> {
     const client = await this.pool.connect();
-    
+
     try {
       await client.query('BEGIN');
-      
+
       // 更新文档基本信息
       const updateFields = [];
       const params = [];
       let paramIndex = 1;
-      
+
       if (updates.title !== undefined) {
         updateFields.push(`title = $${paramIndex}`);
         params.push(updates.title);
         paramIndex++;
       }
-      
+
       if (updates.description !== undefined) {
         updateFields.push(`description = $${paramIndex}`);
         params.push(updates.description);
         paramIndex++;
       }
-      
+
       if (updates.content !== undefined) {
         updateFields.push(`content = $${paramIndex}`);
         params.push(updates.content);
         paramIndex++;
       }
-      
+
       if (updates.category !== undefined) {
         updateFields.push(`category = $${paramIndex}`);
         params.push(updates.category);
         paramIndex++;
       }
-      
+
       if (updates.aiSummary !== undefined) {
         updateFields.push(`ai_summary = $${paramIndex}`);
         params.push(updates.aiSummary);
         paramIndex++;
       }
-      
+
       updateFields.push(`updated_at = NOW()`);
-      
-      if (updateFields.length > 1) { // 除了updated_at之外还有其他字段
+
+      if (updateFields.length > 1) {
+        // 除了updated_at之外还有其他字段
         params.push(documentId);
-        await client.query(`
+        await client.query(
+          `
           UPDATE documents 
           SET ${updateFields.join(', ')}
           WHERE id = $${paramIndex}
-        `, params);
+        `,
+          params
+        );
       }
-      
+
       // 更新标签
       if (updates.tags !== undefined) {
         // 删除现有标签
-        await client.query(
-          'DELETE FROM document_tags WHERE document_id = $1',
-          [documentId]
-        );
-        
+        await client.query('DELETE FROM document_tags WHERE document_id = $1', [
+          documentId
+        ]);
+
         // 插入新标签
         for (const tag of updates.tags) {
           await client.query(
@@ -2862,9 +2936,9 @@ export class DocumentDAO {
           );
         }
       }
-      
+
       await client.query('COMMIT');
-      
+
       return await this.getDocumentById(documentId);
     } catch (error) {
       await client.query('ROLLBACK');
@@ -2902,16 +2976,19 @@ export class DocumentDAO {
     resultCount: number;
     filters?: any;
   }): Promise<void> {
-    await this.pool.query(`
+    await this.pool.query(
+      `
       INSERT INTO search_history (user_id, project_id, query, result_count, filters)
       VALUES ($1, $2, $3, $4, $5)
-    `, [
-      data.userId,
-      data.projectId,
-      data.query,
-      data.resultCount,
-      JSON.stringify(data.filters || {})
-    ]);
+    `,
+      [
+        data.userId,
+        data.projectId,
+        data.query,
+        data.resultCount,
+        JSON.stringify(data.filters || {})
+      ]
+    );
   }
 
   private mapRowToDocument(row: any): Document {

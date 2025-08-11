@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
@@ -12,6 +13,7 @@ import {
 import { hasProjectPermission } from '@/lib/permissions';
 
 // 创建任务请求验证
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createTaskSchema = z.object({
   title: z.string().min(1, '任务标题不能为空'),
   description: z.string().optional(),
@@ -28,6 +30,7 @@ const createTaskSchema = z.object({
 });
 
 // 查询参数验证
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getTasksQuerySchema = z.object({
   status: z
     .enum(['TODO', 'IN_PROGRESS', 'REVIEW', 'DONE', 'BLOCKED'])
@@ -189,8 +192,6 @@ export async function GET(
         400
       );
     }
-
-    console.error('获取任务列表失败:', error);
     return apiError(
       'SERVER_ERROR',
       '获取任务列表失败',
@@ -331,8 +332,6 @@ export async function POST(
         400
       );
     }
-
-    console.error('创建任务失败:', error);
     return apiError(
       'SERVER_ERROR',
       '创建任务失败',

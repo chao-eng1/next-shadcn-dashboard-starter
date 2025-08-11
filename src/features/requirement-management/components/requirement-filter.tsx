@@ -59,37 +59,10 @@ interface RequirementFilterProps {
   filters: FilterOptions;
   onFiltersChange: (filters: FilterOptions) => void;
   onClearFilters: () => void;
+  compact?: boolean;
 }
 
-const statusOptions = [
-  { value: 'draft', label: 'Draft' },
-  { value: 'review', label: 'Review' },
-  { value: 'approved', label: 'Approved' },
-  { value: 'in_progress', label: 'In Progress' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'rejected', label: 'Rejected' }
-];
-
-const priorityOptions = [
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
-  { value: 'critical', label: 'Critical' }
-];
-
-const typeOptions = [
-  { value: 'functional', label: 'Functional' },
-  { value: 'non_functional', label: 'Non-Functional' },
-  { value: 'business', label: 'Business' },
-  { value: 'technical', label: 'Technical' }
-];
-
-const complexityOptions = [
-  { value: 'simple', label: 'Simple' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'complex', label: 'Complex' },
-  { value: 'very_complex', label: 'Very Complex' }
-];
+// Move these inside the component to access translations
 
 // Mock data for projects and users
 const mockProjects = [
@@ -120,10 +93,41 @@ const mockTags = [
 export function RequirementFilter({
   filters,
   onFiltersChange,
-  onClearFilters
+  onClearFilters,
+  compact = false
 }: RequirementFilterProps) {
   const t = useTranslations('requirements');
   const [isOpen, setIsOpen] = useState(false);
+
+  const statusOptions = [
+    { value: 'draft', label: t('statuses.draft') },
+    { value: 'review', label: t('statuses.review') },
+    { value: 'approved', label: t('statuses.approved') },
+    { value: 'in_progress', label: t('statuses.inProgress') },
+    { value: 'completed', label: t('statuses.completed') },
+    { value: 'rejected', label: t('statuses.rejected') }
+  ];
+
+  const priorityOptions = [
+    { value: 'low', label: t('priorities.low') },
+    { value: 'medium', label: t('priorities.medium') },
+    { value: 'high', label: t('priorities.high') },
+    { value: 'critical', label: t('priorities.critical') }
+  ];
+
+  const typeOptions = [
+    { value: 'functional', label: t('types.functional') },
+    { value: 'non_functional', label: t('types.nonFunctional') },
+    { value: 'business', label: t('types.business') },
+    { value: 'technical', label: t('types.technical') }
+  ];
+
+  const complexityOptions = [
+    { value: 'simple', label: t('complexities.simple') },
+    { value: 'medium', label: t('complexities.medium') },
+    { value: 'complex', label: t('complexities.complex') },
+    { value: 'very_complex', label: t('complexities.veryComplex') }
+  ];
   const [businessValueRange, setBusinessValueRange] = useState([
     filters.businessValueMin || 0,
     filters.businessValueMax || 100

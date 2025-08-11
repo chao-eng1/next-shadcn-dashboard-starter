@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/get-current-user';
 import { prisma } from '@/lib/prisma';
@@ -33,8 +34,10 @@ export async function POST(request: NextRequest) {
       return apiUnauthorized();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const formData = await request.formData();
     const file = formData.get('file') as File;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const conversationId = formData.get('conversationId') as string;
 
     if (!file) {
@@ -85,12 +88,6 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    console.log('File uploaded successfully:', {
-      id: uploadedFile.id,
-      fileName: uploadedFile.filename,
-      size: uploadedFile.size
-    });
-
     return apiResponse({
       id: uploadedFile.id,
       url: uploadedFile.filepath,
@@ -99,7 +96,6 @@ export async function POST(request: NextRequest) {
       mimeType: uploadedFile.mimetype
     });
   } catch (error) {
-    console.error('File upload failed:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

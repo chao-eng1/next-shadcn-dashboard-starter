@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from 'zod';
 import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
@@ -86,7 +87,6 @@ export async function GET(
 
     return apiResponse(invitation);
   } catch (error) {
-    console.error('获取邀请详情失败:', error);
     return apiError(
       'SERVER_ERROR',
       '获取邀请详情失败',
@@ -136,6 +136,7 @@ export async function PATCH(
       return apiForbidden('您没有权限更新此邀请');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const body = await request.json();
 
     // 处理不同的操作
@@ -175,7 +176,6 @@ export async function PATCH(
         return apiError('INVALID_ACTION', '无效的操作', null, 400);
     }
   } catch (error) {
-    console.error('更新邀请失败:', error);
     return apiError(
       'SERVER_ERROR',
       '更新邀请失败',
@@ -232,7 +232,6 @@ export async function DELETE(
 
     return apiResponse({ success: true, message: '邀请已删除' });
   } catch (error) {
-    console.error('删除邀请失败:', error);
     return apiError(
       'SERVER_ERROR',
       '删除邀请失败',

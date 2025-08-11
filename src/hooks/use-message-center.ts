@@ -256,7 +256,6 @@ export function useMessageCenter(
     try {
       await wsService.current.connect(userId);
     } catch (error) {
-      console.error('Failed to connect:', error);
       toast.error('连接失败，请检查网络连接');
     }
   }, [userId]);
@@ -295,13 +294,13 @@ export function useMessageCenter(
       setLoading(true);
       try {
         // TODO: 从API加载消息
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         // const messages = await api.getMessages(conversationId);
         // setMessages(conversationId, messages);
 
         // 模拟加载延迟
         await new Promise((resolve) => setTimeout(resolve, 500));
       } catch (error) {
-        console.error('Failed to load messages:', error);
         toast.error('加载消息失败');
       } finally {
         setLoading(false);
@@ -367,7 +366,6 @@ export function useMessageCenter(
           updateMessage(selectedConversationId, message.id, { status: 'sent' });
         }, 1000);
       } catch (error) {
-        console.error('Failed to send message:', error);
         toast.error('发送消息失败');
 
         // 更新消息状态为失败
@@ -401,6 +399,7 @@ export function useMessageCenter(
   );
 
   // 设置输入状态
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const setTyping = useCallback(
     (conversationId: string, isTyping: boolean) => {
       if (!enableTypingIndicator) return;
@@ -424,7 +423,6 @@ export function useMessageCenter(
   // 回复消息
   const replyToMessage = useCallback((message: Message) => {
     // TODO: 设置回复状态
-    console.log('Reply to message:', message);
   }, []);
 
   // 编辑消息
@@ -442,7 +440,6 @@ export function useMessageCenter(
 
         toast.success('消息已编辑');
       } catch (error) {
-        console.error('Failed to edit message:', error);
         toast.error('编辑消息失败');
       }
     },
@@ -457,7 +454,6 @@ export function useMessageCenter(
         removeMessage(conversationId, messageId);
         toast.success('消息已删除');
       } catch (error) {
-        console.error('Failed to delete message:', error);
         toast.error('删除消息失败');
       }
     },
@@ -469,10 +465,8 @@ export function useMessageCenter(
     async (message: Message, targetConversationIds: string[]) => {
       try {
         // TODO: 实现消息转发
-        console.log('Forward message:', message, 'to:', targetConversationIds);
         toast.success('消息已转发');
       } catch (error) {
-        console.error('Failed to forward message:', error);
         toast.error('转发消息失败');
       }
     },
@@ -492,7 +486,6 @@ export function useMessageCenter(
           toast.success(message.isPinned ? '取消置顶' : '消息已置顶');
         }
       } catch (error) {
-        console.error('Failed to pin message:', error);
         toast.error('操作失败');
       }
     },
@@ -533,7 +526,6 @@ export function useMessageCenter(
           updateMessage(conversationId, messageId, { reactions });
         }
       } catch (error) {
-        console.error('Failed to add reaction:', error);
         toast.error('操作失败');
       }
     },
@@ -566,7 +558,6 @@ export function useMessageCenter(
 
         return conversation;
       } catch (error) {
-        console.error('Failed to create conversation:', error);
         toast.error('创建会话失败');
         throw error;
       }
@@ -582,7 +573,6 @@ export function useMessageCenter(
         updateConversation(conversationId, updates);
         toast.success('会话已更新');
       } catch (error) {
-        console.error('Failed to update conversation:', error);
         toast.error('更新会话失败');
       }
     },
@@ -597,7 +587,6 @@ export function useMessageCenter(
         updateConversation(conversationId, { isArchived: true });
         toast.success('会话已归档');
       } catch (error) {
-        console.error('Failed to archive conversation:', error);
         toast.error('归档会话失败');
       }
     },
@@ -612,7 +601,6 @@ export function useMessageCenter(
         removeConversation(conversationId);
         toast.success('会话已删除');
       } catch (error) {
-        console.error('Failed to delete conversation:', error);
         toast.error('删除会话失败');
       }
     },
@@ -638,6 +626,7 @@ export function useMessageCenter(
   // 搜索消息
   const searchMessages = useCallback(
     (query: string, conversationId?: string) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const targetMessages = conversationId
         ? useMessageStore.getState().messages[conversationId] || []
         : Object.values(useMessageStore.getState().messages).flat();

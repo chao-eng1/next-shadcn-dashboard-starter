@@ -39,9 +39,11 @@ export function useRecentMessages(limit: number = 5): UseRecentMessagesReturn {
   const [messages, setMessages] = useState<RecentMessage[]>([]);
   const [unreadCount, setUnreadCount] = useState<UnreadCount | null>(null);
   const [loading, setLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchRecentMessages = useCallback(async () => {
     if (!user) {
       setMessages([]);
@@ -70,13 +72,9 @@ export function useRecentMessages(limit: number = 5): UseRecentMessagesReturn {
       const messagesData = await messagesResponse.json();
       const unreadData = await unreadResponse.json();
 
-      // console.log('useRecentMessages: API response data:', messagesData);
-      // console.log('useRecentMessages: Unread count data:', unreadData);
-
       setMessages(messagesData.data?.messages || []);
       setUnreadCount(unreadData.data || null);
     } catch (err) {
-      console.error('Error fetching recent messages:', err);
       setError(err instanceof Error ? err.message : '获取消息数据失败');
       setMessages([]);
       setUnreadCount(null);
@@ -94,19 +92,15 @@ export function useRecentMessages(limit: number = 5): UseRecentMessagesReturn {
   useEffect(() => {
     if (!user) return;
 
-    console.log('useRecentMessages: Starting polling for user:', user.id);
-
     // 立即执行一次
     fetchRecentMessages();
 
     // 设置轮询定时器
     const pollInterval = setInterval(() => {
-      console.log('useRecentMessages: Polling for new messages...');
       fetchRecentMessages();
     }, 20000); // 20秒轮询一次
 
     return () => {
-      console.log('useRecentMessages: Stopping polling');
       clearInterval(pollInterval);
     };
   }, [user?.id, fetchRecentMessages]);

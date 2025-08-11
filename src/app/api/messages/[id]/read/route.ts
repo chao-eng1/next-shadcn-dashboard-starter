@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
@@ -41,7 +42,6 @@ export async function PUT(
       message: 'Message marked as read'
     });
   } catch (error) {
-    console.error('Error marking message as read:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
@@ -12,6 +13,7 @@ import {
 import { hasProjectPermission } from '@/lib/permissions';
 
 // 创建任务分配请求验证
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createTaskAssignmentSchema = z.object({
   memberId: z.string().min(1, '项目成员ID不能为空')
 });
@@ -76,7 +78,6 @@ export async function GET(
 
     return apiResponse(assignments);
   } catch (error) {
-    console.error('获取任务分配失败:', error);
     return apiError(
       'SERVER_ERROR',
       '获取任务分配失败',
@@ -187,7 +188,6 @@ export async function POST(
       );
     }
 
-    console.error('创建任务分配失败:', error);
     return apiError(
       'SERVER_ERROR',
       '创建任务分配失败',
@@ -278,7 +278,6 @@ export async function DELETE(
 
     return apiResponse({ success: true });
   } catch (error) {
-    console.error('删除任务分配失败:', error);
     return apiError(
       'SERVER_ERROR',
       '删除任务分配失败',

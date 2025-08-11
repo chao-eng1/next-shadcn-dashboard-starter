@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/get-current-user';
 import { hasProjectPermission } from '@/lib/permissions';
@@ -35,7 +36,6 @@ export async function GET(
 
     return apiResponse({ hasPermission: hasPermissionResult });
   } catch (error) {
-    console.error('Failed to check project permission:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

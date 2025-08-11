@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
@@ -12,6 +13,7 @@ import {
 import { hasProjectPermission } from '@/lib/permissions';
 
 // 任务状态更新和分配请求验证
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const taskStatusUpdateSchema = z.object({
   toStatus: z.enum(['TODO', 'IN_PROGRESS', 'REVIEW', 'DONE', 'BLOCKED']),
   comment: z.string().optional(),
@@ -156,8 +158,6 @@ export async function POST(
         400
       );
     }
-
-    console.error('更新任务状态失败:', error);
     return apiError(
       'SERVER_ERROR',
       '更新任务状态失败',

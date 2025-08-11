@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
@@ -12,6 +13,7 @@ import {
 import { hasProjectPermission } from '@/lib/permissions';
 
 // 文档更新请求验证
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const updateDocumentSchema = z.object({
   title: z.string().min(1, '文档标题不能为空').optional(),
   content: z.string().optional(),
@@ -104,7 +106,6 @@ export async function GET(
 
     return apiResponse(document);
   } catch (error) {
-    console.error('获取文档详情失败:', error);
     return apiError(
       'SERVER_ERROR',
       '获取文档详情失败',
@@ -153,6 +154,7 @@ export async function PATCH(
   }
 
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const body = await request.json();
 
     // 验证请求数据
@@ -192,7 +194,6 @@ export async function PATCH(
       );
     }
 
-    console.error('更新文档失败:', error);
     return apiError(
       'SERVER_ERROR',
       '更新文档失败',
@@ -259,7 +260,6 @@ export async function DELETE(
 
     return apiResponse({ success: true }, null, 200);
   } catch (error) {
-    console.error('删除文档失败:', error);
     return apiError(
       'SERVER_ERROR',
       '删除文档失败',

@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/get-current-user';
 import { prisma } from '@/lib/prisma';
@@ -90,7 +91,6 @@ export async function GET(
 
     return NextResponse.json({ members: membersWithStatus });
   } catch (error) {
-    console.error('获取项目成员在线状态失败:', error);
     return NextResponse.json({ error: '服务器内部错误' }, { status: 500 });
   }
 }
@@ -162,7 +162,6 @@ export async function POST(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('更新在线状态失败:', error);
     return NextResponse.json({ error: '服务器内部错误' }, { status: 500 });
   }
 }

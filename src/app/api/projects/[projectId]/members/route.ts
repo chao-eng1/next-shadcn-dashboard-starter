@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
@@ -117,7 +118,6 @@ export async function GET(
 
     return apiResponse(formattedMembers, '获取项目成员列表成功');
   } catch (error) {
-    console.error('获取项目成员列表失败:', error);
     return apiError('获取项目成员列表失败');
   }
 }
@@ -224,7 +224,6 @@ export async function POST(
 
     return apiResponse(formattedMember, '成员添加成功');
   } catch (error) {
-    console.error('添加项目成员失败:', error);
     return apiError('添加项目成员失败');
   }
 }

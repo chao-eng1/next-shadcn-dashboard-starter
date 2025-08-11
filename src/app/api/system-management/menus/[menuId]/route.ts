@@ -70,7 +70,6 @@ export async function GET(req: NextRequest, { params }: { params: Params }) {
 
     return NextResponse.json(menu);
   } catch (error) {
-    console.error('Error fetching menu:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -245,7 +244,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Params }) {
 
     return NextResponse.json(updatedMenu);
   } catch (error) {
-    console.error('Error updating menu:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -326,7 +324,6 @@ export async function DELETE(req: NextRequest, { params }: { params: Params }) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting menu:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

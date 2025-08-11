@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
@@ -11,6 +12,7 @@ import {
 import { hasProjectPermission } from '@/lib/permissions';
 
 // 创建文档请求验证
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createDocumentSchema = z.object({
   title: z.string().min(1, '文档标题不能为空'),
   content: z.string().optional(),
@@ -22,6 +24,7 @@ const createDocumentSchema = z.object({
 });
 
 // 查询参数验证
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getDocumentsQuerySchema = z.object({
   status: z.enum(['DRAFT', 'REVIEW', 'PUBLISHED', 'ARCHIVED']).optional(),
   format: z.enum(['MARKDOWN', 'RICH_TEXT', 'PLAIN_TEXT']).optional(),
@@ -53,18 +56,12 @@ export async function GET(
     user.id
   );
 
-  console.log('项目文档权限检查:', {
-    projectId,
-    userId: user.id,
-    hasPermission,
-    permissionName: 'project.view'
-  });
-
   if (!hasPermission) {
     return apiForbidden('您没有权限查看此项目');
   }
 
   // 解析查询参数
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { searchParams } = new URL(request.url);
 
   try {
@@ -147,14 +144,6 @@ export async function GET(
       }
     });
 
-    console.log('查询到的文档数据:', {
-      projectId,
-      total,
-      documentsCount: documents.length,
-      query,
-      where
-    });
-
     return apiResponse({
       documents,
       pagination: {
@@ -174,7 +163,6 @@ export async function GET(
       );
     }
 
-    console.error('获取文档列表失败:', error);
     return apiError(
       'SERVER_ERROR',
       '获取文档列表失败',
@@ -209,9 +197,8 @@ export async function POST(
   }
 
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const body = await request.json();
-    console.log('项目文档API收到的请求数据:', body);
-    console.log('项目ID (params):', projectId);
 
     // 验证请求数据
     const validated = createDocumentSchema.parse(body);
@@ -257,8 +244,6 @@ export async function POST(
       }
     });
 
-    console.log('项目文档创建成功:', document);
-
     // 确保返回的文档数据包含项目ID
     const documentWithProject = {
       ...document,
@@ -276,7 +261,6 @@ export async function POST(
       );
     }
 
-    console.error('创建文档失败:', error);
     return apiError(
       'SERVER_ERROR',
       '创建文档失败',

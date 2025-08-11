@@ -28,6 +28,7 @@ export async function GET(
       return apiUnauthorized();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { projectId, requirementId } = params;
 
     // 检查用户是否有查看需求的权限
@@ -195,7 +196,6 @@ export async function GET(
 
     return apiResponse(requirement);
   } catch (error) {
-    console.error('获取需求详情失败:', error);
     return apiError('获取需求详情失败');
   }
 }
@@ -211,6 +211,7 @@ export async function PATCH(
       return apiUnauthorized();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { projectId, requirementId } = params;
 
     // 检查用户是否为项目成员
@@ -232,6 +233,7 @@ export async function PATCH(
     }
 
     // 检查用户是否有编辑需求的权限
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const hasEditPermission = await canEditRequirement(requirementId, user.id);
     if (!hasEditPermission) {
       return apiForbidden('您没有权限编辑此需求');
@@ -421,7 +423,6 @@ export async function PATCH(
 
     return apiResponse(updatedRequirement);
   } catch (error) {
-    console.error('更新需求失败:', error);
     return apiError('更新需求失败');
   }
 }
@@ -437,6 +438,7 @@ export async function DELETE(
       return apiUnauthorized();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { projectId, requirementId } = params;
 
     // 检查用户是否为项目成员
@@ -477,7 +479,6 @@ export async function DELETE(
 
     return apiResponse({ message: '需求删除成功' });
   } catch (error) {
-    console.error('删除需求失败:', error);
     return apiError('删除需求失败');
   }
 }

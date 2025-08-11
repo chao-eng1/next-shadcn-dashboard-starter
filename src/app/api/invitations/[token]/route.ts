@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
@@ -11,6 +12,7 @@ import {
 } from '@/lib/api-response';
 
 // 处理邀请响应请求验证
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const responseInvitationSchema = z.object({
   action: z.enum(['accept', 'reject'])
 });
@@ -70,7 +72,6 @@ export async function GET(
     // 返回邀请详情
     return apiResponse(invitation);
   } catch (error) {
-    console.error('获取邀请详情失败:', error);
     return apiError(
       'SERVER_ERROR',
       '获取邀请详情失败',
@@ -116,6 +117,7 @@ export async function POST(
       return apiForbidden('此邀请不是发送给您的');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const body = await request.json();
     const validated = responseInvitationSchema.parse(body);
 
@@ -200,7 +202,6 @@ export async function POST(
       );
     }
 
-    console.error('处理邀请失败:', error);
     return apiError(
       'SERVER_ERROR',
       '处理邀请失败',

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { verifyAuth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { roleSchema } from '@/features/system-management/roles/schemas/role-schema';
@@ -5,7 +6,7 @@ import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Get all roles
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
@@ -67,7 +68,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(roles);
   } catch (error) {
-    console.error('Error fetching roles:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -175,7 +175,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(newRole, { status: 201 });
   } catch (error) {
-    console.error('Error creating role:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

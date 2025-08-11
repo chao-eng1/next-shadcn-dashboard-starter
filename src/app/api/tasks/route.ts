@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
@@ -154,7 +155,6 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('获取任务列表失败:', error);
     return NextResponse.json(
       {
         success: false,

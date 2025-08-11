@@ -18,7 +18,6 @@ export function broadcastToConversation(
       try {
         controller.enqueue(`data: ${JSON.stringify(message)}\n\n`);
       } catch (error) {
-        console.error('Failed to send SSE message:', error);
         connections.delete(connectionId);
       }
     }

@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { join, parse, extname } from 'path';
 import { cwd } from 'process';
 import { prisma } from '@/lib/prisma';
@@ -16,9 +17,7 @@ import {
 async function ensureUploadDir(dir: string) {
   try {
     await mkdir(dir, { recursive: true });
-  } catch (error) {
-    console.error('创建上传目录失败:', error);
-  }
+  } catch (error) {}
 }
 
 // 获取文档的附件列表
@@ -87,7 +86,6 @@ export async function GET(
 
     return apiResponse(attachments);
   } catch (error) {
-    console.error('获取附件列表失败:', error);
     return apiError(
       'SERVER_ERROR',
       '获取附件列表失败',
@@ -142,6 +140,7 @@ export async function POST(
     }
 
     // 处理表单数据
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
@@ -151,6 +150,7 @@ export async function POST(
 
     // 获取文件信息
     const filename = file.name;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const fileSize = file.size;
     const mimeType = file.type;
     const fileExt = extname(filename).toLowerCase();
@@ -184,7 +184,6 @@ export async function POST(
 
     return apiResponse(attachment, null, 201);
   } catch (error) {
-    console.error('上传附件失败:', error);
     return apiError(
       'SERVER_ERROR',
       '上传附件失败',

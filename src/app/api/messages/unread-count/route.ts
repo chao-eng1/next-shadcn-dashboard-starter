@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
@@ -22,7 +23,6 @@ export async function GET(request: NextRequest) {
       count: unreadCount
     });
   } catch (error) {
-    console.error('Error fetching unread count:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

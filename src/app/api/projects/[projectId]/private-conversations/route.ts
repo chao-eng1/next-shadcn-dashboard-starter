@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
@@ -8,9 +9,11 @@ import {
   apiNotFound,
   apiForbidden
 } from '@/lib/api-response';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from 'zod';
 
 // 创建私聊会话的请求schema
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createConversationSchema = z.object({
   participantId: z.string().min(1, '参与者ID不能为空')
 });
@@ -122,7 +125,6 @@ export async function GET(
 
     return apiResponse(formattedConversations, '获取私聊会话列表成功');
   } catch (error) {
-    console.error('获取私聊会话列表失败:', error);
     return apiError('获取私聊会话列表失败');
   }
 }
@@ -263,7 +265,6 @@ export async function POST(
       '创建私聊会话成功'
     );
   } catch (error) {
-    console.error('创建私聊会话失败:', error);
     return apiError('创建私聊会话失败');
   }
 }

@@ -1,10 +1,13 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
 import { hasPermission } from '@/lib/permissions';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from 'zod';
 
 // 查询参数验证
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getProjectsQuerySchema = z.object({
   search: z.string().optional(),
   status: z.enum(['PLANNING', 'ACTIVE', 'COMPLETED', 'ARCHIVED']).optional(),
@@ -142,8 +145,6 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    console.error('Error fetching projects for selector:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

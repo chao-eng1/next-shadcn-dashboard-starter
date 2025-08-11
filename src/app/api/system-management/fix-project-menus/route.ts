@@ -65,7 +65,6 @@ export async function POST() {
       message: '项目管理菜单和权限修复成功'
     });
   } catch (error) {
-    console.error('Fix project menus error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

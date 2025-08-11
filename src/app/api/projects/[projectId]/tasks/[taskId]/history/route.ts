@@ -67,7 +67,6 @@ export async function GET(
 
     return apiResponse(history);
   } catch (error) {
-    console.error('获取任务历史失败:', error);
     return apiError(
       'SERVER_ERROR',
       '获取任务历史失败',

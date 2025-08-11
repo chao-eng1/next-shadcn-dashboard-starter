@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
@@ -12,6 +13,7 @@ import {
 import { hasProjectPermission } from '@/lib/permissions';
 
 // 创建评论请求验证
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const createCommentSchema = z.object({
   content: z
     .string()
@@ -78,7 +80,6 @@ export async function GET(
 
     return apiResponse(comments);
   } catch (error) {
-    console.error('获取评论失败:', error);
     return apiError(
       'SERVER_ERROR',
       '获取评论失败',
@@ -169,7 +170,6 @@ export async function POST(
       );
     }
 
-    console.error('创建评论失败:', error);
     return apiError(
       'SERVER_ERROR',
       '创建评论失败',
