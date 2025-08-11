@@ -34,10 +34,8 @@ export async function POST(request: NextRequest) {
       return apiUnauthorized();
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const conversationId = formData.get('conversationId') as string;
 
     if (!file) {
@@ -62,7 +60,7 @@ export async function POST(request: NextRequest) {
     const uploadsDir = join(process.cwd(), 'public', 'uploads');
     try {
       await mkdir(uploadsDir, { recursive: true });
-    } catch (error) {
+    } catch {
       // 目录可能已存在，忽略错误
     }
 
@@ -96,6 +94,7 @@ export async function POST(request: NextRequest) {
       mimeType: uploadedFile.mimetype
     });
   } catch (error) {
+    console.error('File upload error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
