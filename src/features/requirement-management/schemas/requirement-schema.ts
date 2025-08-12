@@ -30,19 +30,34 @@ export const createRequirementSchema = z.object({
     .max(3000, '验收标准不能超过3000个字符')
     .optional(),
   businessValue: z
-    .number()
-    .min(1, '业务价值必须在1-10之间')
-    .max(10, '业务价值必须在1-10之间')
-    .default(5),
+    .union([
+      z
+        .number()
+        .min(0, '业务价值必须在0-100之间')
+        .max(100, '业务价值必须在0-100之间'),
+      z
+        .string()
+        .regex(/^\d+$/, '业务价值必须是数字')
+        .transform((val) => parseInt(val, 10))
+    ])
+    .transform((val) => val.toString())
+    .optional(),
   userStory: z.string().max(1000, '用户故事不能超过1000个字符').optional(),
   priority: requirementPrioritySchema.default(RequirementPriority.MEDIUM),
   type: requirementTypeSchema.default(RequirementType.FUNCTIONAL),
   complexity: requirementComplexitySchema.default(RequirementComplexity.MEDIUM),
   estimatedEffort: z
-    .number()
-    .min(1, '预估工时必须在1-200小时之间')
-    .max(200, '预估工时必须在1-200小时之间')
-    .default(8),
+    .union([
+      z
+        .number()
+        .min(0, '预估工时不能为负数')
+        .max(1000, '预估工时不能超过1000小时'),
+      z
+        .string()
+        .regex(/^\d+(\.\d+)?$/, '预估工时必须是数字')
+        .transform((val) => parseFloat(val))
+    ])
+    .optional(),
   projectId: z.string().cuid().min(1, '请选择一个项目'),
   assignedToId: z
     .string()

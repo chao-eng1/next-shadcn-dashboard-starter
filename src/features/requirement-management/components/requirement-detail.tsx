@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
 import {
   Select,
   SelectContent,
@@ -17,6 +18,12 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@/components/ui/popover';
 import {
   CalendarDays,
   User,
@@ -29,7 +36,7 @@ import {
   X,
   FileText,
   BarChart3,
-  Calendar,
+  Calendar as CalendarIcon,
   Users,
   Target,
   Zap,
@@ -327,7 +334,13 @@ export function RequirementDetail({
       acceptanceCriteria:
         acceptanceCriteriaList.length > 0
           ? acceptanceCriteriaList.join('\n')
-          : undefined
+          : undefined,
+      // 处理日期格式
+      dueDate: editedRequirement.dueDate
+        ? editedRequirement.dueDate instanceof Date
+          ? editedRequirement.dueDate.toISOString()
+          : editedRequirement.dueDate
+        : null
     };
     onSave?.(updatedRequirement);
     setIsEditing(false);
@@ -594,11 +607,64 @@ export function RequirementDetail({
 
               {/* Due Date */}
               <div className='flex items-center gap-2'>
-                <Calendar className='text-muted-foreground h-3 w-3' />
+                <CalendarIcon className='text-muted-foreground h-3 w-3' />
                 <span className='text-muted-foreground text-xs'>截止:</span>
-                {requirement.dueDate ? (
+                {isEditing ? (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant='outline'
+                        size='sm'
+                        className={cn(
+                          'h-6 px-2 text-xs font-normal',
+                          !editedRequirement.dueDate && 'text-muted-foreground'
+                        )}
+                      >
+                        {editedRequirement.dueDate
+                          ? format(new Date(editedRequirement.dueDate), 'MM/dd')
+                          : '选择日期'}
+                        <CalendarIcon className='ml-1 h-3 w-3' />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className='w-auto p-0' align='start'>
+                      <Calendar
+                        mode='single'
+                        selected={
+                          editedRequirement.dueDate
+                            ? new Date(editedRequirement.dueDate)
+                            : undefined
+                        }
+                        onSelect={(date) =>
+                          setEditedRequirement({
+                            ...editedRequirement,
+                            dueDate: date || null
+                          })
+                        }
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                      />
+                      {editedRequirement.dueDate && (
+                        <div className='border-t p-2'>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            onClick={() =>
+                              setEditedRequirement({
+                                ...editedRequirement,
+                                dueDate: null
+                              })
+                            }
+                            className='h-6 w-full text-xs'
+                          >
+                            清除日期
+                          </Button>
+                        </div>
+                      )}
+                    </PopoverContent>
+                  </Popover>
+                ) : requirement.dueDate ? (
                   <span className='text-xs font-medium'>
-                    {format(requirement.dueDate, 'MM/dd')}
+                    {format(new Date(requirement.dueDate), 'MM/dd')}
                   </span>
                 ) : (
                   <span className='text-xs text-gray-400'>未设置</span>
@@ -645,45 +711,58 @@ export function RequirementDetail({
                 <Target className='h-3 w-3 text-green-600' />
                 <span className='text-muted-foreground text-xs'>商业价值:</span>
                 {isEditing ? (
-                  <Input
-                    type='number'
-                    min='0'
-                    max='100'
-                    value={editedRequirement.businessValue}
-                    onChange={(e) =>
-                      setEditedRequirement({
-                        ...editedRequirement,
-                        businessValue: parseInt(e.target.value)
-                      })
-                    }
-                    className='h-6 w-12 text-xs'
-                  />
+                  <div className='flex w-full max-w-sm items-center gap-3'>
+                    <Slider
+                      min={1}
+                      max={10}
+                      step={1}
+                      value={[editedRequirement.businessValue]}
+                      onValueChange={(values) =>
+                        setEditedRequirement({
+                          ...editedRequirement,
+                          businessValue: values[0]
+                        })
+                      }
+                      className='w-32'
+                    />
+                    <span className='text-xs font-bold whitespace-nowrap text-green-600'>
+                      {editedRequirement.businessValue}/10
+                    </span>
+                  </div>
                 ) : (
                   <span className='text-xs font-bold text-green-600'>
-                    {requirement.businessValue}/100
+                    {requirement.businessValue}/10
                   </span>
                 )}
               </div>
 
               <div className='flex items-center gap-2'>
                 <Zap className='h-3 w-3 text-blue-600' />
-                <span className='text-muted-foreground text-xs'>工作量:</span>
+                <span className='text-muted-foreground text-xs whitespace-nowrap'>
+                  工作量:
+                </span>
                 {isEditing ? (
-                  <Input
-                    type='number'
-                    min='0'
-                    value={editedRequirement.estimatedEffort}
-                    onChange={(e) =>
-                      setEditedRequirement({
-                        ...editedRequirement,
-                        estimatedEffort: parseInt(e.target.value)
-                      })
-                    }
-                    className='h-6 w-12 text-xs'
-                  />
+                  <div className='flex w-full max-w-md items-center gap-3'>
+                    <Slider
+                      min={1}
+                      max={200}
+                      step={1}
+                      value={[editedRequirement.estimatedEffort]}
+                      onValueChange={(values) =>
+                        setEditedRequirement({
+                          ...editedRequirement,
+                          estimatedEffort: values[0]
+                        })
+                      }
+                      className='w-40'
+                    />
+                    <span className='text-xs font-bold whitespace-nowrap text-blue-600'>
+                      {editedRequirement.estimatedEffort}h
+                    </span>
+                  </div>
                 ) : (
                   <span className='text-xs font-bold text-blue-600'>
-                    {requirement.estimatedEffort}天
+                    {requirement.estimatedEffort}小时
                   </span>
                 )}
               </div>

@@ -14,18 +14,23 @@ export function RequirementDetailWrapper({
   requirementId,
   initialRequirement
 }: RequirementDetailWrapperProps) {
-  const { requirement, loading, updateRequirement } = useRequirementDetail({
-    projectId,
-    requirementId,
-    autoFetch: !initialRequirement
-  });
+  const { requirement, loading, updateRequirement, refreshRequirement } =
+    useRequirementDetail({
+      projectId,
+      requirementId,
+      autoFetch: !initialRequirement
+    });
 
-  // Use initial requirement if provided, otherwise use fetched requirement
-  const displayRequirement = initialRequirement || requirement;
+  // Use fetched requirement if available, otherwise use initial requirement
+  const displayRequirement = requirement || initialRequirement;
 
   const handleSave = async (updatedData: any) => {
     try {
       await updateRequirement(updatedData);
+      // 保存成功后刷新数据以确保显示最新状态
+      if (initialRequirement) {
+        await refreshRequirement();
+      }
     } catch (error) {
       console.error('Failed to update requirement:', error);
     }
