@@ -7,7 +7,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -40,23 +39,17 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@/components/ui/popover';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import {
   CalendarIcon,
   Plus,
   X,
-  Upload,
   FileText,
   Users,
   Target,
   Zap,
-  AlertCircle,
   CheckCircle2,
-  Clock,
   Tag,
-  Link,
-  Save,
   Send,
   Loader2
 } from 'lucide-react';
@@ -67,8 +60,7 @@ import { createRequirementSchema } from '../schemas/requirement-schema';
 import {
   RequirementPriority,
   RequirementType,
-  RequirementComplexity,
-  RequirementStatus
+  RequirementComplexity
 } from '../types/requirement';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -264,7 +256,7 @@ export function RequirementForm({
       type: RequirementType.FUNCTIONAL,
       priority: RequirementPriority.MEDIUM,
       complexity: RequirementComplexity.MEDIUM,
-      estimatedEffort: 1,
+      estimatedEffort: 8,
       acceptanceCriteria: '',
       businessValue: 5,
       userStory: '',
@@ -622,22 +614,28 @@ export function RequirementForm({
                   name='estimatedEffort'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('form.effortEstimateLabel')}</FormLabel>
+                      <FormLabel>工时估算 ({field.value}小时)</FormLabel>
                       <FormControl>
-                        <Input
-                          type='number'
-                          min='0.1'
-                          max='1000'
-                          step='0.1'
-                          placeholder='预估工作量(天)'
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
-                        />
+                        <div className='space-y-3'>
+                          <Slider
+                            min={1}
+                            max={200}
+                            step={1}
+                            value={[field.value]}
+                            onValueChange={(values) =>
+                              field.onChange(values[0])
+                            }
+                            className='w-full'
+                          />
+                          <div className='text-muted-foreground flex justify-between text-xs'>
+                            <span>1小时 (简单)</span>
+                            <span>40小时 (一周)</span>
+                            <span>200小时 (复杂)</span>
+                          </div>
+                        </div>
                       </FormControl>
                       <FormDescription>
-                        {t('form.effortEstimateHelp')}
+                        评估完成该需求所需的工作时间（小时）
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -881,7 +879,7 @@ export function RequirementForm({
                 <FormField
                   control={form.control}
                   name='userStory'
-                  render={({ field }) => (
+                  render={() => (
                     <FormItem>
                       <FormLabel>用户故事</FormLabel>
                       <FormControl>

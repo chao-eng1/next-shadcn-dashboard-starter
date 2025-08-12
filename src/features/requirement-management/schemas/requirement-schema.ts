@@ -40,9 +40,9 @@ export const createRequirementSchema = z.object({
   complexity: requirementComplexitySchema.default(RequirementComplexity.MEDIUM),
   estimatedEffort: z
     .number()
-    .min(0, '预估工作量不能为负数')
-    .max(1000, '预估工作量不能超过1000人天')
-    .optional(),
+    .min(1, '预估工时必须在1-200小时之间')
+    .max(200, '预估工时必须在1-200小时之间')
+    .default(8),
   projectId: z.string().cuid().min(1, '请选择一个项目'),
   assignedToId: z
     .string()
