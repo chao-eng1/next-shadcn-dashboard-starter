@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -103,6 +104,20 @@ interface User {
   };
 }
 
+// 动态导入Markdown编辑器，避免SSR问题
+const MDEditor = dynamic(
+  () => import('@uiw/react-md-editor').then((mod) => mod.default),
+  {
+    ssr: false,
+    loading: () => (
+      <div className='bg-muted flex h-64 w-full items-center justify-center rounded-md'>
+        <Loader2 className='text-primary h-8 w-8 animate-spin' />
+        <span className='ml-2'>加载编辑器...</span>
+      </div>
+    )
+  }
+);
+
 const mockTags = [
   'authentication',
   'security',
@@ -134,6 +149,8 @@ export function RequirementForm({
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [newAcceptanceCriteria, setNewAcceptanceCriteria] = useState('');
+  const [description, setDescription] = useState<string>('');
+  const [userStory, setUserStory] = useState<string>('');
   const [acceptanceCriteriaList, setAcceptanceCriteriaList] = useState<
     string[]
   >([]);
@@ -219,6 +236,26 @@ export function RequirementForm({
     setFilteredUsers(filtered);
   };
 
+  // 初始化描述内容
+  useEffect(() => {
+    setDescription(initialData?.description || '');
+  }, [initialData?.description]);
+
+  // 初始化用户故事内容
+  useEffect(() => {
+    setUserStory(initialData?.userStory || '');
+  }, [initialData?.userStory]);
+
+  // 当描述内容变化时更新表单值
+  useEffect(() => {
+    form.setValue('description', description);
+  }, [description]);
+
+  // 当用户故事内容变化时更新表单值
+  useEffect(() => {
+    form.setValue('userStory', userStory);
+  }, [userStory]);
+
   const form = useForm<RequirementFormData>({
     resolver: zodResolver(createRequirementSchema),
     defaultValues: {
@@ -229,7 +266,7 @@ export function RequirementForm({
       complexity: RequirementComplexity.MEDIUM,
       estimatedEffort: 1,
       acceptanceCriteria: '',
-      businessValue: '',
+      businessValue: 5,
       userStory: '',
       assignedToId: '', // 确保默认值是空字符串
       ...initialData
@@ -320,6 +357,9 @@ export function RequirementForm({
 
   // 提交表单
   const handleSubmit = async (data: RequirementFormData) => {
+    // 确保使用最新的描述和用户故事内容
+    data.description = description;
+    data.userStory = userStory;
     setIsSubmitting(true);
     try {
       // 验证必填字段
@@ -451,11 +491,16 @@ export function RequirementForm({
                   <FormItem>
                     <FormLabel>{t('form.descriptionLabel')}</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder={t('form.descriptionPlaceholder')}
-                        className='min-h-[120px]'
-                        {...field}
-                      />
+                      <div data-color-mode='light' className='w-full'>
+                        <MDEditor
+                          value={description}
+                          onChange={(value) => setDescription(value || '')}
+                          height={300}
+                          preview='edit'
+                          data-color-mode='light'
+                          visibleDragbar={false}
+                        />
+                      </div>
                     </FormControl>
                     <FormDescription>
                       {t('form.descriptionHelp')}
@@ -805,16 +850,28 @@ export function RequirementForm({
                   name='businessValue'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{t('form.businessValueLabel')}</FormLabel>
+                      <FormLabel>业务价值 ({field.value}/10)</FormLabel>
                       <FormControl>
-                        <Textarea
-                          placeholder='描述该需求的业务价值...'
-                          className='min-h-[80px]'
-                          {...field}
-                        />
+                        <div className='space-y-3'>
+                          <Slider
+                            min={1}
+                            max={10}
+                            step={1}
+                            value={[field.value]}
+                            onValueChange={(values) =>
+                              field.onChange(values[0])
+                            }
+                            className='w-full'
+                          />
+                          <div className='text-muted-foreground flex justify-between text-xs'>
+                            <span>1 (低)</span>
+                            <span>5 (中等)</span>
+                            <span>10 (高)</span>
+                          </div>
+                        </div>
                       </FormControl>
                       <FormDescription>
-                        {t('form.businessValueHelp')}
+                        评估该需求对业务的价值程度，1为最低，10为最高
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -828,14 +885,19 @@ export function RequirementForm({
                     <FormItem>
                       <FormLabel>用户故事</FormLabel>
                       <FormControl>
-                        <Textarea
-                          placeholder='作为[用户角色]，我希望[功能描述]，以便[价值/目标]...'
-                          className='min-h-[80px]'
-                          {...field}
-                        />
+                        <div data-color-mode='light' className='w-full'>
+                          <MDEditor
+                            value={userStory}
+                            onChange={(value) => setUserStory(value || '')}
+                            height={200}
+                            preview='edit'
+                            data-color-mode='light'
+                            visibleDragbar={false}
+                          />
+                        </div>
                       </FormControl>
                       <FormDescription>
-                        用标准的用户故事格式描述需求
+                        用标准的用户故事格式描述需求，支持Markdown格式
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

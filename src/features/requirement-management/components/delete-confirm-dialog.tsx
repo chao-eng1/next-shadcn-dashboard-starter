@@ -46,13 +46,24 @@ export function DeleteConfirmDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading}>取消</AlertDialogCancel>
+          <AlertDialogCancel>取消</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
+            className={`${
+              loading
+                ? 'cursor-not-allowed bg-red-400'
+                : 'bg-red-600 hover:bg-red-700'
+            } text-white transition-colors`}
             disabled={loading}
-            className='bg-red-600 hover:bg-red-700'
           >
-            {loading ? '删除中...' : '确认删除'}
+            {loading ? (
+              <div className='flex items-center gap-2'>
+                <div className='h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent'></div>
+                删除中...
+              </div>
+            ) : (
+              '确认删除'
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

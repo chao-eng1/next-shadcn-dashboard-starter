@@ -132,22 +132,6 @@ export function RequirementList({
     }
   };
 
-  const priorityConfig = {
-    LOW: { label: t('priorities.low'), color: 'bg-gray-100 text-gray-800' },
-    MEDIUM: {
-      label: t('priorities.medium'),
-      color: 'bg-yellow-100 text-yellow-800'
-    },
-    HIGH: {
-      label: t('priorities.high'),
-      color: 'bg-orange-100 text-orange-800'
-    },
-    CRITICAL: {
-      label: t('priorities.critical'),
-      color: 'bg-red-100 text-red-800'
-    }
-  };
-
   const typeConfig = {
     FUNCTIONAL: {
       label: t('types.functional'),
@@ -222,8 +206,6 @@ export function RequirementList({
       <div className='space-y-4'>
         {requirements.map((requirement) => {
           const statusKey = requirement.status as keyof typeof statusConfig;
-          const priorityKey =
-            requirement.priority as keyof typeof priorityConfig;
           const typeKey = requirement.type as keyof typeof typeConfig;
 
           const StatusIcon = statusConfig[statusKey]?.icon || Clock;
@@ -273,29 +255,31 @@ export function RequirementList({
                       {requirement.description}
                     </p>
                   </div>
-                  <div className='ml-4 flex items-start gap-2'>
-                    <div className='flex flex-col items-end space-y-2'>
-                      <Badge
-                        variant='secondary'
-                        className={cn(
-                          statusConfig[statusKey]?.color ||
-                            'bg-gray-100 text-gray-800'
-                        )}
-                      >
-                        <StatusIcon className='mr-1 h-3 w-3' />
-                        {statusConfig[statusKey]?.label || requirement.status}
-                      </Badge>
-                      <Badge
-                        variant='outline'
-                        className={cn(
-                          priorityConfig[priorityKey]?.color ||
-                            'bg-gray-100 text-gray-800'
-                        )}
-                      >
-                        {priorityConfig[priorityKey]?.label ||
-                          requirement.priority}
-                      </Badge>
-                    </div>
+                  <div className='ml-4 flex items-center gap-2'>
+                    {/* 状态标签 */}
+                    <Badge
+                      variant='secondary'
+                      className={cn(
+                        'text-xs',
+                        statusConfig[statusKey]?.color ||
+                          'bg-gray-100 text-gray-800'
+                      )}
+                    >
+                      <StatusIcon className='mr-1 h-3 w-3' />
+                      {statusConfig[statusKey]?.label || requirement.status}
+                    </Badge>
+
+                    {/* 类型标签 */}
+                    <Badge
+                      variant='outline'
+                      className={cn(
+                        'text-xs',
+                        typeConfig[typeKey]?.color ||
+                          'bg-gray-100 text-gray-800'
+                      )}
+                    >
+                      {typeConfig[typeKey]?.label || requirement.type}
+                    </Badge>
 
                     {/* 操作菜单 */}
                     <DropdownMenu>
@@ -303,7 +287,7 @@ export function RequirementList({
                         <Button
                           variant='ghost'
                           size='sm'
-                          className='h-8 w-8 p-0'
+                          className='h-8 w-8 flex-shrink-0 p-0'
                         >
                           <MoreVertical className='h-4 w-4' />
                         </Button>

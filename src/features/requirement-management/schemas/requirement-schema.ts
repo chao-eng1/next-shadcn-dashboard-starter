@@ -30,9 +30,10 @@ export const createRequirementSchema = z.object({
     .max(3000, '验收标准不能超过3000个字符')
     .optional(),
   businessValue: z
-    .string()
-    .max(2000, '业务价值描述不能超过2000个字符')
-    .optional(),
+    .number()
+    .min(1, '业务价值必须在1-10之间')
+    .max(10, '业务价值必须在1-10之间')
+    .default(5),
   userStory: z.string().max(1000, '用户故事不能超过1000个字符').optional(),
   priority: requirementPrioritySchema.default(RequirementPriority.MEDIUM),
   type: requirementTypeSchema.default(RequirementType.FUNCTIONAL),
