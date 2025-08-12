@@ -1293,6 +1293,7 @@
       "nonFunctional": "非功能性需求",
       "business": "业务需求",
       "technical": "技术需求",
+      "uiUx": "UI/UX需求",
       "web": "Web",
       "api": "API",
       "mobile": "移动端"

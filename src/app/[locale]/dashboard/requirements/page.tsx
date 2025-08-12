@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { RequirementList } from '@/features/requirement-management/components/requirement-list';
 import { RequirementFilter } from '@/features/requirement-management/components/requirement-filter';
 import { RequirementActions } from '@/features/requirement-management/components/requirement-actions';
@@ -37,6 +38,7 @@ interface FilterOptions {
 
 export default function RequirementsPage() {
   const t = useTranslations('requirements');
+  const router = useRouter();
   const [filters, setFilters] = useState<FilterOptions>({});
 
   const handleFilterChange = (newFilters: FilterOptions) => {
@@ -45,6 +47,10 @@ export default function RequirementsPage() {
 
   const handleClearFilters = () => {
     setFilters({});
+  };
+
+  const handleRequirementClick = (requirementId: string) => {
+    router.push(`/dashboard/requirements/${requirementId}`);
   };
 
   return (
@@ -92,7 +98,10 @@ export default function RequirementsPage() {
                 onFiltersChange={handleFilterChange}
                 onClearFilters={handleClearFilters}
               />
-              <RequirementList filters={filters} />
+              <RequirementList
+                filters={filters}
+                onRequirementClick={handleRequirementClick}
+              />
             </CardContent>
           </Card>
         </TabsContent>

@@ -59,14 +59,14 @@ export default async function RequirementDetailPage({
           name: true
         }
       },
-      assignee: {
+      assignedTo: {
         select: {
           id: true,
           name: true,
           email: true
         }
       },
-      creator: {
+      createdBy: {
         select: {
           id: true,
           name: true,
@@ -81,7 +81,8 @@ export default async function RequirementDetailPage({
       _count: {
         select: {
           comments: true,
-          history: true
+          versions: true,
+          attachments: true
         }
       }
     }
@@ -126,7 +127,7 @@ export default async function RequirementDetailPage({
             </TabsTrigger>
             <TabsTrigger value='history' className='flex items-center gap-2'>
               <History className='h-4 w-4' />
-              变更历史 ({requirement._count.history})
+              版本历史 ({requirement._count.versions})
             </TabsTrigger>
           </TabsList>
 
@@ -163,8 +164,8 @@ export default async function RequirementDetailPage({
           <TabsContent value='history' className='space-y-4'>
             <Card>
               <CardHeader>
-                <CardTitle>变更历史</CardTitle>
-                <CardDescription>需求的所有变更记录和版本历史</CardDescription>
+                <CardTitle>版本历史</CardTitle>
+                <CardDescription>需求的所有版本变更记录</CardDescription>
               </CardHeader>
               <CardContent>
                 <RequirementHistory requirementId={requirement.id} />

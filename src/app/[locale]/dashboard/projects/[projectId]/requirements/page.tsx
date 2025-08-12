@@ -16,8 +16,6 @@ import { Badge } from '@/components/ui/badge';
 import PageContainer from '@/components/layout/page-container';
 import { ProjectPermissionGate } from '@/components/project-permission-gate';
 import { RequirementList } from '@/features/requirement-management/components/requirement-list';
-import { RequirementKanban } from '@/features/requirement-management/components/requirement-kanban';
-import { RequirementTree } from '@/features/requirement-management/components/requirement-tree';
 
 import { prisma } from '@/lib/prisma';
 import { getCurrentUser } from '@/lib/get-current-user';
@@ -31,7 +29,9 @@ import {
   PlusIcon,
   ListIcon,
   KanbanIcon,
-  TreePineIcon
+  TreePineIcon,
+  FilterIcon,
+  SearchIcon
 } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
@@ -117,22 +117,6 @@ export default async function RequirementsPage({
   // 检查用户的权限
   const canCreate = await canCreateRequirement(projectId, user.id);
 
-  // 对于编辑和删除权限，我们需要在组件中针对具体需求进行检查
-  // 这里先检查基础的项目权限
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const canEdit = await hasProjectPermission(
-    projectId,
-    'project.view',
-    user.id
-  );
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const canDelete = await hasProjectPermission(
-    projectId,
-    'project.view',
-    user.id
-  );
-
   // 获取需求统计
   const requirementStats = await prisma.requirement.groupBy({
     by: ['status'],
@@ -181,62 +165,6 @@ export default async function RequirementsPage({
     },
     {} as Record<string, number>
   );
-
-  // 获取需求列表数据
-  const requirements = await prisma.requirement.findMany({
-    where: {
-      projectId
-    },
-    include: {
-      createdBy: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          image: true
-        }
-      },
-      assignedTo: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          image: true
-        }
-      },
-      parent: {
-        select: {
-          id: true,
-          requirementId: true,
-          title: true
-        }
-      },
-      children: {
-        select: {
-          id: true,
-          requirementId: true,
-          title: true,
-          status: true
-        }
-      },
-      tags: {
-        include: {
-          tag: true
-        }
-      },
-      _count: {
-        select: {
-          comments: true,
-          attachments: true,
-          tasks: true,
-          children: true
-        }
-      }
-    },
-    orderBy: {
-      createdAt: 'desc'
-    }
-  });
 
   return (
     <PageContainer>
@@ -395,13 +323,11 @@ export default async function RequirementsPage({
                   }
                 >
                   <RequirementList
-                    projectId={projectId}
-                    requirements={requirements}
-                    canEdit={canEdit}
-                    canDelete={canDelete}
-                    showActions={true}
-                    showFilters={true}
-                    showSearch={true}
+                    filters={{ projectId: [projectId] }}
+                    onRequirementClick={(requirementId) => {
+                      // Navigate to requirement detail page
+                      window.location.href = `/dashboard/requirements/${requirementId}`;
+                    }}
                   />
                 </Suspense>
               </CardContent>
@@ -421,13 +347,14 @@ export default async function RequirementsPage({
                     <div className='py-8 text-center'>{tc('loading')}</div>
                   }
                 >
-                  <RequirementKanban
-                    projectId={projectId}
-                    requirements={requirements}
-                    canEdit={canEdit}
-                    canDelete={canDelete}
-                    canDrag={canEdit}
-                  />
+                  <div className='flex items-center justify-center py-16'>
+                    <div className='space-y-4 text-center'>
+                      <h3 className='text-lg font-semibold'>看板视图开发中</h3>
+                      <p className='text-muted-foreground text-sm'>
+                        即将推出拖拽式看板管理，让需求状态管理更加直观便捷
+                      </p>
+                    </div>
+                  </div>
                 </Suspense>
               </CardContent>
             </Card>
@@ -438,14 +365,14 @@ export default async function RequirementsPage({
             <Suspense
               fallback={<div className='py-8 text-center'>{tc('loading')}</div>}
             >
-              <RequirementTree
-                projectId={projectId}
-                requirements={requirements}
-                canEdit={canEdit}
-                canDelete={canDelete}
-                showActions={true}
-                expandAll={false}
-              />
+              <div className='flex items-center justify-center py-16'>
+                <div className='space-y-4 text-center'>
+                  <h3 className='text-lg font-semibold'>树形视图开发中</h3>
+                  <p className='text-muted-foreground text-sm'>
+                    即将推出层级化需求树形视图，便于管理需求依赖关系
+                  </p>
+                </div>
+              </div>
             </Suspense>
           </TabsContent>
         </Tabs>

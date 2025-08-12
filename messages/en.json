@@ -1286,6 +1286,7 @@
       "nonFunctional": "Non-Functional",
       "business": "Business",
       "technical": "Technical",
+      "uiUx": "UI/UX",
       "web": "Web",
       "api": "API",
       "mobile": "Mobile"

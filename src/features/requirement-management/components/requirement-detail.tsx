@@ -173,82 +173,93 @@ export function RequirementDetail({
   const [editedRequirement, setEditedRequirement] = useState(requirement);
 
   const statusConfig = {
-    draft: {
+    DRAFT: {
       label: t('statuses.draft'),
       color: 'bg-gray-100 text-gray-800 border-gray-200',
       icon: Clock
     },
-    review: {
+    REVIEW: {
       label: t('statuses.review'),
       color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
       icon: AlertCircle
     },
-    approved: {
+    APPROVED: {
       label: t('statuses.approved'),
       color: 'bg-green-100 text-green-800 border-green-200',
       icon: CheckCircle2
     },
-    in_progress: {
+    IN_PROGRESS: {
       label: t('statuses.inProgress'),
       color: 'bg-blue-100 text-blue-800',
       icon: Clock
     },
-    completed: {
+    TESTING: {
+      label: t('statuses.testing'),
+      color: 'bg-purple-100 text-purple-800',
+      icon: AlertCircle
+    },
+    COMPLETED: {
       label: t('statuses.completed'),
       color: 'bg-green-100 text-green-800 border-green-200',
       icon: CheckCircle2
     },
-    rejected: {
+    REJECTED: {
       label: t('statuses.rejected'),
       color: 'bg-red-100 text-red-800 border-red-200',
+      icon: AlertCircle
+    },
+    CANCELLED: {
+      label: t('statuses.cancelled'),
+      color: 'bg-gray-100 text-gray-800 border-gray-200',
       icon: AlertCircle
     }
   };
 
   const priorityConfig = {
-    low: { label: t('priorities.low'), color: 'bg-gray-100 text-gray-800' },
-    medium: {
+    LOW: { label: t('priorities.low'), color: 'bg-gray-100 text-gray-800' },
+    MEDIUM: {
       label: t('priorities.medium'),
       color: 'bg-yellow-100 text-yellow-800'
     },
-    high: {
+    HIGH: {
       label: t('priorities.high'),
       color: 'bg-orange-100 text-orange-800'
     },
-    critical: {
+    CRITICAL: {
       label: t('priorities.critical'),
       color: 'bg-red-100 text-red-800'
     }
   };
 
   const typeConfig = {
-    functional: { label: t('types.functional'), icon: Target },
-    non_functional: { label: t('types.nonFunctional'), icon: Zap },
-    business: { label: t('types.business'), icon: BarChart3 },
-    technical: { label: t('types.technical'), icon: FileText }
+    FUNCTIONAL: { label: t('types.functional'), icon: Target },
+    NON_FUNCTIONAL: { label: t('types.nonFunctional'), icon: Zap },
+    BUSINESS: { label: t('types.business'), icon: BarChart3 },
+    TECHNICAL: { label: t('types.technical'), icon: FileText },
+    UI_UX: { label: t('types.uiUx'), icon: FileText }
   };
 
   const complexityConfig = {
-    simple: {
+    SIMPLE: {
       label: t('complexities.simple'),
       color: 'bg-green-100 text-green-800'
     },
-    medium: {
+    MEDIUM: {
       label: t('complexities.medium'),
       color: 'bg-yellow-100 text-yellow-800'
     },
-    complex: {
+    COMPLEX: {
       label: t('complexities.complex'),
       color: 'bg-orange-100 text-orange-800'
     },
-    very_complex: {
+    VERY_COMPLEX: {
       label: t('complexities.veryComplex'),
       color: 'bg-red-100 text-red-800'
     }
   };
 
-  const StatusIcon = statusConfig[requirement.status].icon;
-  const TypeIcon = typeConfig[requirement.type].icon;
+  const StatusIcon = statusConfig[requirement.status]?.icon || Clock;
+  const TypeIcon = typeConfig[requirement.type]?.icon || FileText;
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -341,8 +352,14 @@ export function RequirementDetail({
                     </SelectContent>
                   </Select>
                 ) : (
-                  <Badge className={cn(statusConfig[requirement.status].color)}>
-                    {statusConfig[requirement.status].label}
+                  <Badge
+                    className={cn(
+                      statusConfig[requirement.status]?.color ||
+                        'bg-gray-100 text-gray-800'
+                    )}
+                  >
+                    {statusConfig[requirement.status]?.label ||
+                      requirement.status}
                   </Badge>
                 )}
               </div>
@@ -441,8 +458,14 @@ export function RequirementDetail({
                 </SelectContent>
               </Select>
             ) : (
-              <Badge className={cn(priorityConfig[requirement.priority].color)}>
-                {priorityConfig[requirement.priority].label}
+              <Badge
+                className={cn(
+                  priorityConfig[requirement.priority]?.color ||
+                    'bg-gray-100 text-gray-800'
+                )}
+              >
+                {priorityConfig[requirement.priority]?.label ||
+                  requirement.priority}
               </Badge>
             )}
           </CardContent>
@@ -477,7 +500,7 @@ export function RequirementDetail({
               </Select>
             ) : (
               <span className='text-sm'>
-                {typeConfig[requirement.type].label}
+                {typeConfig[requirement.type]?.label || requirement.type}
               </span>
             )}
           </CardContent>
@@ -515,9 +538,13 @@ export function RequirementDetail({
               </Select>
             ) : (
               <Badge
-                className={cn(complexityConfig[requirement.complexity].color)}
+                className={cn(
+                  complexityConfig[requirement.complexity]?.color ||
+                    'bg-gray-100 text-gray-800'
+                )}
               >
-                {complexityConfig[requirement.complexity].label}
+                {complexityConfig[requirement.complexity]?.label ||
+                  requirement.complexity}
               </Badge>
             )}
           </CardContent>
@@ -645,22 +672,28 @@ export function RequirementDetail({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className='flex items-center gap-3'>
-              <Avatar className='h-8 w-8'>
-                <AvatarImage src={requirement.creator.avatar} />
-                <AvatarFallback>
-                  {requirement.creator.name.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className='text-sm font-medium'>
-                  {requirement.creator.name}
-                </p>
-                <p className='text-xs text-gray-500'>
-                  {requirement.creator.email}
-                </p>
+            {requirement.creator ? (
+              <div className='flex items-center gap-3'>
+                <Avatar className='h-8 w-8'>
+                  <AvatarImage src={requirement.creator.avatar} />
+                  <AvatarFallback>
+                    {requirement.creator.name?.charAt(0) || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className='text-sm font-medium'>
+                    {requirement.creator.name}
+                  </p>
+                  <p className='text-xs text-gray-500'>
+                    {requirement.creator.email}
+                  </p>
+                </div>
               </div>
-            </div>
+            ) : (
+              <span className='text-sm text-gray-400'>
+                No creator information
+              </span>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -687,16 +720,16 @@ export function RequirementDetail({
       )}
 
       {/* Acceptance Criteria */}
-      {requirement.acceptanceCriteria &&
-        requirement.acceptanceCriteria.length > 0 && (
-          <Card>
-            <CardHeader className='pb-3'>
-              <CardTitle className='flex items-center gap-2 text-sm font-medium'>
-                <CheckCircle2 className='h-4 w-4' />
-                Acceptance Criteria
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+      {requirement.acceptanceCriteria && (
+        <Card>
+          <CardHeader className='pb-3'>
+            <CardTitle className='flex items-center gap-2 text-sm font-medium'>
+              <CheckCircle2 className='h-4 w-4' />
+              Acceptance Criteria
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {Array.isArray(requirement.acceptanceCriteria) ? (
               <ul className='space-y-2'>
                 {requirement.acceptanceCriteria.map((criteria, index) => (
                   <li key={index} className='flex items-start gap-2 text-sm'>
@@ -705,9 +738,14 @@ export function RequirementDetail({
                   </li>
                 ))}
               </ul>
-            </CardContent>
-          </Card>
-        )}
+            ) : (
+              <div className='text-sm whitespace-pre-wrap'>
+                {requirement.acceptanceCriteria}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Dependencies */}
       {requirement.dependencies && requirement.dependencies.length > 0 && (
