@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { RequirementDetail } from '@/features/requirement-management/components/requirement-detail';
 import { RequirementComments } from '@/features/requirement-management/components/requirement-comments';
 import { RequirementHistory } from '@/features/requirement-management/components/requirement-history';
@@ -20,13 +21,15 @@ import { prisma } from '@/lib/prisma';
 interface RequirementDetailPageProps {
   params: Promise<{
     id: string;
+    locale: string;
   }>;
 }
 
 export async function generateMetadata({
   params
 }: RequirementDetailPageProps): Promise<Metadata> {
-  const { id } = await params;
+  const { id, locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'requirements' });
 
   const requirement = await prisma.requirement.findUnique({
     where: { id },
@@ -35,20 +38,22 @@ export async function generateMetadata({
 
   if (!requirement) {
     return {
-      title: '需求未找到'
+      title: t('messages.notFound')
     };
   }
 
   return {
-    title: `${requirement.title} - 需求详情`,
-    description: `查看和编辑需求：${requirement.title}`
+    title: `${requirement.title} - ${t('view')}`,
+    description: `${t('view')} ${requirement.title}`
   };
 }
 
 export default async function RequirementDetailPage({
   params
 }: RequirementDetailPageProps) {
-  const { id } = await params;
+  const { id, locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'requirements' });
+  const tCommon = await getTranslations({ locale, namespace: 'common' });
 
   const requirement = await prisma.requirement.findUnique({
     where: { id },
@@ -98,7 +103,7 @@ export default async function RequirementDetailPage({
         <Link href='/dashboard/requirements'>
           <Button variant='ghost' size='sm'>
             <ArrowLeft className='mr-2 h-4 w-4' />
-            返回需求列表
+            {t('backToList')}
           </Button>
         </Link>
       </div>
@@ -109,25 +114,25 @@ export default async function RequirementDetailPage({
             {requirement.title}
           </h2>
           <p className='text-muted-foreground'>
-            需求ID: {requirement.id} • 项目:{' '}
-            {requirement.project?.name || '未关联'}
+            {t('requirementInfo')}: {requirement.id} • {t('project')}:{' '}
+            {requirement.project?.name || tCommon('none')}
           </p>
         </div>
 
         <Tabs defaultValue='detail' className='space-y-4'>
           <TabsList>
-            <TabsTrigger value='detail'>详情信息</TabsTrigger>
+            <TabsTrigger value='detail'>{t('details')}</TabsTrigger>
             <TabsTrigger value='relations' className='flex items-center gap-2'>
               <Link2 className='h-4 w-4' />
-              关联管理
+              {t('relationTypes.relatesTo')}
             </TabsTrigger>
             <TabsTrigger value='comments' className='flex items-center gap-2'>
               <MessageSquare className='h-4 w-4' />
-              评论讨论 ({requirement._count.comments})
+              {t('comments')} ({requirement._count.comments})
             </TabsTrigger>
             <TabsTrigger value='history' className='flex items-center gap-2'>
               <History className='h-4 w-4' />
-              版本历史 ({requirement._count.versions})
+              {t('history')} ({requirement._count.versions})
             </TabsTrigger>
           </TabsList>
 
@@ -138,10 +143,8 @@ export default async function RequirementDetailPage({
           <TabsContent value='relations' className='space-y-4'>
             <Card>
               <CardHeader>
-                <CardTitle>关联管理</CardTitle>
-                <CardDescription>
-                  管理需求与项目、任务、其他需求的关联关系
-                </CardDescription>
+                <CardTitle>{t('relationTypes.relatesTo')}</CardTitle>
+                <CardDescription>{t('relationManagement')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <RequirementRelations requirementId={requirement.id} />
@@ -152,8 +155,8 @@ export default async function RequirementDetailPage({
           <TabsContent value='comments' className='space-y-4'>
             <Card>
               <CardHeader>
-                <CardTitle>评论讨论</CardTitle>
-                <CardDescription>需求相关的讨论和评论</CardDescription>
+                <CardTitle>{t('comments')}</CardTitle>
+                <CardDescription>{t('commentsDescription')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <RequirementComments requirementId={requirement.id} />
@@ -164,8 +167,8 @@ export default async function RequirementDetailPage({
           <TabsContent value='history' className='space-y-4'>
             <Card>
               <CardHeader>
-                <CardTitle>版本历史</CardTitle>
-                <CardDescription>需求的所有版本变更记录</CardDescription>
+                <CardTitle>{t('history')}</CardTitle>
+                <CardDescription>{t('historyDescription')}</CardDescription>
               </CardHeader>
               <CardContent>
                 <RequirementHistory requirementId={requirement.id} />

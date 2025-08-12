@@ -309,7 +309,7 @@ export function RequirementDetail({
 
   return (
     <div className='space-y-6'>
-      {/* Header */}
+      {/* Compact Banner/Header Style */}
       <Card>
         <CardHeader>
           <div className='flex items-start justify-between'>
@@ -369,27 +369,325 @@ export function RequirementDetail({
                 <>
                   <Button onClick={handleSave} size='sm'>
                     <Save className='mr-2 h-4 w-4' />
-                    Save
+                    保存
                   </Button>
                   <Button onClick={handleCancel} variant='outline' size='sm'>
                     <X className='mr-2 h-4 w-4' />
-                    Cancel
+                    取消
                   </Button>
                 </>
               ) : (
                 <Button onClick={handleEdit} size='sm'>
                   <Edit className='mr-2 h-4 w-4' />
-                  Edit
+                  编辑
                 </Button>
               )}
             </div>
           </div>
         </CardHeader>
+
         <CardContent>
+          {/* Compact Info Banner */}
+          <div className='mb-6 space-y-4 rounded-lg bg-gray-50 p-4'>
+            {/* Top Row: Basic Info */}
+            <div className='grid grid-cols-2 gap-x-8 gap-y-3 sm:grid-cols-4 lg:grid-cols-6'>
+              {/* Priority */}
+              <div className='flex items-center gap-2'>
+                <AlertCircle className='text-muted-foreground h-3 w-3' />
+                <span className='text-muted-foreground text-xs'>优先级:</span>
+                {isEditing ? (
+                  <Select
+                    value={editedRequirement.priority}
+                    onValueChange={(value: any) =>
+                      setEditedRequirement({
+                        ...editedRequirement,
+                        priority: value
+                      })
+                    }
+                  >
+                    <SelectTrigger className='h-6 w-20 text-xs'>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(priorityConfig).map(([key, config]) => (
+                        <SelectItem key={key} value={key}>
+                          {config.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Badge
+                    className={cn(
+                      priorityConfig[requirement.priority]?.color ||
+                        'bg-gray-100 text-gray-800',
+                      'px-1.5 py-0.5 text-xs'
+                    )}
+                  >
+                    {priorityConfig[requirement.priority]?.label ||
+                      requirement.priority}
+                  </Badge>
+                )}
+              </div>
+
+              {/* Type */}
+              <div className='flex items-center gap-2'>
+                <TypeIcon className='text-muted-foreground h-3 w-3' />
+                <span className='text-muted-foreground text-xs'>类型:</span>
+                {isEditing ? (
+                  <Select
+                    value={editedRequirement.type}
+                    onValueChange={(value: any) =>
+                      setEditedRequirement({
+                        ...editedRequirement,
+                        type: value
+                      })
+                    }
+                  >
+                    <SelectTrigger className='h-6 w-20 text-xs'>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(typeConfig).map(([key, config]) => (
+                        <SelectItem key={key} value={key}>
+                          {config.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <span className='text-xs font-medium'>
+                    {typeConfig[requirement.type]?.label || requirement.type}
+                  </span>
+                )}
+              </div>
+
+              {/* Complexity */}
+              <div className='flex items-center gap-2'>
+                <BarChart3 className='text-muted-foreground h-3 w-3' />
+                <span className='text-muted-foreground text-xs'>复杂度:</span>
+                {isEditing ? (
+                  <Select
+                    value={editedRequirement.complexity}
+                    onValueChange={(value: any) =>
+                      setEditedRequirement({
+                        ...editedRequirement,
+                        complexity: value
+                      })
+                    }
+                  >
+                    <SelectTrigger className='h-6 w-20 text-xs'>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(complexityConfig).map(([key, config]) => (
+                        <SelectItem key={key} value={key}>
+                          {config.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Badge
+                    className={cn(
+                      complexityConfig[requirement.complexity]?.color ||
+                        'bg-gray-100 text-gray-800',
+                      'px-1.5 py-0.5 text-xs'
+                    )}
+                  >
+                    {complexityConfig[requirement.complexity]?.label ||
+                      requirement.complexity}
+                  </Badge>
+                )}
+              </div>
+
+              {/* Due Date */}
+              <div className='flex items-center gap-2'>
+                <Calendar className='text-muted-foreground h-3 w-3' />
+                <span className='text-muted-foreground text-xs'>截止:</span>
+                {requirement.dueDate ? (
+                  <span className='text-xs font-medium'>
+                    {format(requirement.dueDate, 'MM/dd')}
+                  </span>
+                ) : (
+                  <span className='text-xs text-gray-400'>未设置</span>
+                )}
+              </div>
+
+              {/* Assignee */}
+              <div className='flex items-center gap-2'>
+                <User className='text-muted-foreground h-3 w-3' />
+                <span className='text-muted-foreground text-xs'>负责人:</span>
+                {requirement.assignee ? (
+                  <div className='flex items-center gap-1'>
+                    <Avatar className='h-4 w-4'>
+                      <AvatarImage src={requirement.assignee.avatar} />
+                      <AvatarFallback className='text-xs'>
+                        {requirement.assignee.name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className='text-xs font-medium'>
+                      {requirement.assignee.name}
+                    </span>
+                  </div>
+                ) : (
+                  <span className='text-xs text-gray-400'>未分配</span>
+                )}
+              </div>
+
+              {/* Progress */}
+              <div className='flex items-center gap-2'>
+                <BarChart3 className='text-muted-foreground h-3 w-3' />
+                <span className='text-muted-foreground text-xs'>进度:</span>
+                <div className='flex items-center gap-1'>
+                  <span className='text-xs font-medium text-purple-600'>
+                    {requirement.progress}%
+                  </span>
+                  <Progress value={requirement.progress} className='h-1 w-12' />
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Row: Metrics */}
+            <div className='grid grid-cols-3 gap-4 border-t border-gray-200 pt-2'>
+              <div className='flex items-center gap-2'>
+                <Target className='h-3 w-3 text-green-600' />
+                <span className='text-muted-foreground text-xs'>商业价值:</span>
+                {isEditing ? (
+                  <Input
+                    type='number'
+                    min='0'
+                    max='100'
+                    value={editedRequirement.businessValue}
+                    onChange={(e) =>
+                      setEditedRequirement({
+                        ...editedRequirement,
+                        businessValue: parseInt(e.target.value)
+                      })
+                    }
+                    className='h-6 w-12 text-xs'
+                  />
+                ) : (
+                  <span className='text-xs font-bold text-green-600'>
+                    {requirement.businessValue}/100
+                  </span>
+                )}
+              </div>
+
+              <div className='flex items-center gap-2'>
+                <Zap className='h-3 w-3 text-blue-600' />
+                <span className='text-muted-foreground text-xs'>工作量:</span>
+                {isEditing ? (
+                  <Input
+                    type='number'
+                    min='0'
+                    value={editedRequirement.effort}
+                    onChange={(e) =>
+                      setEditedRequirement({
+                        ...editedRequirement,
+                        effort: parseInt(e.target.value)
+                      })
+                    }
+                    className='h-6 w-12 text-xs'
+                  />
+                ) : (
+                  <span className='text-xs font-bold text-blue-600'>
+                    {requirement.effort}天
+                  </span>
+                )}
+              </div>
+
+              <div className='flex items-center gap-2'>
+                <CalendarDays className='text-muted-foreground h-3 w-3' />
+                <span className='text-muted-foreground text-xs'>创建:</span>
+                <span className='text-xs'>
+                  {format(requirement.createdAt, 'MM/dd/yyyy')}
+                </span>
+              </div>
+            </div>
+
+            {/* Tags */}
+            {requirement.tags.length > 0 && (
+              <div className='flex items-center gap-2 pt-2'>
+                <Tag className='text-muted-foreground h-3 w-3' />
+                <span className='text-muted-foreground text-xs'>标签:</span>
+                <div className='flex flex-wrap gap-1'>
+                  {requirement.tags.map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant='secondary'
+                      className='px-1.5 py-0.5 text-xs'
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Attachments */}
+            {requirement.attachments && requirement.attachments.length > 0 && (
+              <div className='flex items-center gap-2 pt-2'>
+                <FileText className='text-muted-foreground h-3 w-3' />
+                <span className='text-muted-foreground text-xs'>附件:</span>
+                <div className='flex items-center gap-2'>
+                  {requirement.attachments.slice(0, 2).map((attachment) => (
+                    <div
+                      key={attachment.id}
+                      className='flex items-center gap-1'
+                    >
+                      <span className='max-w-20 truncate text-xs font-medium'>
+                        {attachment.name}
+                      </span>
+                      <Button
+                        variant='outline'
+                        size='sm'
+                        className='h-5 px-1.5 text-xs'
+                      >
+                        下载
+                      </Button>
+                    </div>
+                  ))}
+                  {requirement.attachments.length > 2 && (
+                    <span className='text-muted-foreground text-xs'>
+                      +{requirement.attachments.length - 2}个
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Dependencies */}
+            {requirement.dependencies &&
+              requirement.dependencies.length > 0 && (
+                <div className='flex items-start gap-2 pt-2'>
+                  <AlertCircle className='mt-0.5 h-3 w-3 text-orange-500' />
+                  <span className='text-muted-foreground text-xs'>依赖:</span>
+                  <div className='flex flex-wrap gap-1'>
+                    {requirement.dependencies
+                      .slice(0, 3)
+                      .map((dependency, index) => (
+                        <span
+                          key={index}
+                          className='rounded bg-orange-50 px-2 py-0.5 text-xs text-orange-700'
+                        >
+                          {dependency}
+                        </span>
+                      ))}
+                    {requirement.dependencies.length > 3 && (
+                      <span className='text-muted-foreground text-xs'>
+                        +{requirement.dependencies.length - 3}个
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+          </div>
+
+          {/* Description Section */}
           <div className='space-y-4'>
-            {/* Description */}
             <div>
-              <Label className='text-sm font-medium'>Description</Label>
+              <Label className='mb-2 block text-sm font-medium'>需求描述</Label>
               {isEditing ? (
                 <Textarea
                   value={editedRequirement.description}
@@ -399,429 +697,46 @@ export function RequirementDetail({
                       description: e.target.value
                     })
                   }
-                  className='mt-2'
                   rows={4}
+                  className='resize-none'
                 />
               ) : (
-                <p className='mt-2 text-sm text-gray-600'>
-                  {requirement.description}
-                </p>
+                <div className='rounded-lg bg-gray-50 p-4'>
+                  <p className='text-sm leading-relaxed text-gray-700'>
+                    {requirement.description}
+                  </p>
+                </div>
               )}
             </div>
 
-            {/* Progress */}
-            {requirement.progress > 0 && (
+            {/* Acceptance Criteria */}
+            {requirement.acceptanceCriteria && (
               <div>
-                <div className='mb-2 flex items-center justify-between'>
-                  <Label className='text-sm font-medium'>Progress</Label>
-                  <span className='text-sm font-medium'>
-                    {requirement.progress}%
-                  </span>
-                </div>
-                <Progress value={requirement.progress} className='h-2' />
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Metadata */}
-      <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
-        {/* Priority */}
-        <Card>
-          <CardHeader className='pb-3'>
-            <CardTitle className='flex items-center gap-2 text-sm font-medium'>
-              <AlertCircle className='h-4 w-4' />
-              Priority
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isEditing ? (
-              <Select
-                value={editedRequirement.priority}
-                onValueChange={(value: any) =>
-                  setEditedRequirement({
-                    ...editedRequirement,
-                    priority: value
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(priorityConfig).map(([key, config]) => (
-                    <SelectItem key={key} value={key}>
-                      {config.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <Badge
-                className={cn(
-                  priorityConfig[requirement.priority]?.color ||
-                    'bg-gray-100 text-gray-800'
-                )}
-              >
-                {priorityConfig[requirement.priority]?.label ||
-                  requirement.priority}
-              </Badge>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Type */}
-        <Card>
-          <CardHeader className='pb-3'>
-            <CardTitle className='flex items-center gap-2 text-sm font-medium'>
-              <TypeIcon className='h-4 w-4' />
-              Type
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isEditing ? (
-              <Select
-                value={editedRequirement.type}
-                onValueChange={(value: any) =>
-                  setEditedRequirement({ ...editedRequirement, type: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(typeConfig).map(([key, config]) => (
-                    <SelectItem key={key} value={key}>
-                      {config.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <span className='text-sm'>
-                {typeConfig[requirement.type]?.label || requirement.type}
-              </span>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Complexity */}
-        <Card>
-          <CardHeader className='pb-3'>
-            <CardTitle className='flex items-center gap-2 text-sm font-medium'>
-              <BarChart3 className='h-4 w-4' />
-              Complexity
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isEditing ? (
-              <Select
-                value={editedRequirement.complexity}
-                onValueChange={(value: any) =>
-                  setEditedRequirement({
-                    ...editedRequirement,
-                    complexity: value
-                  })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(complexityConfig).map(([key, config]) => (
-                    <SelectItem key={key} value={key}>
-                      {config.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <Badge
-                className={cn(
-                  complexityConfig[requirement.complexity]?.color ||
-                    'bg-gray-100 text-gray-800'
-                )}
-              >
-                {complexityConfig[requirement.complexity]?.label ||
-                  requirement.complexity}
-              </Badge>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Business Value */}
-        <Card>
-          <CardHeader className='pb-3'>
-            <CardTitle className='flex items-center gap-2 text-sm font-medium'>
-              <Target className='h-4 w-4' />
-              Business Value
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isEditing ? (
-              <Input
-                type='number'
-                min='0'
-                max='100'
-                value={editedRequirement.businessValue}
-                onChange={(e) =>
-                  setEditedRequirement({
-                    ...editedRequirement,
-                    businessValue: parseInt(e.target.value)
-                  })
-                }
-              />
-            ) : (
-              <span className='text-2xl font-bold text-green-600'>
-                {requirement.businessValue}
-              </span>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Effort */}
-        <Card>
-          <CardHeader className='pb-3'>
-            <CardTitle className='flex items-center gap-2 text-sm font-medium'>
-              <Zap className='h-4 w-4' />
-              Effort
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isEditing ? (
-              <Input
-                type='number'
-                min='0'
-                value={editedRequirement.effort}
-                onChange={(e) =>
-                  setEditedRequirement({
-                    ...editedRequirement,
-                    effort: parseInt(e.target.value)
-                  })
-                }
-              />
-            ) : (
-              <span className='text-2xl font-bold text-blue-600'>
-                {requirement.effort}
-              </span>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Due Date */}
-        <Card>
-          <CardHeader className='pb-3'>
-            <CardTitle className='flex items-center gap-2 text-sm font-medium'>
-              <Calendar className='h-4 w-4' />
-              Due Date
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {requirement.dueDate ? (
-              <span className='text-sm'>
-                {format(requirement.dueDate, 'PPP')}
-              </span>
-            ) : (
-              <span className='text-sm text-gray-400'>Not set</span>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* People */}
-      <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-        {/* Assignee */}
-        <Card>
-          <CardHeader className='pb-3'>
-            <CardTitle className='flex items-center gap-2 text-sm font-medium'>
-              <User className='h-4 w-4' />
-              Assignee
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {requirement.assignee ? (
-              <div className='flex items-center gap-3'>
-                <Avatar className='h-8 w-8'>
-                  <AvatarImage src={requirement.assignee.avatar} />
-                  <AvatarFallback>
-                    {requirement.assignee.name.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className='text-sm font-medium'>
-                    {requirement.assignee.name}
-                  </p>
-                  <p className='text-xs text-gray-500'>
-                    {requirement.assignee.email}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <span className='text-sm text-gray-400'>Unassigned</span>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Creator */}
-        <Card>
-          <CardHeader className='pb-3'>
-            <CardTitle className='flex items-center gap-2 text-sm font-medium'>
-              <Users className='h-4 w-4' />
-              Creator
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {requirement.creator ? (
-              <div className='flex items-center gap-3'>
-                <Avatar className='h-8 w-8'>
-                  <AvatarImage src={requirement.creator.avatar} />
-                  <AvatarFallback>
-                    {requirement.creator.name?.charAt(0) || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className='text-sm font-medium'>
-                    {requirement.creator.name}
-                  </p>
-                  <p className='text-xs text-gray-500'>
-                    {requirement.creator.email}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <span className='text-sm text-gray-400'>
-                No creator information
-              </span>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Tags */}
-      {requirement.tags.length > 0 && (
-        <Card>
-          <CardHeader className='pb-3'>
-            <CardTitle className='flex items-center gap-2 text-sm font-medium'>
-              <Tag className='h-4 w-4' />
-              Tags
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className='flex flex-wrap gap-2'>
-              {requirement.tags.map((tag) => (
-                <Badge key={tag} variant='secondary'>
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Acceptance Criteria */}
-      {requirement.acceptanceCriteria && (
-        <Card>
-          <CardHeader className='pb-3'>
-            <CardTitle className='flex items-center gap-2 text-sm font-medium'>
-              <CheckCircle2 className='h-4 w-4' />
-              Acceptance Criteria
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {Array.isArray(requirement.acceptanceCriteria) ? (
-              <ul className='space-y-2'>
-                {requirement.acceptanceCriteria.map((criteria, index) => (
-                  <li key={index} className='flex items-start gap-2 text-sm'>
-                    <CheckCircle2 className='mt-0.5 h-4 w-4 flex-shrink-0 text-green-500' />
-                    {criteria}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className='text-sm whitespace-pre-wrap'>
-                {requirement.acceptanceCriteria}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Dependencies */}
-      {requirement.dependencies && requirement.dependencies.length > 0 && (
-        <Card>
-          <CardHeader className='pb-3'>
-            <CardTitle className='flex items-center gap-2 text-sm font-medium'>
-              <AlertCircle className='h-4 w-4' />
-              Dependencies
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className='space-y-2'>
-              {requirement.dependencies.map((dependency, index) => (
-                <li key={index} className='flex items-start gap-2 text-sm'>
-                  <AlertCircle className='mt-0.5 h-4 w-4 flex-shrink-0 text-orange-500' />
-                  {dependency}
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Attachments */}
-      {requirement.attachments && requirement.attachments.length > 0 && (
-        <Card>
-          <CardHeader className='pb-3'>
-            <CardTitle className='flex items-center gap-2 text-sm font-medium'>
-              <FileText className='h-4 w-4' />
-              Attachments
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className='space-y-2'>
-              {requirement.attachments.map((attachment) => (
-                <div
-                  key={attachment.id}
-                  className='flex items-center justify-between rounded border p-2'
-                >
-                  <div className='flex items-center gap-2'>
-                    <FileText className='h-4 w-4 text-gray-500' />
-                    <div>
-                      <p className='text-sm font-medium'>{attachment.name}</p>
-                      <p className='text-xs text-gray-500'>
-                        {formatFileSize(attachment.size)}
-                      </p>
+                <Label className='mb-2 block flex items-center gap-2 text-sm font-medium'>
+                  <CheckCircle2 className='h-4 w-4 text-green-600' />
+                  验收标准
+                </Label>
+                <div className='rounded-lg bg-gray-50 p-4'>
+                  {Array.isArray(requirement.acceptanceCriteria) ? (
+                    <ul className='space-y-2'>
+                      {requirement.acceptanceCriteria.map((criteria, index) => (
+                        <li
+                          key={index}
+                          className='flex items-start gap-3 text-sm'
+                        >
+                          <CheckCircle2 className='mt-0.5 h-4 w-4 flex-shrink-0 text-green-500' />
+                          <span className='text-gray-700'>{criteria}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className='text-sm whitespace-pre-wrap text-gray-700'>
+                      {requirement.acceptanceCriteria}
                     </div>
-                  </div>
-                  <Button variant='outline' size='sm'>
-                    Download
-                  </Button>
+                  )}
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Timestamps */}
-      <Card>
-        <CardHeader className='pb-3'>
-          <CardTitle className='flex items-center gap-2 text-sm font-medium'>
-            <CalendarDays className='h-4 w-4' />
-            Timeline
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className='grid grid-cols-1 gap-4 text-sm md:grid-cols-2'>
-            <div>
-              <Label className='text-xs text-gray-500'>Created</Label>
-              <p>{format(requirement.createdAt, 'PPP p')}</p>
-            </div>
-            <div>
-              <Label className='text-xs text-gray-500'>Last Updated</Label>
-              <p>{format(requirement.updatedAt, 'PPP p')}</p>
-            </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
