@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
+import ReactMarkdown from 'react-markdown';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -791,12 +792,13 @@ export function RequirementDetail({
                 </div>
               ) : (
                 <div className='rounded-lg bg-gray-50 p-4'>
-                  <div
-                    className='text-sm leading-relaxed text-gray-700 [&>blockquote]:border-l-4 [&>blockquote]:border-gray-300 [&>blockquote]:pl-4 [&>blockquote]:italic [&>code]:rounded [&>code]:bg-gray-200 [&>code]:px-1 [&>h1]:text-lg [&>h1]:font-bold [&>h2]:text-base [&>h2]:font-semibold [&>h3]:text-sm [&>h3]:font-medium [&>ol]:mb-2 [&>ol]:list-decimal [&>ol]:pl-4 [&>p]:mb-2 [&>pre]:overflow-x-auto [&>pre]:rounded [&>pre]:bg-gray-100 [&>pre]:p-2 [&>ul]:mb-2 [&>ul]:list-disc [&>ul]:pl-4'
-                    dangerouslySetInnerHTML={{
-                      __html: description || '暂无描述'
-                    }}
-                  />
+                  {description ? (
+                    <div className='prose prose-sm prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-p:mb-2 prose-p:leading-relaxed prose-p:text-gray-700 prose-ul:mb-2 prose-ul:list-disc prose-ul:pl-4 prose-ol:mb-2 prose-ol:list-decimal prose-ol:pl-4 prose-li:text-gray-700 prose-blockquote:border-l-4 prose-blockquote:border-gray-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-gray-600 prose-code:rounded prose-code:bg-gray-200 prose-code:px-1 prose-code:text-sm prose-pre:overflow-x-auto prose-pre:rounded prose-pre:bg-gray-100 prose-pre:p-2 max-w-none'>
+                      <ReactMarkdown>{description}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <div className='text-sm text-gray-500 italic'>暂无描述</div>
+                  )}
                 </div>
               )}
             </div>
@@ -821,12 +823,9 @@ export function RequirementDetail({
               ) : (
                 <div className='rounded-lg bg-blue-50 p-4'>
                   {userStory ? (
-                    <div
-                      className='text-sm leading-relaxed text-blue-800 [&>blockquote]:border-l-4 [&>blockquote]:border-blue-300 [&>blockquote]:pl-4 [&>blockquote]:italic [&>code]:rounded [&>code]:bg-blue-200 [&>code]:px-1 [&>h1]:text-lg [&>h1]:font-bold [&>h2]:text-base [&>h2]:font-semibold [&>h3]:text-sm [&>h3]:font-medium [&>ol]:mb-2 [&>ol]:list-decimal [&>ol]:pl-4 [&>p]:mb-2 [&>pre]:overflow-x-auto [&>pre]:rounded [&>pre]:bg-blue-100 [&>pre]:p-2 [&>ul]:mb-2 [&>ul]:list-disc [&>ul]:pl-4'
-                      dangerouslySetInnerHTML={{
-                        __html: userStory
-                      }}
-                    />
+                    <div className='prose prose-sm prose-headings:font-semibold prose-headings:text-blue-900 prose-h1:text-lg prose-h2:text-base prose-h3:text-sm prose-p:mb-2 prose-p:leading-relaxed prose-p:text-blue-800 prose-ul:mb-2 prose-ul:list-disc prose-ul:pl-4 prose-ol:mb-2 prose-ol:list-decimal prose-ol:pl-4 prose-li:text-blue-800 prose-blockquote:border-l-4 prose-blockquote:border-blue-300 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:text-blue-700 prose-code:rounded prose-code:bg-blue-200 prose-code:px-1 prose-code:text-sm prose-code:text-blue-900 prose-pre:overflow-x-auto prose-pre:rounded prose-pre:bg-blue-100 prose-pre:p-2 max-w-none'>
+                      <ReactMarkdown>{userStory}</ReactMarkdown>
+                    </div>
                   ) : (
                     <div className='flex items-center gap-2 text-blue-600'>
                       <Users className='h-4 w-4' />

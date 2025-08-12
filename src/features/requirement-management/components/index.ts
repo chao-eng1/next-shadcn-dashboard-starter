@@ -4,6 +4,7 @@ export { RequirementActions } from './requirement-actions';
 export { RequirementKanban } from './requirement-kanban';
 export { RequirementTree } from './requirement-tree';
 export { RequirementDetail } from './requirement-detail';
+export { RequirementDetailWrapper } from './requirement-detail-wrapper';
 export { RequirementComments } from './requirement-comments';
 export { RequirementHistory } from './requirement-history';
 export { RequirementRelations } from './requirement-relations';

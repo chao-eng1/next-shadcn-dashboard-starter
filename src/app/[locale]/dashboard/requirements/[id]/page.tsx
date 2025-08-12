@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { RequirementDetail } from '@/features/requirement-management/components/requirement-detail';
+import { RequirementDetailWrapper } from '@/features/requirement-management/components/requirement-detail-wrapper';
 import { RequirementComments } from '@/features/requirement-management/components/requirement-comments';
 import { RequirementHistory } from '@/features/requirement-management/components/requirement-history';
 import { RequirementRelations } from '@/features/requirement-management/components/requirement-relations';
@@ -207,7 +207,11 @@ export default async function RequirementDetailPage({
           </TabsList>
 
           <TabsContent value='detail' className='space-y-4'>
-            <RequirementDetail requirement={transformedRequirement} />
+            <RequirementDetailWrapper
+              projectId={requirement.project?.id || ''}
+              requirementId={requirement.id}
+              initialRequirement={transformedRequirement}
+            />
           </TabsContent>
 
           <TabsContent value='relations' className='space-y-4'>
