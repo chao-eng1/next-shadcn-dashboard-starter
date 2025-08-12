@@ -12,147 +12,120 @@ import {
   Tag,
   AlertCircle,
   CheckCircle2,
-  Clock
+  Clock,
+  Trash2,
+  MoreVertical
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
-
-interface Requirement {
-  id: string;
-  title: string;
-  description: string;
-  status:
-    | 'draft'
-    | 'review'
-    | 'approved'
-    | 'in_progress'
-    | 'completed'
-    | 'rejected';
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  type: 'functional' | 'non_functional' | 'business' | 'technical';
-  complexity: 'simple' | 'medium' | 'complex' | 'very_complex';
-  businessValue: number;
-  effort: number;
-  progress: number;
-  dueDate?: Date;
-  assignee?: {
-    id: string;
-    name: string;
-    avatar?: string;
-  };
-  creator: {
-    id: string;
-    name: string;
-    avatar?: string;
-  };
-  tags: string[];
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { useGlobalRequirements } from '../hooks/use-global-requirements';
+import { DeleteConfirmDialog } from './delete-confirm-dialog';
 
 interface RequirementListProps {
-  requirements?: Requirement[];
-  loading?: boolean;
-  onRequirementClick?: (requirement: Requirement) => void;
-  onStatusChange?: (
-    requirementId: string,
-    status: Requirement['status']
-  ) => void;
+  filters?: {
+    search?: string;
+    status?: string[];
+    priority?: string[];
+    type?: string[];
+    complexity?: string[];
+    projectId?: string[];
+    assigneeId?: string[];
+    creatorId?: string[];
+    tags?: string[];
+    dueDateFrom?: Date;
+    dueDateTo?: Date;
+    createdFrom?: Date;
+    createdTo?: Date;
+  };
+  onRequirementClick?: (requirementId: string) => void;
 }
 
-// Mock data for demonstration
-const mockRequirements: Requirement[] = [
-  {
-    id: '1',
-    title: 'User Authentication System',
-    description:
-      'Implement secure user login and registration functionality with multi-factor authentication support.',
-    status: 'in_progress',
-    priority: 'high',
-    type: 'functional',
-    complexity: 'complex',
-    businessValue: 85,
-    effort: 40,
-    progress: 65,
-    dueDate: new Date('2024-02-15'),
-    assignee: {
-      id: 'user1',
-      name: 'John Doe',
-      avatar: '/avatars/john.jpg'
-    },
-    creator: {
-      id: 'user2',
-      name: 'Jane Smith',
-      avatar: '/avatars/jane.jpg'
-    },
-    tags: ['security', 'authentication', 'user-management'],
-    createdAt: new Date('2024-01-10'),
-    updatedAt: new Date('2024-01-20')
-  },
-  {
-    id: '2',
-    title: 'Performance Optimization',
-    description:
-      'Optimize application performance to achieve sub-2-second page load times.',
-    status: 'review',
-    priority: 'medium',
-    type: 'non_functional',
-    complexity: 'medium',
-    businessValue: 70,
-    effort: 25,
-    progress: 30,
-    dueDate: new Date('2024-03-01'),
-    assignee: {
-      id: 'user3',
-      name: 'Mike Johnson',
-      avatar: '/avatars/mike.jpg'
-    },
-    creator: {
-      id: 'user2',
-      name: 'Jane Smith',
-      avatar: '/avatars/jane.jpg'
-    },
-    tags: ['performance', 'optimization'],
-    createdAt: new Date('2024-01-15'),
-    updatedAt: new Date('2024-01-25')
-  }
-];
-
 export function RequirementList({
-  requirements = mockRequirements,
-  loading = false,
-  onRequirementClick,
-  onStatusChange
+  filters = {},
+  onRequirementClick
 }: RequirementListProps) {
   const t = useTranslations('requirements');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    requirement: { id: string; title: string; requirementId?: string } | null;
+  }>({ open: false, requirement: null });
+  const [deleting, setDeleting] = useState(false);
+
+  // 转换过滤器参数
+  const { requirements, loading, error, pagination, deleteRequirement } =
+    useGlobalRequirements({
+      page: currentPage,
+      limit: 20,
+      search: filters.search,
+      status: filters.status,
+      priority: filters.priority,
+      type: filters.type,
+      complexity: filters.complexity,
+      projectId: filters.projectId?.[0],
+      assignedToId: filters.assigneeId?.[0],
+      createdById: filters.creatorId?.[0],
+      sortField: 'createdAt',
+      sortDirection: 'desc'
+    });
+
+  // 处理删除确认
+  const handleDeleteConfirm = async () => {
+    if (!deleteDialog.requirement) return;
+
+    setDeleting(true);
+    try {
+      await deleteRequirement(deleteDialog.requirement.id);
+      setDeleteDialog({ open: false, requirement: null });
+    } catch (error) {
+      // 错误已在hook中处理
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  // 打开删除确认对话框
+  const handleDeleteClick = (requirement: {
+    id: string;
+    title: string;
+    requirementId?: string;
+  }) => {
+    setDeleteDialog({ open: true, requirement });
+  };
 
   const statusConfig = {
-    draft: {
+    DRAFT: {
       label: t('statuses.draft'),
       color: 'bg-gray-100 text-gray-800',
       icon: Clock
     },
-    review: {
+    REVIEW: {
       label: t('statuses.review'),
       color: 'bg-yellow-100 text-yellow-800',
       icon: AlertCircle
     },
-    approved: {
+    APPROVED: {
       label: t('statuses.approved'),
       color: 'bg-green-100 text-green-800',
       icon: CheckCircle2
     },
-    in_progress: {
+    IN_DEVELOPMENT: {
       label: t('statuses.inProgress'),
       color: 'bg-blue-100 text-blue-800',
       icon: Clock
     },
-    completed: {
+    COMPLETED: {
       label: t('statuses.completed'),
       color: 'bg-green-100 text-green-800',
       icon: CheckCircle2
     },
-    rejected: {
+    REJECTED: {
       label: t('statuses.rejected'),
       color: 'bg-red-100 text-red-800',
       icon: AlertCircle
@@ -160,35 +133,35 @@ export function RequirementList({
   };
 
   const priorityConfig = {
-    low: { label: t('priorities.low'), color: 'bg-gray-100 text-gray-800' },
-    medium: {
+    LOW: { label: t('priorities.low'), color: 'bg-gray-100 text-gray-800' },
+    MEDIUM: {
       label: t('priorities.medium'),
       color: 'bg-yellow-100 text-yellow-800'
     },
-    high: {
+    HIGH: {
       label: t('priorities.high'),
       color: 'bg-orange-100 text-orange-800'
     },
-    critical: {
+    CRITICAL: {
       label: t('priorities.critical'),
       color: 'bg-red-100 text-red-800'
     }
   };
 
   const typeConfig = {
-    functional: {
+    FUNCTIONAL: {
       label: t('types.functional'),
       color: 'bg-blue-100 text-blue-800'
     },
-    non_functional: {
+    NON_FUNCTIONAL: {
       label: t('types.nonFunctional'),
       color: 'bg-purple-100 text-purple-800'
     },
-    business: {
+    BUSINESS: {
       label: t('types.business'),
       color: 'bg-green-100 text-green-800'
     },
-    technical: {
+    TECHNICAL: {
       label: t('types.technical'),
       color: 'bg-gray-100 text-gray-800'
     }
@@ -215,6 +188,19 @@ export function RequirementList({
     );
   }
 
+  if (error) {
+    return (
+      <Card>
+        <CardContent className='flex flex-col items-center justify-center py-12'>
+          <AlertCircle className='mb-4 h-12 w-12 text-red-400' />
+          <h3 className='mb-2 text-lg font-medium text-gray-900'>加载失败</h3>
+          <p className='mb-4 text-center text-gray-500'>{error}</p>
+          <Button onClick={() => window.location.reload()}>重试</Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (requirements.length === 0) {
     return (
       <Card>
@@ -232,114 +218,242 @@ export function RequirementList({
   }
 
   return (
-    <div className='space-y-4'>
-      {requirements.map((requirement) => {
-        const StatusIcon = statusConfig[requirement.status].icon;
+    <>
+      <div className='space-y-4'>
+        {requirements.map((requirement) => {
+          const statusKey = requirement.status as keyof typeof statusConfig;
+          const priorityKey =
+            requirement.priority as keyof typeof priorityConfig;
+          const typeKey = requirement.type as keyof typeof typeConfig;
 
-        return (
-          <Card
-            key={requirement.id}
-            className='cursor-pointer transition-shadow hover:shadow-md'
-            onClick={() => onRequirementClick?.(requirement)}
-          >
-            <CardHeader className='pb-3'>
-              <div className='flex items-start justify-between'>
-                <div className='flex-1'>
-                  <CardTitle className='mb-2 text-lg font-semibold'>
-                    {requirement.title}
-                  </CardTitle>
-                  <p className='line-clamp-2 text-sm text-gray-600'>
-                    {requirement.description}
-                  </p>
-                </div>
-                <div className='ml-4 flex flex-col items-end space-y-2'>
-                  <Badge
-                    variant='secondary'
-                    className={cn(statusConfig[requirement.status].color)}
-                  >
-                    <StatusIcon className='mr-1 h-3 w-3' />
-                    {statusConfig[requirement.status].label}
-                  </Badge>
-                  <Badge
-                    variant='outline'
-                    className={cn(priorityConfig[requirement.priority].color)}
-                  >
-                    {priorityConfig[requirement.priority].label}
-                  </Badge>
-                </div>
-              </div>
-            </CardHeader>
+          const StatusIcon = statusConfig[statusKey]?.icon || Clock;
 
-            <CardContent className='pt-0'>
-              <div className='space-y-4'>
-                {/* Progress */}
-                {requirement.progress > 0 && (
-                  <div className='space-y-1'>
-                    <div className='flex justify-between text-sm'>
-                      <span className='text-gray-600'>Progress</span>
-                      <span className='font-medium'>
-                        {requirement.progress}%
+          // 计算进度（可以基于状态或其他逻辑）
+          const getProgress = (status: string) => {
+            switch (status) {
+              case 'DRAFT':
+                return 0;
+              case 'REVIEW':
+                return 25;
+              case 'APPROVED':
+                return 40;
+              case 'IN_DEVELOPMENT':
+                return 70;
+              case 'COMPLETED':
+                return 100;
+              default:
+                return 0;
+            }
+          };
+
+          const progress = getProgress(requirement.status);
+
+          return (
+            <Card
+              key={requirement.id}
+              className='transition-shadow hover:shadow-md'
+            >
+              <CardHeader className='pb-3'>
+                <div className='flex items-start justify-between'>
+                  <div
+                    className='flex-1 cursor-pointer'
+                    onClick={() => onRequirementClick?.(requirement.id)}
+                  >
+                    <CardTitle className='mb-2 text-lg font-semibold'>
+                      <div className='flex items-center gap-2'>
+                        {requirement.requirementId && (
+                          <Badge variant='outline' className='text-xs'>
+                            {requirement.requirementId}
+                          </Badge>
+                        )}
+                        {requirement.title}
+                      </div>
+                    </CardTitle>
+                    <p className='line-clamp-2 text-sm text-gray-600'>
+                      {requirement.description}
+                    </p>
+                  </div>
+                  <div className='ml-4 flex items-start gap-2'>
+                    <div className='flex flex-col items-end space-y-2'>
+                      <Badge
+                        variant='secondary'
+                        className={cn(
+                          statusConfig[statusKey]?.color ||
+                            'bg-gray-100 text-gray-800'
+                        )}
+                      >
+                        <StatusIcon className='mr-1 h-3 w-3' />
+                        {statusConfig[statusKey]?.label || requirement.status}
+                      </Badge>
+                      <Badge
+                        variant='outline'
+                        className={cn(
+                          priorityConfig[priorityKey]?.color ||
+                            'bg-gray-100 text-gray-800'
+                        )}
+                      >
+                        {priorityConfig[priorityKey]?.label ||
+                          requirement.priority}
+                      </Badge>
+                    </div>
+
+                    {/* 操作菜单 */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          className='h-8 w-8 p-0'
+                        >
+                          <MoreVertical className='h-4 w-4' />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align='end'>
+                        <DropdownMenuItem
+                          className='cursor-pointer text-red-600'
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteClick({
+                              id: requirement.id,
+                              title: requirement.title,
+                              requirementId: requirement.requirementId
+                            });
+                          }}
+                        >
+                          <Trash2 className='mr-2 h-4 w-4' />
+                          删除需求
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              </CardHeader>
+
+              <CardContent className='pt-0'>
+                <div className='space-y-4'>
+                  {/* Progress */}
+                  {progress > 0 && (
+                    <div className='space-y-1'>
+                      <div className='flex justify-between text-sm'>
+                        <span className='text-gray-600'>进度</span>
+                        <span className='font-medium'>{progress}%</span>
+                      </div>
+                      <Progress value={progress} className='h-2' />
+                    </div>
+                  )}
+
+                  {/* Metadata */}
+                  <div className='flex flex-wrap items-center gap-4 text-sm text-gray-600'>
+                    <div className='flex items-center gap-1'>
+                      <Tag className='h-4 w-4' />
+                      <Badge
+                        variant='outline'
+                        className={cn(
+                          typeConfig[typeKey]?.color ||
+                            'bg-gray-100 text-gray-800'
+                        )}
+                      >
+                        {typeConfig[typeKey]?.label || requirement.type}
+                      </Badge>
+                    </div>
+
+                    <div className='flex items-center gap-2'>
+                      <span className='text-muted-foreground text-xs'>
+                        项目: {requirement.project.name}
                       </span>
                     </div>
-                    <Progress value={requirement.progress} className='h-2' />
-                  </div>
-                )}
 
-                {/* Metadata */}
-                <div className='flex flex-wrap items-center gap-4 text-sm text-gray-600'>
-                  <div className='flex items-center gap-1'>
-                    <Tag className='h-4 w-4' />
-                    <Badge
-                      variant='outline'
-                      className={cn(typeConfig[requirement.type].color)}
-                    >
-                      {typeConfig[requirement.type].label}
-                    </Badge>
+                    {requirement.assignedTo && (
+                      <div className='flex items-center gap-2'>
+                        <User className='h-4 w-4' />
+                        <Avatar className='h-5 w-5'>
+                          <AvatarImage src={requirement.assignedTo.image} />
+                          <AvatarFallback className='text-xs'>
+                            {requirement.assignedTo.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span>{requirement.assignedTo.name}</span>
+                      </div>
+                    )}
+
+                    {requirement.dueDate && (
+                      <div className='flex items-center gap-1'>
+                        <CalendarDays className='h-4 w-4' />
+                        <span>
+                          {new Date(requirement.dueDate).toLocaleDateString()}
+                        </span>
+                      </div>
+                    )}
+
+                    {requirement.estimatedEffort && (
+                      <div className='flex items-center gap-2'>
+                        <span>工作量: {requirement.estimatedEffort}天</span>
+                      </div>
+                    )}
                   </div>
 
-                  {requirement.assignee && (
-                    <div className='flex items-center gap-2'>
-                      <User className='h-4 w-4' />
-                      <Avatar className='h-5 w-5'>
-                        <AvatarImage src={requirement.assignee.avatar} />
-                        <AvatarFallback className='text-xs'>
-                          {requirement.assignee.name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span>{requirement.assignee.name}</span>
+                  {/* Tags */}
+                  {requirement.tags && requirement.tags.length > 0 && (
+                    <div className='flex flex-wrap gap-1'>
+                      {requirement.tags.map((tagItem) => (
+                        <Badge
+                          key={tagItem.tag.id}
+                          variant='secondary'
+                          className='text-xs'
+                        >
+                          {tagItem.tag.name}
+                        </Badge>
+                      ))}
                     </div>
                   )}
-
-                  {requirement.dueDate && (
-                    <div className='flex items-center gap-1'>
-                      <CalendarDays className='h-4 w-4' />
-                      <span>{requirement.dueDate.toLocaleDateString()}</span>
-                    </div>
-                  )}
-
-                  <div className='flex items-center gap-2'>
-                    <span>Value: {requirement.businessValue}</span>
-                    <span>•</span>
-                    <span>Effort: {requirement.effort}</span>
-                  </div>
                 </div>
+              </CardContent>
+            </Card>
+          );
+        })}
 
-                {/* Tags */}
-                {requirement.tags.length > 0 && (
-                  <div className='flex flex-wrap gap-1'>
-                    {requirement.tags.map((tag) => (
-                      <Badge key={tag} variant='secondary' className='text-xs'>
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
-    </div>
+        {/* Pagination */}
+        {pagination.totalPages > 1 && (
+          <div className='flex items-center justify-center gap-2 pt-4'>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage <= 1}
+            >
+              上一页
+            </Button>
+
+            <span className='text-muted-foreground text-sm'>
+              第 {pagination.page} 页，共 {pagination.totalPages} 页
+            </span>
+
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() =>
+                setCurrentPage((prev) =>
+                  Math.min(pagination.totalPages, prev + 1)
+                )
+              }
+              disabled={currentPage >= pagination.totalPages}
+            >
+              下一页
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* 删除确认对话框 */}
+      <DeleteConfirmDialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => setDeleteDialog({ open, requirement: null })}
+        onConfirm={handleDeleteConfirm}
+        title={deleteDialog.requirement?.title || ''}
+        requirementId={deleteDialog.requirement?.requirementId}
+        loading={deleting}
+      />
+    </>
   );
 }
 

@@ -41,13 +41,10 @@ export default function RequirementsPage() {
 
   const handleFilterChange = (newFilters: FilterOptions) => {
     setFilters(newFilters);
-    // TODO: 实现过滤逻辑
-    console.log('Filter changed:', newFilters);
   };
 
   const handleClearFilters = () => {
     setFilters({});
-    console.log('Filters cleared');
   };
 
   return (
@@ -95,7 +92,7 @@ export default function RequirementsPage() {
                 onFiltersChange={handleFilterChange}
                 onClearFilters={handleClearFilters}
               />
-              <RequirementList />
+              <RequirementList filters={filters} />
             </CardContent>
           </Card>
         </TabsContent>
