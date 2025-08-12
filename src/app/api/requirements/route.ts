@@ -220,14 +220,25 @@ export async function POST(request: NextRequest) {
 
     const data = validationResult.data;
 
+    // 检查必填字段
+    if (!data.projectId) {
+      return apiValidationError([
+        {
+          path: ['projectId'],
+          message: '请选择一个项目',
+          code: 'invalid_type'
+        }
+      ]);
+    }
+
     // 生成需求ID
     const count = await prisma.requirement.count();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const requirementId = `REQ-${String(count + 1).padStart(4, '0')}`;
 
     // 创建需求
     const requirement = await prisma.requirement.create({
       data: {
+        requirementId,
         title: data.title,
         description: data.description,
         acceptanceCriteria: data.acceptanceCriteria,
@@ -286,6 +297,7 @@ export async function POST(request: NextRequest) {
 
     return apiResponse(requirement, '需求创建成功');
   } catch (error) {
+    console.error('Error creating requirement:', error);
     return apiError('创建需求失败');
   }
 }

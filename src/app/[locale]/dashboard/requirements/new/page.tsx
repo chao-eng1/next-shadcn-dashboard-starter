@@ -12,13 +12,27 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
-export const metadata: Metadata = {
-  title: '创建需求',
-  description: '创建新的需求项目'
-};
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'requirements' });
 
-export default async function NewRequirementPage() {
-  const t = await getTranslations('requirements');
+  return {
+    title: t('newRequirementTitle'),
+    description: t('newRequirementDescription')
+  };
+}
+
+export default async function NewRequirementPage({
+  params
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'requirements' });
 
   return (
     <div className='flex-1 space-y-4 p-4 pt-6 md:p-8'>
@@ -26,7 +40,7 @@ export default async function NewRequirementPage() {
         <Link href='/dashboard/requirements'>
           <Button variant='ghost' size='sm'>
             <ArrowLeft className='mr-2 h-4 w-4' />
-            返回需求列表
+            {t('backToList')}
           </Button>
         </Link>
       </div>
@@ -35,9 +49,11 @@ export default async function NewRequirementPage() {
         <div className='flex justify-center'>
           <Card className='mx-4 w-full max-w-7xl'>
             <CardHeader>
-              <CardTitle className='text-center text-2xl'>需求信息</CardTitle>
+              <CardTitle className='text-center text-2xl'>
+                {t('requirementInfo')}
+              </CardTitle>
               <CardDescription className='text-center'>
-                请填写完整的需求信息，包括基本信息、详细描述和验收标准
+                {t('requirementFormDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -33,7 +33,6 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar } from '@/components/ui/calendar';
 import {
   Popover,
@@ -57,41 +56,23 @@ import {
   Tag,
   Link,
   Save,
-  Send
+  Send,
+  Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import { createRequirementSchema } from '../schemas/requirement-schema';
+import {
+  RequirementPriority,
+  RequirementType,
+  RequirementComplexity,
+  RequirementStatus
+} from '../types/requirement';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
-const requirementFormSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(200, 'Title too long'),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
-  type: z.enum(['functional', 'non_functional', 'business', 'technical']),
-  priority: z.enum(['low', 'medium', 'high', 'critical']),
-  complexity: z.enum(['simple', 'medium', 'complex', 'very_complex']),
-  status: z.enum([
-    'draft',
-    'review',
-    'approved',
-    'in_progress',
-    'completed',
-    'rejected'
-  ]),
-  projectId: z.string().optional(),
-  assigneeId: z.string().optional(),
-  dueDate: z.date().optional(),
-  businessValue: z.number().min(1).max(10),
-  effort: z.number().min(1).max(10),
-  acceptanceCriteria: z
-    .array(z.string())
-    .min(1, 'At least one acceptance criteria is required'),
-  tags: z.array(z.string()),
-  attachments: z.array(z.string()),
-  relatedRequirements: z.array(z.string()),
-  stakeholders: z.array(z.string())
-});
-
-type RequirementFormData = z.infer<typeof requirementFormSchema>;
+type RequirementFormData = z.infer<typeof createRequirementSchema>;
 
 interface RequirementFormProps {
   initialData?: Partial<RequirementFormData>;
@@ -101,19 +82,26 @@ interface RequirementFormProps {
   mode?: 'create' | 'edit';
 }
 
-// Mock data
-const mockProjects = [
-  { id: 'proj1', name: 'User Management System' },
-  { id: 'proj2', name: 'E-commerce Platform' },
-  { id: 'proj3', name: 'Analytics Dashboard' }
-];
+// 接口类型定义
+interface Project {
+  id: string;
+  name: string;
+  description?: string;
+  status: string;
+  memberCount: number;
+  role?: string;
+}
 
-const mockUsers = [
-  { id: 'user1', name: 'Alice Johnson', avatar: '/avatars/alice.jpg' },
-  { id: 'user2', name: 'Bob Smith', avatar: '/avatars/bob.jpg' },
-  { id: 'user3', name: 'Carol Davis', avatar: '/avatars/carol.jpg' },
-  { id: 'user4', name: 'David Wilson', avatar: '/avatars/david.jpg' }
-];
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  image?: string;
+  onlineStatus?: {
+    isOnline: boolean;
+    lastSeenAt: string;
+  };
+}
 
 const mockTags = [
   'authentication',
@@ -128,8 +116,6 @@ const mockTags = [
   'documentation'
 ];
 
-// Move config objects inside component to access translations
-
 export function RequirementForm({
   initialData,
   onSubmit,
@@ -138,24 +124,151 @@ export function RequirementForm({
   mode = 'create'
 }: RequirementFormProps) {
   const t = useTranslations('requirements');
+  const router = useRouter();
+
+  // 状态管理
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [loadingProjects, setLoadingProjects] = useState(true);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [newAcceptanceCriteria, setNewAcceptanceCriteria] = useState('');
+  const [acceptanceCriteriaList, setAcceptanceCriteriaList] = useState<
+    string[]
+  >([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+    null
+  );
+
+  // 获取项目列表
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch('/api/projects/selector');
+        if (response.ok) {
+          const data = await response.json();
+          setProjects(data);
+        } else {
+          toast.error('获取项目列表失败');
+        }
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        toast.error('获取项目列表失败');
+      } finally {
+        setLoadingProjects(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  // 获取项目成员
+  const fetchProjectMembers = useCallback(async (projectId: string) => {
+    console.log('fetchProjectMembers called with:', projectId);
+
+    if (!projectId) {
+      setUsers([]);
+      setFilteredUsers([]);
+      return;
+    }
+
+    setLoadingUsers(true);
+    try {
+      const response = await fetch(
+        `/api/users/search?projectId=${projectId}&limit=50`
+      );
+      console.log('API response status:', response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Received users data:', data);
+
+        setUsers(data.data);
+        setFilteredUsers(data.data); // 初始时显示所有成员
+        console.log('Updated users state:', data.length, 'users');
+      } else {
+        console.error('Failed to fetch project members', response.status);
+        setUsers([]);
+        setFilteredUsers([]);
+      }
+    } catch (error) {
+      console.error('Error fetching project members:', error);
+      setUsers([]);
+      setFilteredUsers([]);
+    } finally {
+      setLoadingUsers(false);
+      console.log('Loading users finished');
+    }
+  }, []);
+
+  // 在已加载的项目成员中搜索
+  const handleUserSearch = (query: string) => {
+    if (!query || query.trim().length === 0) {
+      // 没有搜索词时显示所有成员
+      setFilteredUsers(users);
+      return;
+    }
+
+    const filtered = users.filter(
+      (user) =>
+        user.name?.toLowerCase().includes(query.toLowerCase()) ||
+        user.email?.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+  };
+
+  const form = useForm<RequirementFormData>({
+    resolver: zodResolver(createRequirementSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+      type: RequirementType.FUNCTIONAL,
+      priority: RequirementPriority.MEDIUM,
+      complexity: RequirementComplexity.MEDIUM,
+      estimatedEffort: 1,
+      acceptanceCriteria: '',
+      businessValue: '',
+      userStory: '',
+      assignedToId: '', // 确保默认值是空字符串
+      ...initialData
+    }
+  });
+
+  // 当选择项目时获取项目成员并清空已选择的分配人
+  const handleProjectChange = useCallback(
+    (projectId: string) => {
+      console.log('handleProjectChange called with:', projectId);
+      setSelectedProjectId(projectId);
+
+      // 清空分配人选择
+      form.setValue('assignedToId', '');
+      form.trigger('assignedToId'); // 触发验证更新
+
+      // 获取项目成员
+      fetchProjectMembers(projectId);
+    },
+    [form, fetchProjectMembers]
+  );
 
   const typeConfig = {
-    functional: {
+    FUNCTIONAL: {
       label: t('types.functional'),
       color: 'bg-blue-100 text-blue-800',
       icon: Target
     },
-    non_functional: {
+    NON_FUNCTIONAL: {
       label: t('types.nonFunctional'),
       color: 'bg-purple-100 text-purple-800',
       icon: Zap
     },
-    business: {
+    BUSINESS: {
       label: t('types.business'),
       color: 'bg-green-100 text-green-800',
       icon: Users
     },
-    technical: {
+    TECHNICAL: {
       label: t('types.technical'),
       color: 'bg-orange-100 text-orange-800',
       icon: FileText
@@ -163,114 +276,122 @@ export function RequirementForm({
   };
 
   const priorityConfig = {
-    low: { label: t('priorities.low'), color: 'bg-gray-100 text-gray-800' },
-    medium: {
+    LOW: { label: t('priorities.low'), color: 'bg-gray-100 text-gray-800' },
+    MEDIUM: {
       label: t('priorities.medium'),
       color: 'bg-yellow-100 text-yellow-800'
     },
-    high: {
+    HIGH: {
       label: t('priorities.high'),
       color: 'bg-orange-100 text-orange-800'
     },
-    critical: {
+    CRITICAL: {
       label: t('priorities.critical'),
       color: 'bg-red-100 text-red-800'
     }
   };
 
   const complexityConfig = {
-    simple: {
+    SIMPLE: {
       label: t('complexities.simple'),
       color: 'bg-green-100 text-green-800'
     },
-    medium: {
+    MEDIUM: {
       label: t('complexities.medium'),
       color: 'bg-yellow-100 text-yellow-800'
     },
-    complex: {
+    COMPLEX: {
       label: t('complexities.complex'),
       color: 'bg-orange-100 text-orange-800'
     },
-    very_complex: {
+    VERY_COMPLEX: {
       label: t('complexities.veryComplex'),
       color: 'bg-red-100 text-red-800'
     }
   };
 
-  const statusConfig = {
-    draft: {
-      label: t('statuses.draft'),
-      color: 'bg-gray-100 text-gray-800',
-      icon: Clock
-    },
-    review: {
-      label: t('statuses.review'),
-      color: 'bg-yellow-100 text-yellow-800',
-      icon: AlertCircle
-    },
-    approved: {
-      label: t('statuses.approved'),
-      color: 'bg-green-100 text-green-800',
-      icon: CheckCircle2
-    },
-    in_progress: {
-      label: t('statuses.inProgress'),
-      color: 'bg-blue-100 text-blue-800',
-      icon: Clock
-    },
-    completed: {
-      label: t('statuses.completed'),
-      color: 'bg-green-100 text-green-800',
-      icon: CheckCircle2
-    },
-    rejected: {
-      label: t('statuses.rejected'),
-      color: 'bg-red-100 text-red-800',
-      icon: AlertCircle
+  // 初始化选中的项目ID并获取成员
+  useEffect(() => {
+    if (initialData?.projectId) {
+      setSelectedProjectId(initialData.projectId);
+      fetchProjectMembers(initialData.projectId);
     }
-  };
+  }, [initialData?.projectId, fetchProjectMembers]);
 
-  const [newAcceptanceCriteria, setNewAcceptanceCriteria] = useState('');
-  const [newTag, setNewTag] = useState('');
-  const [selectedTags, setSelectedTags] = useState<string[]>(
-    initialData?.tags || []
-  );
+  // 提交表单
+  const handleSubmit = async (data: RequirementFormData) => {
+    setIsSubmitting(true);
+    try {
+      // 验证必填字段
+      if (!data.projectId) {
+        toast.error('请选择一个项目');
+        setIsSubmitting(false);
+        return;
+      }
 
-  const form = useForm<RequirementFormData>({
-    resolver: zodResolver(requirementFormSchema),
-    defaultValues: {
-      title: '',
-      description: '',
-      type: 'functional',
-      priority: 'medium',
-      complexity: 'medium',
-      status: 'draft',
-      businessValue: 5,
-      effort: 5,
-      acceptanceCriteria: [],
-      tags: [],
-      attachments: [],
-      relatedRequirements: [],
-      stakeholders: [],
-      ...initialData
+      // 构建提交数据
+      const submitData = {
+        ...data,
+        acceptanceCriteria:
+          acceptanceCriteriaList.length > 0
+            ? acceptanceCriteriaList.join('\n')
+            : undefined,
+        // 确保空字符串转换为 undefined
+        assignedToId: data.assignedToId || undefined,
+        parentId: data.parentId || undefined,
+        dueDate: data.dueDate || undefined
+        // TODO: 需要实现标签ID转换，暂时不提交标签数据
+        // tagIds: selectedTags // 这些是标签名称，不是CUID格式的ID
+      };
+
+      const response = await fetch('/api/requirements', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(submitData)
+      });
+
+      if (response.ok) {
+        await response.json(); // Consume the response
+        toast.success(mode === 'create' ? '需求创建成功' : '需求更新成功');
+
+        // 如果有自定义回调，调用它
+        if (onSubmit) {
+          onSubmit(data);
+        } else {
+          // 否则跳转到需求列表
+          router.push('/dashboard/requirements');
+        }
+      } else {
+        const error = await response.json();
+        if (error.details && Array.isArray(error.details)) {
+          // 处理验证错误
+          error.details.forEach((detail: any) => {
+            if (detail.path) {
+              const fieldName = detail.path[0];
+              form.setError(fieldName as any, {
+                message: detail.message
+              });
+            }
+          });
+          toast.error('请检查表单中的错误');
+        } else {
+          toast.error(error.message || '操作失败');
+        }
+      }
+    } catch (error) {
+      console.error('Error submitting requirement:', error);
+      toast.error('提交失败，请重试');
+    } finally {
+      setIsSubmitting(false);
     }
-  });
-
-  const watchedAcceptanceCriteria = form.watch('acceptanceCriteria');
-
-  const handleSubmit = (data: RequirementFormData, isDraft = false) => {
-    const formData = {
-      ...data,
-      tags: selectedTags
-    };
-    onSubmit?.(formData, isDraft);
   };
 
   const addAcceptanceCriteria = () => {
     if (newAcceptanceCriteria.trim()) {
-      const current = form.getValues('acceptanceCriteria');
-      form.setValue('acceptanceCriteria', [
-        ...current,
+      setAcceptanceCriteriaList([
+        ...acceptanceCriteriaList,
         newAcceptanceCriteria.trim()
       ]);
       setNewAcceptanceCriteria('');
@@ -278,17 +399,14 @@ export function RequirementForm({
   };
 
   const removeAcceptanceCriteria = (index: number) => {
-    const current = form.getValues('acceptanceCriteria');
-    form.setValue(
-      'acceptanceCriteria',
-      current.filter((_, i) => i !== index)
+    setAcceptanceCriteriaList(
+      acceptanceCriteriaList.filter((_, i) => i !== index)
     );
   };
 
-  const addTag = () => {
-    if (newTag.trim() && !selectedTags.includes(newTag.trim())) {
-      setSelectedTags([...selectedTags, newTag.trim()]);
-      setNewTag('');
+  const addTag = (tagName: string) => {
+    if (tagName.trim() && !selectedTags.includes(tagName.trim())) {
+      setSelectedTags([...selectedTags, tagName.trim()]);
     }
   };
 
@@ -296,47 +414,89 @@ export function RequirementForm({
     setSelectedTags(selectedTags.filter((t) => t !== tag));
   };
 
-  const addPredefinedTag = (tag: string) => {
-    if (!selectedTags.includes(tag)) {
-      setSelectedTags([...selectedTags, tag]);
-    }
-  };
-
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit((data) => handleSubmit(data, false))}
-        className='space-y-6'
-      >
-        <Tabs defaultValue='basic' className='w-full'>
-          <TabsList className='grid w-full grid-cols-4'>
-            <TabsTrigger value='basic'>Basic Info</TabsTrigger>
-            <TabsTrigger value='details'>Details</TabsTrigger>
-            <TabsTrigger value='criteria'>Acceptance</TabsTrigger>
-            <TabsTrigger value='metadata'>Metadata</TabsTrigger>
-          </TabsList>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-6'>
+        <div className='space-y-6'>
+          {/* 基本信息卡片 */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('form.basicInfo')}</CardTitle>
+              <CardDescription>
+                {t('form.basicInfoDescription')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className='space-y-4'>
+              <FormField
+                control={form.control}
+                name='title'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('form.titleLabel')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t('form.titlePlaceholder')}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          <TabsContent value='basic' className='space-y-6'>
-            <Card>
-              <CardHeader>
-                <CardTitle>Basic Information</CardTitle>
-                <CardDescription>
-                  Provide the essential information about the requirement
-                </CardDescription>
-              </CardHeader>
-              <CardContent className='space-y-4'>
+              <FormField
+                control={form.control}
+                name='description'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('form.descriptionLabel')}</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder={t('form.descriptionPlaceholder')}
+                        className='min-h-[120px]'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t('form.descriptionHelp')}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className='grid grid-cols-2 gap-4'>
                 <FormField
                   control={form.control}
-                  name='title'
+                  name='type'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Title *</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder='Enter requirement title...'
-                          {...field}
-                        />
-                      </FormControl>
+                      <FormLabel>{t('form.typeLabel')}</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={t('form.typePlaceholder')}
+                            />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.entries(typeConfig).map(([key, config]) => {
+                            const Icon = config.icon;
+                            return (
+                              <SelectItem key={key} value={key}>
+                                <div className='flex items-center gap-2'>
+                                  <Icon className='h-4 w-4' />
+                                  {config.label}
+                                </div>
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -344,511 +504,488 @@ export function RequirementForm({
 
                 <FormField
                   control={form.control}
-                  name='description'
+                  name='priority'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description *</FormLabel>
+                      <FormLabel>{t('form.priorityLabel')}</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={t('form.priorityPlaceholder')}
+                            />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.entries(priorityConfig).map(
+                            ([key, config]) => (
+                              <SelectItem key={key} value={key}>
+                                <Badge className={cn('text-xs', config.color)}>
+                                  {config.label}
+                                </Badge>
+                              </SelectItem>
+                            )
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className='grid grid-cols-2 gap-4'>
+                <FormField
+                  control={form.control}
+                  name='complexity'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('form.complexityLabel')}</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={t('form.complexityPlaceholder')}
+                            />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.entries(complexityConfig).map(
+                            ([key, config]) => (
+                              <SelectItem key={key} value={key}>
+                                <Badge className={cn('text-xs', config.color)}>
+                                  {config.label}
+                                </Badge>
+                              </SelectItem>
+                            )
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name='estimatedEffort'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('form.effortEstimateLabel')}</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='number'
+                          min='0.1'
+                          max='1000'
+                          step='0.1'
+                          placeholder='预估工作量(天)'
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        {t('form.effortEstimateHelp')}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 分配和时间线卡片 */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('form.assignmentTimeline')}</CardTitle>
+              <CardDescription>
+                {t('form.assignmentTimelineDescription')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className='space-y-4'>
+              <div className='grid grid-cols-2 gap-4'>
+                <FormField
+                  control={form.control}
+                  name='projectId'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('form.projectLabel')}</FormLabel>
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          handleProjectChange(value);
+                        }}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={
+                                loadingProjects
+                                  ? '加载中...'
+                                  : t('form.projectPlaceholder')
+                              }
+                            />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {projects.map((project) => (
+                            <SelectItem key={project.id} value={project.id}>
+                              <div className='flex items-center gap-2'>
+                                <span>{project.name}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                          {projects.length === 0 && !loadingProjects && (
+                            <SelectItem value='' disabled>
+                              没有可用的项目
+                            </SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>需求必须关联到一个项目</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name='assignedToId'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('form.assigneeLabel')}</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value || ''}
+                        disabled={!selectedProjectId || loadingUsers}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={
+                                !selectedProjectId
+                                  ? '请先选择项目'
+                                  : loadingUsers
+                                    ? '加载成员中...'
+                                    : filteredUsers.length === 0
+                                      ? '该项目暂无成员'
+                                      : t('form.assigneePlaceholder')
+                              }
+                            />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {selectedProjectId && !loadingUsers && (
+                            <div className='p-2'>
+                              <Input
+                                placeholder='输入姓名或邮箱搜索...'
+                                onChange={(e) =>
+                                  handleUserSearch(e.target.value)
+                                }
+                                className='mb-2'
+                              />
+                            </div>
+                          )}
+                          {loadingUsers ? (
+                            <div className='p-4 text-center'>
+                              <Loader2 className='mx-auto mb-2 h-4 w-4 animate-spin' />
+                              <span className='text-muted-foreground text-sm'>
+                                加载项目成员中...
+                              </span>
+                            </div>
+                          ) : selectedProjectId ? (
+                            filteredUsers.length > 0 ? (
+                              filteredUsers.map((user) => (
+                                <SelectItem key={user.id} value={user.id}>
+                                  <div className='flex items-center gap-2'>
+                                    <Avatar className='h-5 w-5'>
+                                      <AvatarImage src={user.image} />
+                                      <AvatarFallback className='text-xs'>
+                                        {user.name?.charAt(0)}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div className='flex flex-col'>
+                                      <span>{user.name}</span>
+                                      <span className='text-muted-foreground text-xs'>
+                                        {user.email}
+                                      </span>
+                                    </div>
+                                    {user.onlineStatus?.isOnline && (
+                                      <div className='ml-auto'>
+                                        <div className='h-2 w-2 rounded-full bg-green-500'></div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </SelectItem>
+                              ))
+                            ) : (
+                              <SelectItem value='' disabled>
+                                {users.length === 0
+                                  ? '该项目暂无成员'
+                                  : '未找到匹配的成员'}
+                              </SelectItem>
+                            )
+                          ) : (
+                            <SelectItem value='' disabled>
+                              请先选择项目
+                            </SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        {!selectedProjectId
+                          ? '先选择项目后，可以分配给项目成员'
+                          : loadingUsers
+                            ? '正在加载项目成员...'
+                            : `项目成员 (${users.length})`}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name='dueDate'
+                render={({ field }) => (
+                  <FormItem className='flex flex-col'>
+                    <FormLabel>{t('form.dueDateLabel')}</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={'outline'}
+                            className={cn(
+                              'w-[240px] pl-3 text-left font-normal',
+                              !field.value && 'text-muted-foreground'
+                            )}
+                          >
+                            {field.value ? (
+                              format(new Date(field.value), 'PPP')
+                            ) : (
+                              <span>{t('form.dueDatePlaceholder')}</span>
+                            )}
+                            <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className='w-auto p-0' align='start'>
+                        <Calendar
+                          mode='single'
+                          selected={
+                            field.value ? new Date(field.value) : undefined
+                          }
+                          onSelect={(date) =>
+                            field.onChange(date?.toISOString())
+                          }
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* 业务价值和用户故事 */}
+              <div className='grid grid-cols-1 gap-4'>
+                <FormField
+                  control={form.control}
+                  name='businessValue'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('form.businessValueLabel')}</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder='Describe the requirement in detail...'
-                          className='min-h-[120px]'
+                          placeholder='描述该需求的业务价值...'
+                          className='min-h-[80px]'
                           {...field}
                         />
                       </FormControl>
                       <FormDescription>
-                        Provide a clear and detailed description of what needs
-                        to be implemented
+                        {t('form.businessValueHelp')}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <div className='grid grid-cols-2 gap-4'>
-                  <FormField
-                    control={form.control}
-                    name='type'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Type</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder='Select type' />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Object.entries(typeConfig).map(([key, config]) => {
-                              const Icon = config.icon;
-                              return (
-                                <SelectItem key={key} value={key}>
-                                  <div className='flex items-center gap-2'>
-                                    <Icon className='h-4 w-4' />
-                                    {config.label}
-                                  </div>
-                                </SelectItem>
-                              );
-                            })}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name='priority'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Priority</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder='Select priority' />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Object.entries(priorityConfig).map(
-                              ([key, config]) => (
-                                <SelectItem key={key} value={key}>
-                                  <Badge
-                                    className={cn('text-xs', config.color)}
-                                  >
-                                    {config.label}
-                                  </Badge>
-                                </SelectItem>
-                              )
-                            )}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className='grid grid-cols-2 gap-4'>
-                  <FormField
-                    control={form.control}
-                    name='complexity'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Complexity</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder='Select complexity' />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Object.entries(complexityConfig).map(
-                              ([key, config]) => (
-                                <SelectItem key={key} value={key}>
-                                  <Badge
-                                    className={cn('text-xs', config.color)}
-                                  >
-                                    {config.label}
-                                  </Badge>
-                                </SelectItem>
-                              )
-                            )}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name='status'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder='Select status' />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {Object.entries(statusConfig).map(
-                              ([key, config]) => {
-                                const Icon = config.icon;
-                                return (
-                                  <SelectItem key={key} value={key}>
-                                    <div className='flex items-center gap-2'>
-                                      <Icon className='h-4 w-4' />
-                                      <Badge
-                                        className={cn('text-xs', config.color)}
-                                      >
-                                        {config.label}
-                                      </Badge>
-                                    </div>
-                                  </SelectItem>
-                                );
-                              }
-                            )}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value='details' className='space-y-6'>
-            <Card>
-              <CardHeader>
-                <CardTitle>Assignment & Timeline</CardTitle>
-                <CardDescription>
-                  Assign the requirement and set timeline
-                </CardDescription>
-              </CardHeader>
-              <CardContent className='space-y-4'>
-                <div className='grid grid-cols-2 gap-4'>
-                  <FormField
-                    control={form.control}
-                    name='projectId'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Project</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder='Select project' />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {mockProjects.map((project) => (
-                              <SelectItem key={project.id} value={project.id}>
-                                {project.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name='assigneeId'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Assignee</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder='Select assignee' />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {mockUsers.map((user) => (
-                              <SelectItem key={user.id} value={user.id}>
-                                <div className='flex items-center gap-2'>
-                                  <Avatar className='h-5 w-5'>
-                                    <AvatarImage src={user.avatar} />
-                                    <AvatarFallback className='text-xs'>
-                                      {user.name.charAt(0)}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  {user.name}
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
                 <FormField
                   control={form.control}
-                  name='dueDate'
+                  name='userStory'
                   render={({ field }) => (
-                    <FormItem className='flex flex-col'>
-                      <FormLabel>Due Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={'outline'}
-                              className={cn(
-                                'w-[240px] pl-3 text-left font-normal',
-                                !field.value && 'text-muted-foreground'
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, 'PPP')
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className='w-auto p-0' align='start'>
-                          <Calendar
-                            mode='single'
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) => date < new Date()}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
+                    <FormItem>
+                      <FormLabel>用户故事</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder='作为[用户角色]，我希望[功能描述]，以便[价值/目标]...'
+                          className='min-h-[80px]'
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        用标准的用户故事格式描述需求
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+              </div>
+            </CardContent>
+          </Card>
 
-                <div className='grid grid-cols-2 gap-4'>
-                  <FormField
-                    control={form.control}
-                    name='businessValue'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Business Value: {field.value}</FormLabel>
-                        <FormControl>
-                          <Slider
-                            min={1}
-                            max={10}
-                            step={1}
-                            value={[field.value]}
-                            onValueChange={(value) => field.onChange(value[0])}
-                            className='w-full'
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Rate the business value from 1 (low) to 10 (high)
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name='effort'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Effort Estimate: {field.value}</FormLabel>
-                        <FormControl>
-                          <Slider
-                            min={1}
-                            max={10}
-                            step={1}
-                            value={[field.value]}
-                            onValueChange={(value) => field.onChange(value[0])}
-                            className='w-full'
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Estimate the effort from 1 (easy) to 10 (very hard)
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value='criteria' className='space-y-6'>
-            <Card>
-              <CardHeader>
-                <CardTitle>Acceptance Criteria</CardTitle>
-                <CardDescription>
-                  Define the conditions that must be met for this requirement to
-                  be considered complete
-                </CardDescription>
-              </CardHeader>
-              <CardContent className='space-y-4'>
-                <div className='space-y-2'>
-                  {watchedAcceptanceCriteria.map((criteria, index) => (
-                    <div
-                      key={index}
-                      className='flex items-center gap-2 rounded-lg border p-3'
+          {/* 验收标准卡片 */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('form.acceptanceCriteriaLabel')}</CardTitle>
+              <CardDescription>
+                {t('form.acceptanceCriteriaDescription')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className='space-y-4'>
+              <div className='space-y-2'>
+                {acceptanceCriteriaList.map((criteria, index) => (
+                  <div
+                    key={index}
+                    className='flex items-center gap-2 rounded-lg border p-3'
+                  >
+                    <CheckCircle2 className='h-4 w-4 text-green-600' />
+                    <span className='flex-1 text-sm'>{criteria}</span>
+                    <Button
+                      type='button'
+                      variant='ghost'
+                      size='sm'
+                      onClick={() => removeAcceptanceCriteria(index)}
+                      className='h-8 w-8 p-0'
                     >
-                      <CheckCircle2 className='h-4 w-4 text-green-600' />
-                      <span className='flex-1 text-sm'>{criteria}</span>
+                      <X className='h-4 w-4' />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+
+              <div className='flex gap-2'>
+                <Input
+                  placeholder={t('form.acceptanceCriteriaPlaceholder')}
+                  value={newAcceptanceCriteria}
+                  onChange={(e) => setNewAcceptanceCriteria(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addAcceptanceCriteria();
+                    }
+                  }}
+                />
+                <Button
+                  type='button'
+                  variant='outline'
+                  onClick={addAcceptanceCriteria}
+                  disabled={!newAcceptanceCriteria.trim()}
+                >
+                  <Plus className='h-4 w-4' />
+                </Button>
+              </div>
+
+              {acceptanceCriteriaList.length === 0 && (
+                <p className='text-sm text-red-600'>请至少添加一个验收标准</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* 标签和元数据卡片 */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('form.tagsMetadata')}</CardTitle>
+              <CardDescription>
+                {t('form.tagsMetadataDescription')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className='space-y-4'>
+              <div className='space-y-2'>
+                <Label>{t('form.tagsLabel')}</Label>
+                <div className='mb-2 flex flex-wrap gap-2'>
+                  {selectedTags.map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant='secondary'
+                      className='flex items-center gap-1'
+                    >
+                      <Tag className='h-3 w-3' />
+                      {tag}
                       <Button
                         type='button'
                         variant='ghost'
                         size='sm'
-                        onClick={() => removeAcceptanceCriteria(index)}
-                        className='h-8 w-8 p-0'
+                        onClick={() => removeTag(tag)}
+                        className='ml-1 h-4 w-4 p-0'
                       >
-                        <X className='h-4 w-4' />
+                        <X className='h-3 w-3' />
                       </Button>
-                    </div>
+                    </Badge>
                   ))}
                 </div>
 
-                <div className='flex gap-2'>
-                  <Input
-                    placeholder='Add acceptance criteria...'
-                    value={newAcceptanceCriteria}
-                    onChange={(e) => setNewAcceptanceCriteria(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        addAcceptanceCriteria();
-                      }
-                    }}
-                  />
-                  <Button
-                    type='button'
-                    variant='outline'
-                    onClick={addAcceptanceCriteria}
-                    disabled={!newAcceptanceCriteria.trim()}
-                  >
-                    <Plus className='h-4 w-4' />
-                  </Button>
-                </div>
-
-                {form.formState.errors.acceptanceCriteria && (
-                  <p className='text-sm text-red-600'>
-                    {form.formState.errors.acceptanceCriteria.message}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value='metadata' className='space-y-6'>
-            <Card>
-              <CardHeader>
-                <CardTitle>Tags & Metadata</CardTitle>
-                <CardDescription>
-                  Add tags and additional metadata to help organize and
-                  categorize this requirement
-                </CardDescription>
-              </CardHeader>
-              <CardContent className='space-y-4'>
                 <div className='space-y-2'>
-                  <Label>Tags</Label>
-                  <div className='mb-2 flex flex-wrap gap-2'>
-                    {selectedTags.map((tag) => (
-                      <Badge
-                        key={tag}
-                        variant='secondary'
-                        className='flex items-center gap-1'
-                      >
-                        <Tag className='h-3 w-3' />
-                        {tag}
+                  <Label className='text-sm text-gray-600'>
+                    {t('form.suggestedTags')}
+                  </Label>
+                  <div className='flex flex-wrap gap-2'>
+                    {mockTags
+                      .filter((tag) => !selectedTags.includes(tag))
+                      .map((tag) => (
                         <Button
+                          key={tag}
                           type='button'
-                          variant='ghost'
+                          variant='outline'
                           size='sm'
-                          onClick={() => removeTag(tag)}
-                          className='ml-1 h-4 w-4 p-0'
+                          onClick={() => addTag(tag)}
+                          className='h-7 text-xs'
                         >
-                          <X className='h-3 w-3' />
+                          <Plus className='mr-1 h-3 w-3' />
+                          {tag}
                         </Button>
-                      </Badge>
-                    ))}
-                  </div>
-
-                  <div className='flex gap-2'>
-                    <Input
-                      placeholder='Add custom tag...'
-                      value={newTag}
-                      onChange={(e) => setNewTag(e.target.value)}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          addTag();
-                        }
-                      }}
-                    />
-                    <Button
-                      type='button'
-                      variant='outline'
-                      onClick={addTag}
-                      disabled={!newTag.trim()}
-                    >
-                      <Plus className='h-4 w-4' />
-                    </Button>
-                  </div>
-
-                  <div className='space-y-2'>
-                    <Label className='text-sm text-gray-600'>
-                      Suggested Tags:
-                    </Label>
-                    <div className='flex flex-wrap gap-2'>
-                      {mockTags
-                        .filter((tag) => !selectedTags.includes(tag))
-                        .map((tag) => (
-                          <Button
-                            key={tag}
-                            type='button'
-                            variant='outline'
-                            size='sm'
-                            onClick={() => addPredefinedTag(tag)}
-                            className='h-7 text-xs'
-                          >
-                            <Plus className='mr-1 h-3 w-3' />
-                            {tag}
-                          </Button>
-                        ))}
-                    </div>
+                      ))}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         <div className='flex items-center justify-between border-t pt-6'>
           <div className='flex gap-2'>
             {onCancel && (
               <Button type='button' variant='outline' onClick={onCancel}>
-                Cancel
+                {t('form.cancel')}
               </Button>
             )}
           </div>
 
           <div className='flex gap-2'>
             <Button
-              type='button'
-              variant='outline'
-              onClick={() => handleSubmit(form.getValues(), true)}
-              disabled={loading}
+              type='submit'
+              disabled={isSubmitting || loading}
+              className='min-w-[120px]'
             >
-              <Save className='mr-2 h-4 w-4' />
-              Save as Draft
-            </Button>
-            <Button type='submit' disabled={loading}>
-              <Send className='mr-2 h-4 w-4' />
-              {mode === 'create' ? 'Create Requirement' : 'Update Requirement'}
+              {isSubmitting ? (
+                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+              ) : (
+                <Send className='mr-2 h-4 w-4' />
+              )}
+              {mode === 'create'
+                ? t('form.createRequirement')
+                : t('form.updateRequirement')}
             </Button>
           </div>
         </div>

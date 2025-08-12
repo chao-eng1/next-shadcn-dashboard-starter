@@ -42,8 +42,21 @@ export const createRequirementSchema = z.object({
     .min(0, '预估工作量不能为负数')
     .max(1000, '预估工作量不能超过1000人天')
     .optional(),
-  assignedToId: z.string().cuid().optional(),
-  parentId: z.string().cuid().optional(),
+  projectId: z.string().cuid().min(1, '请选择一个项目'),
+  assignedToId: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || z.string().cuid().safeParse(val).success,
+      '分配人ID格式不正确'
+    ),
+  parentId: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || z.string().cuid().safeParse(val).success,
+      '父需求ID格式不正确'
+    ),
   dueDate: z
     .string()
     .datetime()
