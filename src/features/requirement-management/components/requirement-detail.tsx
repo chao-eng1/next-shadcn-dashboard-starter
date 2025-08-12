@@ -196,6 +196,9 @@ export function RequirementDetail({
   const [description, setDescription] = useState(requirement.description);
   const [userStory, setUserStory] = useState(requirement.userStory || '');
 
+  // 兼容不同数据源的 assignee 字段
+  const assigneeInfo = requirement.assignee || (requirement as any).assignedTo;
+
   // 验收标准列表状态 - 智能处理数组和字符串格式
   const [acceptanceCriteriaList, setAcceptanceCriteriaList] = useState<
     string[]
@@ -675,16 +678,18 @@ export function RequirementDetail({
               <div className='flex items-center gap-2'>
                 <User className='text-muted-foreground h-3 w-3' />
                 <span className='text-muted-foreground text-xs'>负责人:</span>
-                {requirement.assignee ? (
+                {assigneeInfo ? (
                   <div className='flex items-center gap-1'>
                     <Avatar className='h-4 w-4'>
-                      <AvatarImage src={requirement.assignee.avatar} />
+                      <AvatarImage
+                        src={assigneeInfo.avatar || assigneeInfo.image}
+                      />
                       <AvatarFallback className='text-xs'>
-                        {requirement.assignee.name.charAt(0)}
+                        {(assigneeInfo.name || assigneeInfo.email).charAt(0)}
                       </AvatarFallback>
                     </Avatar>
                     <span className='text-xs font-medium'>
-                      {requirement.assignee.name}
+                      {assigneeInfo.name || assigneeInfo.email}
                     </span>
                   </div>
                 ) : (
