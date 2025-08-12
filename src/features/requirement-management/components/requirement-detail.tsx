@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -16,15 +16,6 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog';
 import {
   CalendarDays,
   User,
@@ -40,44 +31,63 @@ import {
   Calendar,
   Users,
   Target,
-  Zap
+  Zap,
+  Plus,
+  Loader2
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+
+// 动态导入Markdown编辑器，避免SSR问题
+const MDEditor = dynamic(
+  () => import('@uiw/react-md-editor').then((mod) => mod.default),
+  {
+    ssr: false,
+    loading: () => (
+      <div className='bg-muted flex h-32 w-full items-center justify-center rounded-md'>
+        <Loader2 className='text-primary h-6 w-6 animate-spin' />
+        <span className='ml-2'>加载编辑器...</span>
+      </div>
+    )
+  }
+);
 
 interface Requirement {
   id: string;
   title: string;
   description: string;
   status:
-    | 'draft'
-    | 'review'
-    | 'approved'
-    | 'in_progress'
-    | 'completed'
-    | 'rejected';
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  type: 'functional' | 'non_functional' | 'business' | 'technical';
-  complexity: 'simple' | 'medium' | 'complex' | 'very_complex';
-  businessValue: number;
-  effort: number;
-  progress: number;
-  dueDate?: Date;
+    | 'DRAFT'
+    | 'REVIEW'
+    | 'APPROVED'
+    | 'IN_PROGRESS'
+    | 'TESTING'
+    | 'COMPLETED'
+    | 'REJECTED'
+    | 'CANCELLED';
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  type: 'FUNCTIONAL' | 'NON_FUNCTIONAL' | 'BUSINESS' | 'TECHNICAL';
+  complexity: 'SIMPLE' | 'MEDIUM' | 'COMPLEX' | 'VERY_COMPLEX';
+  businessValue: number; // 转换后的数字
+  estimatedEffort: number; // 数据库中的 Float 值
+  progress: number; // 计算得出的进度
+  dueDate?: Date | null;
   assignee?: {
     id: string;
     name: string;
     avatar?: string;
     email?: string;
   };
-  creator: {
+  creator?: {
     id: string;
     name: string;
     avatar?: string;
     email?: string;
   };
   tags: string[];
-  acceptanceCriteria?: string[];
+  acceptanceCriteria?: string[] | string;
+  userStory?: string;
   dependencies?: string[];
   attachments?: {
     id: string;
@@ -105,12 +115,12 @@ const mockRequirement: Requirement = {
   title: 'User Authentication System',
   description:
     'Implement a comprehensive user authentication system with multi-factor authentication support, password policies, and session management. The system should support various authentication methods including email/password, social login, and enterprise SSO integration.',
-  status: 'in_progress',
-  priority: 'high',
-  type: 'functional',
-  complexity: 'complex',
+  status: 'IN_PROGRESS',
+  priority: 'HIGH',
+  type: 'FUNCTIONAL',
+  complexity: 'COMPLEX',
   businessValue: 85,
-  effort: 40,
+  estimatedEffort: 40,
   progress: 65,
   dueDate: new Date('2024-02-15'),
   assignee: {
@@ -135,6 +145,8 @@ const mockRequirement: Requirement = {
     'Session timeout after 30 minutes of inactivity',
     'Support for 2FA via SMS or authenticator app'
   ],
+  userStory:
+    '作为一个平台用户，我希望能够安全地注册和登录我的账户，以便我可以访问个人数据和使用平台的各种功能，同时确保我的账户信息受到保护。',
   dependencies: [
     'Email service integration',
     'Database user schema',
@@ -171,6 +183,25 @@ export function RequirementDetail({
   const t = useTranslations('requirements');
   const [isEditing, setIsEditing] = useState(editable);
   const [editedRequirement, setEditedRequirement] = useState(requirement);
+
+  // Markdown 编辑器状态
+  const [description, setDescription] = useState(requirement.description);
+  const [userStory, setUserStory] = useState(requirement.userStory || '');
+
+  // 验收标准列表状态 - 智能处理数组和字符串格式
+  const [acceptanceCriteriaList, setAcceptanceCriteriaList] = useState<
+    string[]
+  >(() => {
+    if (!requirement.acceptanceCriteria) return [];
+    if (Array.isArray(requirement.acceptanceCriteria)) {
+      return requirement.acceptanceCriteria;
+    }
+    // 如果是字符串，按换行符分割并过滤空行
+    return requirement.acceptanceCriteria
+      .split('\n')
+      .filter((criteria) => criteria.trim());
+  });
+  const [newAcceptanceCriteria, setNewAcceptanceCriteria] = useState('');
 
   const statusConfig = {
     DRAFT: {
@@ -263,19 +294,78 @@ export function RequirementDetail({
 
   const handleEdit = () => {
     setIsEditing(true);
-    setEditedRequirement(requirement);
+    // 确保 editedRequirement 包含正确的字段
+    setEditedRequirement({
+      ...requirement,
+      // 确保数字字段是数字类型
+      businessValue: requirement.businessValue || 5,
+      estimatedEffort: requirement.estimatedEffort || 0,
+      progress: requirement.progress || 0
+    });
+    setDescription(requirement.description || '');
+    setUserStory(requirement.userStory || '');
+    setAcceptanceCriteriaList(() => {
+      if (!requirement.acceptanceCriteria) return [];
+      if (Array.isArray(requirement.acceptanceCriteria)) {
+        return requirement.acceptanceCriteria;
+      }
+      // 如果是字符串，按换行符分割并过滤空行
+      return requirement.acceptanceCriteria
+        .split('\n')
+        .filter((criteria) => criteria.trim());
+    });
     onEdit?.();
   };
 
   const handleSave = () => {
-    onSave?.(editedRequirement);
+    const updatedRequirement = {
+      ...editedRequirement,
+      description,
+      userStory,
+      // 将验收标准数组转换为换行符分隔的字符串，与创建表单保持一致
+      acceptanceCriteria:
+        acceptanceCriteriaList.length > 0
+          ? acceptanceCriteriaList.join('\n')
+          : undefined
+    };
+    onSave?.(updatedRequirement);
     setIsEditing(false);
   };
 
   const handleCancel = () => {
     setIsEditing(false);
     setEditedRequirement(requirement);
+    setDescription(requirement.description || '');
+    setUserStory(requirement.userStory || '');
+    setAcceptanceCriteriaList(() => {
+      if (!requirement.acceptanceCriteria) return [];
+      if (Array.isArray(requirement.acceptanceCriteria)) {
+        return requirement.acceptanceCriteria;
+      }
+      // 如果是字符串，按换行符分割并过滤空行
+      return requirement.acceptanceCriteria
+        .split('\n')
+        .filter((criteria) => criteria.trim());
+    });
+    setNewAcceptanceCriteria('');
     onCancel?.();
+  };
+
+  // 验收标准操作函数
+  const addAcceptanceCriteria = () => {
+    if (newAcceptanceCriteria.trim()) {
+      setAcceptanceCriteriaList([
+        ...acceptanceCriteriaList,
+        newAcceptanceCriteria.trim()
+      ]);
+      setNewAcceptanceCriteria('');
+    }
+  };
+
+  const removeAcceptanceCriteria = (index: number) => {
+    setAcceptanceCriteriaList(
+      acceptanceCriteriaList.filter((_, i) => i !== index)
+    );
   };
 
   const formatFileSize = (bytes: number) => {
@@ -581,18 +671,18 @@ export function RequirementDetail({
                   <Input
                     type='number'
                     min='0'
-                    value={editedRequirement.effort}
+                    value={editedRequirement.estimatedEffort}
                     onChange={(e) =>
                       setEditedRequirement({
                         ...editedRequirement,
-                        effort: parseInt(e.target.value)
+                        estimatedEffort: parseInt(e.target.value)
                       })
                     }
                     className='h-6 w-12 text-xs'
                   />
                 ) : (
                   <span className='text-xs font-bold text-blue-600'>
-                    {requirement.effort}天
+                    {requirement.estimatedEffort}天
                   </span>
                 )}
               </div>
@@ -689,37 +779,131 @@ export function RequirementDetail({
             <div>
               <Label className='mb-2 block text-sm font-medium'>需求描述</Label>
               {isEditing ? (
-                <Textarea
-                  value={editedRequirement.description}
-                  onChange={(e) =>
-                    setEditedRequirement({
-                      ...editedRequirement,
-                      description: e.target.value
-                    })
-                  }
-                  rows={4}
-                  className='resize-none'
-                />
+                <div data-color-mode='light' className='w-full'>
+                  <MDEditor
+                    value={description}
+                    onChange={(value) => setDescription(value || '')}
+                    height={300}
+                    preview='edit'
+                    data-color-mode='light'
+                    visibleDragbar={false}
+                  />
+                </div>
               ) : (
                 <div className='rounded-lg bg-gray-50 p-4'>
-                  <p className='text-sm leading-relaxed text-gray-700'>
-                    {requirement.description}
-                  </p>
+                  <div
+                    className='text-sm leading-relaxed text-gray-700 [&>blockquote]:border-l-4 [&>blockquote]:border-gray-300 [&>blockquote]:pl-4 [&>blockquote]:italic [&>code]:rounded [&>code]:bg-gray-200 [&>code]:px-1 [&>h1]:text-lg [&>h1]:font-bold [&>h2]:text-base [&>h2]:font-semibold [&>h3]:text-sm [&>h3]:font-medium [&>ol]:mb-2 [&>ol]:list-decimal [&>ol]:pl-4 [&>p]:mb-2 [&>pre]:overflow-x-auto [&>pre]:rounded [&>pre]:bg-gray-100 [&>pre]:p-2 [&>ul]:mb-2 [&>ul]:list-disc [&>ul]:pl-4'
+                    dangerouslySetInnerHTML={{
+                      __html: description || '暂无描述'
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* User Story */}
+            <div>
+              <Label className='mb-2 block flex items-center gap-2 text-sm font-medium'>
+                <Users className='h-4 w-4 text-blue-600' />
+                用户故事
+              </Label>
+              {isEditing ? (
+                <div data-color-mode='light' className='w-full'>
+                  <MDEditor
+                    value={userStory}
+                    onChange={(value) => setUserStory(value || '')}
+                    height={200}
+                    preview='edit'
+                    data-color-mode='light'
+                    visibleDragbar={false}
+                  />
+                </div>
+              ) : (
+                <div className='rounded-lg bg-blue-50 p-4'>
+                  {userStory ? (
+                    <div
+                      className='text-sm leading-relaxed text-blue-800 [&>blockquote]:border-l-4 [&>blockquote]:border-blue-300 [&>blockquote]:pl-4 [&>blockquote]:italic [&>code]:rounded [&>code]:bg-blue-200 [&>code]:px-1 [&>h1]:text-lg [&>h1]:font-bold [&>h2]:text-base [&>h2]:font-semibold [&>h3]:text-sm [&>h3]:font-medium [&>ol]:mb-2 [&>ol]:list-decimal [&>ol]:pl-4 [&>p]:mb-2 [&>pre]:overflow-x-auto [&>pre]:rounded [&>pre]:bg-blue-100 [&>pre]:p-2 [&>ul]:mb-2 [&>ul]:list-disc [&>ul]:pl-4'
+                      dangerouslySetInnerHTML={{
+                        __html: userStory
+                      }}
+                    />
+                  ) : (
+                    <div className='flex items-center gap-2 text-blue-600'>
+                      <Users className='h-4 w-4' />
+                      <span className='text-sm italic'>暂无用户故事</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
             {/* Acceptance Criteria */}
-            {requirement.acceptanceCriteria && (
+            {(acceptanceCriteriaList.length > 0 || isEditing) && (
               <div>
                 <Label className='mb-2 block flex items-center gap-2 text-sm font-medium'>
                   <CheckCircle2 className='h-4 w-4 text-green-600' />
                   验收标准
                 </Label>
-                <div className='rounded-lg bg-gray-50 p-4'>
-                  {Array.isArray(requirement.acceptanceCriteria) ? (
+                {isEditing ? (
+                  <div className='space-y-4'>
+                    {/* 现有的验收标准列表 */}
+                    <div className='space-y-2'>
+                      {acceptanceCriteriaList.map((criteria, index) => (
+                        <div
+                          key={index}
+                          className='flex items-center gap-2 rounded-lg border p-3'
+                        >
+                          <CheckCircle2 className='h-4 w-4 text-green-600' />
+                          <span className='flex-1 text-sm'>{criteria}</span>
+                          <Button
+                            type='button'
+                            variant='ghost'
+                            size='sm'
+                            onClick={() => removeAcceptanceCriteria(index)}
+                            className='h-8 w-8 p-0 text-red-500 hover:text-red-700'
+                          >
+                            <X className='h-4 w-4' />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* 添加新验收标准 */}
+                    <div className='flex gap-2'>
+                      <Input
+                        placeholder='请输入验收标准...'
+                        value={newAcceptanceCriteria}
+                        onChange={(e) =>
+                          setNewAcceptanceCriteria(e.target.value)
+                        }
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            addAcceptanceCriteria();
+                          }
+                        }}
+                      />
+                      <Button
+                        type='button'
+                        variant='outline'
+                        onClick={addAcceptanceCriteria}
+                        disabled={!newAcceptanceCriteria.trim()}
+                        className='shrink-0'
+                      >
+                        <Plus className='h-4 w-4' />
+                      </Button>
+                    </div>
+
+                    {acceptanceCriteriaList.length === 0 && (
+                      <p className='text-sm text-amber-600'>
+                        建议至少添加一个验收标准
+                      </p>
+                    )}
+                  </div>
+                ) : acceptanceCriteriaList.length > 0 ? (
+                  <div className='rounded-lg bg-gray-50 p-4'>
                     <ul className='space-y-2'>
-                      {requirement.acceptanceCriteria.map((criteria, index) => (
+                      {acceptanceCriteriaList.map((criteria, index) => (
                         <li
                           key={index}
                           className='flex items-start gap-3 text-sm'
@@ -729,12 +913,15 @@ export function RequirementDetail({
                         </li>
                       ))}
                     </ul>
-                  ) : (
-                    <div className='text-sm whitespace-pre-wrap text-gray-700'>
-                      {requirement.acceptanceCriteria}
+                  </div>
+                ) : (
+                  <div className='rounded-lg bg-gray-50 p-4'>
+                    <div className='flex items-center gap-2 text-gray-500'>
+                      <CheckCircle2 className='h-4 w-4' />
+                      <span className='text-sm italic'>暂无验收标准</span>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

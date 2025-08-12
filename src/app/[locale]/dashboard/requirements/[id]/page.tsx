@@ -83,6 +83,7 @@ export default async function RequirementDetailPage({
           tag: true
         }
       },
+      attachments: true, // 添加附件查询
       _count: {
         select: {
           comments: true,
@@ -96,6 +97,75 @@ export default async function RequirementDetailPage({
   if (!requirement) {
     notFound();
   }
+
+  // 转换数据库数据为组件期望的格式
+  const transformedRequirement: any = {
+    id: requirement.id,
+    title: requirement.title,
+    description: requirement.description || '',
+    status: requirement.status,
+    priority: requirement.priority,
+    type: requirement.type,
+    complexity: requirement.complexity,
+    // 将数据库的字段名映射为组件期望的格式
+    assignee: requirement.assignedTo
+      ? {
+          id: requirement.assignedTo.id,
+          name: requirement.assignedTo.name || requirement.assignedTo.email,
+          email: requirement.assignedTo.email,
+          avatar: undefined // 数据库中可能没有头像字段
+        }
+      : undefined,
+    creator: requirement.createdBy
+      ? {
+          id: requirement.createdBy.id,
+          name: requirement.createdBy.name || requirement.createdBy.email,
+          email: requirement.createdBy.email,
+          avatar: undefined
+        }
+      : undefined,
+    // 将 businessValue 从字符串转换为数字，如果是数字则保持，如果无效则用默认值
+    businessValue: requirement.businessValue
+      ? typeof requirement.businessValue === 'string'
+        ? parseInt(requirement.businessValue) || 5
+        : requirement.businessValue
+      : 5,
+    // estimatedEffort 已经是 Float，直接使用
+    estimatedEffort: requirement.estimatedEffort || 0,
+    // 计算进度 - 如果没有实际进度字段，可以根据状态计算
+    progress:
+      requirement.status === 'COMPLETED'
+        ? 100
+        : requirement.status === 'IN_PROGRESS'
+          ? 50
+          : requirement.status === 'APPROVED'
+            ? 25
+            : 0,
+    // 处理标签 - 将关联的标签对象转换为字符串数组
+    tags: requirement.tags ? requirement.tags.map((t) => t.tag.name) : [],
+    // 处理附件 - 转换为组件期望的格式
+    attachments: requirement.attachments
+      ? requirement.attachments.map((att) => ({
+          id: att.id,
+          name: att.filename,
+          url: att.filepath,
+          type: att.mimetype,
+          size: att.size
+        }))
+      : [],
+    // 处理依赖项 - 这里可能需要根据实际数据结构调整
+    dependencies: [], // 暂时为空，可能需要单独查询依赖关系
+    // 处理可能为 null 的字段
+    acceptanceCriteria: requirement.acceptanceCriteria
+      ? requirement.acceptanceCriteria
+          .split('\n')
+          .filter((criteria) => criteria.trim())
+      : undefined,
+    userStory: requirement.userStory || undefined,
+    dueDate: requirement.dueDate,
+    createdAt: requirement.createdAt,
+    updatedAt: requirement.updatedAt
+  };
 
   return (
     <div className='flex-1 space-y-4 p-4 pt-6 md:p-8'>
@@ -137,7 +207,7 @@ export default async function RequirementDetailPage({
           </TabsList>
 
           <TabsContent value='detail' className='space-y-4'>
-            <RequirementDetail requirement={requirement} />
+            <RequirementDetail requirement={transformedRequirement} />
           </TabsContent>
 
           <TabsContent value='relations' className='space-y-4'>
