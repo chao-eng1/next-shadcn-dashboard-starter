@@ -32,24 +32,19 @@ export default async function NewRequirementPage() {
       </div>
 
       <div className='space-y-4'>
-        <div>
-          <h2 className='text-3xl font-bold tracking-tight'>{t('create')}</h2>
-          <p className='text-muted-foreground'>
-            填写需求信息，创建新的需求项目
-          </p>
+        <div className='flex justify-center'>
+          <Card className='mx-4 w-full max-w-7xl'>
+            <CardHeader>
+              <CardTitle className='text-center text-2xl'>需求信息</CardTitle>
+              <CardDescription className='text-center'>
+                请填写完整的需求信息，包括基本信息、详细描述和验收标准
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RequirementForm />
+            </CardContent>
+          </Card>
         </div>
-
-        <Card className='max-w-4xl'>
-          <CardHeader>
-            <CardTitle>需求信息</CardTitle>
-            <CardDescription>
-              请填写完整的需求信息，包括基本信息、详细描述和验收标准
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <RequirementForm />
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

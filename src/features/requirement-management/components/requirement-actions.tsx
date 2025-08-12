@@ -15,21 +15,10 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Plus,
   Download,
@@ -47,12 +36,12 @@ import {
   SortDesc,
   RefreshCw
 } from 'lucide-react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface RequirementActionsProps {
   selectedRequirements?: string[];
-  onCreateRequirement?: () => void;
   onBulkAction?: (action: string, requirementIds: string[]) => void;
   onExport?: (format: string) => void;
   onImport?: (file: File) => void;
@@ -66,7 +55,6 @@ interface RequirementActionsProps {
 
 export function RequirementActions({
   selectedRequirements = [],
-  onCreateRequirement,
   onBulkAction,
   onExport,
   onImport,
@@ -76,7 +64,6 @@ export function RequirementActions({
   onSortChange
 }: RequirementActionsProps) {
   const t = useTranslations('requirements');
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
 
   const sortOptions = [
@@ -96,27 +83,6 @@ export function RequirementActions({
     { value: 'pdf', label: t('exportFormats.pdf'), icon: FileText },
     { value: 'json', label: t('exportFormats.json'), icon: FileText }
   ];
-  const [newRequirement, setNewRequirement] = useState({
-    title: '',
-    description: '',
-    priority: 'medium',
-    type: 'functional',
-    complexity: 'medium'
-  });
-
-  const handleCreateRequirement = () => {
-    // TODO: Implement requirement creation
-    console.log('Creating requirement:', newRequirement);
-    onCreateRequirement?.();
-    setIsCreateDialogOpen(false);
-    setNewRequirement({
-      title: '',
-      description: '',
-      priority: 'medium',
-      type: 'functional',
-      complexity: 'medium'
-    });
-  };
 
   const handleBulkAction = (action: string) => {
     if (selectedRequirements.length === 0) return;
@@ -145,131 +111,12 @@ export function RequirementActions({
       {/* Left side - Primary actions */}
       <div className='flex items-center gap-2'>
         {/* Create Requirement */}
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className='gap-2'>
-              <Plus className='h-4 w-4' />
-              {t('createRequirement')}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className='sm:max-w-[600px]'>
-            <DialogHeader>
-              <DialogTitle>{t('createNewRequirement')}</DialogTitle>
-              <DialogDescription>
-                {t('createRequirementDescription')}
-              </DialogDescription>
-            </DialogHeader>
-            <div className='grid gap-4 py-4'>
-              <div className='grid gap-2'>
-                <Label htmlFor='title'>{t('title')}</Label>
-                <Input
-                  id='title'
-                  value={newRequirement.title}
-                  onChange={(e) =>
-                    setNewRequirement({
-                      ...newRequirement,
-                      title: e.target.value
-                    })
-                  }
-                  placeholder={t('enterTitle')}
-                />
-              </div>
-              <div className='grid gap-2'>
-                <Label htmlFor='description'>{t('description')}</Label>
-                <Textarea
-                  id='description'
-                  value={newRequirement.description}
-                  onChange={(e) =>
-                    setNewRequirement({
-                      ...newRequirement,
-                      description: e.target.value
-                    })
-                  }
-                  placeholder={t('enterDescription')}
-                  rows={3}
-                />
-              </div>
-              <div className='grid grid-cols-3 gap-4'>
-                <div className='grid gap-2'>
-                  <Label htmlFor='priority'>{t('priority')}</Label>
-                  <Select
-                    value={newRequirement.priority}
-                    onValueChange={(value) =>
-                      setNewRequirement({ ...newRequirement, priority: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='low'>Low</SelectItem>
-                      <SelectItem value='medium'>Medium</SelectItem>
-                      <SelectItem value='high'>High</SelectItem>
-                      <SelectItem value='critical'>Critical</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className='grid gap-2'>
-                  <Label htmlFor='type'>{t('type')}</Label>
-                  <Select
-                    value={newRequirement.type}
-                    onValueChange={(value) =>
-                      setNewRequirement({ ...newRequirement, type: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='functional'>Functional</SelectItem>
-                      <SelectItem value='non_functional'>
-                        Non-Functional
-                      </SelectItem>
-                      <SelectItem value='business'>Business</SelectItem>
-                      <SelectItem value='technical'>Technical</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className='grid gap-2'>
-                  <Label htmlFor='complexity'>{t('complexity')}</Label>
-                  <Select
-                    value={newRequirement.complexity}
-                    onValueChange={(value) =>
-                      setNewRequirement({
-                        ...newRequirement,
-                        complexity: value
-                      })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='simple'>Simple</SelectItem>
-                      <SelectItem value='medium'>Medium</SelectItem>
-                      <SelectItem value='complex'>Complex</SelectItem>
-                      <SelectItem value='very_complex'>Very Complex</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button
-                variant='outline'
-                onClick={() => setIsCreateDialogOpen(false)}
-              >
-                {t('cancel')}
-              </Button>
-              <Button
-                onClick={handleCreateRequirement}
-                disabled={!newRequirement.title.trim()}
-              >
-                {t('create')}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Button asChild className='gap-2'>
+          <Link href='/dashboard/requirements/new'>
+            <Plus className='h-4 w-4' />
+            {t('createRequirement')}
+          </Link>
+        </Button>
 
         {/* Bulk Actions */}
         {selectedRequirements.length > 0 && (
